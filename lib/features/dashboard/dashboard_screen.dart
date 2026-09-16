@@ -5,7 +5,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../models/mess.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/month_calculation_provider.dart';
-import '../members/add_edit_member_screen.dart';
+import '../members/add_edit_member_dialog.dart';
 import '../members/member_detail_screen.dart';
 import '../members/members_screen.dart';
 import '../settings/settings_screen.dart';
@@ -59,11 +59,8 @@ class DashboardScreen extends ConsumerWidget {
                       title: 'No members yet',
                       message: 'Add the people in your mess to start tracking meals and bazar.',
                       actionLabel: 'Add Member',
-                      onAction: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => AddEditMemberScreen(messId: mess.id),
-                        ),
-                      ),
+                      onAction: () =>
+                          showAddEditMemberDialog(context, messId: mess.id),
                     );
                   }
 

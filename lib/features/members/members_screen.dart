@@ -9,7 +9,7 @@ import '../../providers/repository_providers.dart';
 import '../shared/widgets/confirm_dialog.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/page_header_card.dart';
-import 'add_edit_member_screen.dart';
+import 'add_edit_member_dialog.dart';
 import 'member_detail_screen.dart';
 
 /// Member management (section 19): active members with this month's meal
@@ -38,11 +38,7 @@ class MembersScreen extends ConsumerWidget {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => AddEditMemberScreen(messId: messId),
-          ),
-        ),
+        onPressed: () => showAddEditMemberDialog(context, messId: messId),
         icon: const Icon(Icons.person_add_alt),
         label: const Text('Add Member'),
       ),
@@ -59,11 +55,8 @@ class MembersScreen extends ConsumerWidget {
                       title: 'No members yet',
                       message: 'Add the people in your mess to start tracking meals and bazar.',
                       actionLabel: 'Add Member',
-                      onAction: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => AddEditMemberScreen(messId: messId),
-                        ),
-                      ),
+                      onAction: () =>
+                          showAddEditMemberDialog(context, messId: messId),
                     );
                   }
 
@@ -190,11 +183,10 @@ class _MemberTile extends ConsumerWidget {
   ) async {
     switch (action) {
       case 'edit':
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) =>
-                AddEditMemberScreen(messId: member.messId, existing: member),
-          ),
+        await showAddEditMemberDialog(
+          context,
+          messId: member.messId,
+          existing: member,
         );
       case 'archive':
         final confirmed = await confirmDestructiveAction(

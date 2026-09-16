@@ -8,7 +8,7 @@ import '../../providers/member_providers.dart';
 import '../../providers/month_calculation_provider.dart';
 import '../../providers/repository_providers.dart';
 import '../../providers/selection_providers.dart';
-import '../members/add_edit_member_screen.dart';
+import '../members/add_edit_member_dialog.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/page_header_card.dart';
 import 'widgets/meal_day_row.dart';
@@ -82,11 +82,8 @@ class MealsScreen extends ConsumerWidget {
                       title: 'No members yet',
                       message: 'Add the people in your mess to start tracking meals.',
                       actionLabel: 'Add Member',
-                      onAction: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => AddEditMemberScreen(messId: messId),
-                        ),
-                      ),
+                      onAction: () =>
+                          showAddEditMemberDialog(context, messId: messId),
                     );
                   }
 
