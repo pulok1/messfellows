@@ -27,7 +27,11 @@ class DashboardScreen extends ConsumerWidget {
     final now = DateTime.now();
     final membersAsync = ref.watch(activeMembersProvider(mess.id));
     final calculation = ref.watch(
-      monthCalculationProvider((messId: mess.id, year: now.year, month: now.month)),
+      monthCalculationProvider((
+        messId: mess.id,
+        year: now.year,
+        month: now.month,
+      )),
     );
 
     return Scaffold(
@@ -37,12 +41,14 @@ class DashboardScreen extends ConsumerWidget {
             DashboardHeaderCard(
               mess: mess,
               month: now,
-              onMembers: () => Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => MembersScreen(messId: mess.id))),
-              onSettings: () => Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => SettingsScreen(mess: mess))),
+              onMembers: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => MembersScreen(messId: mess.id),
+                ),
+              ),
+              onSettings: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => SettingsScreen(mess: mess)),
+              ),
             ),
             Expanded(
               child: membersAsync.when(
@@ -54,7 +60,9 @@ class DashboardScreen extends ConsumerWidget {
                       message: 'Add the people in your mess to start tracking meals and bazar.',
                       actionLabel: 'Add Member',
                       onAction: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => AddEditMemberScreen(messId: mess.id)),
+                        MaterialPageRoute(
+                          builder: (_) => AddEditMemberScreen(messId: mess.id),
+                        ),
                       ),
                     );
                   }
@@ -82,9 +90,10 @@ class DashboardScreen extends ConsumerWidget {
                                 calculation.hasNoMeals
                                     ? 'No meals recorded yet'
                                     : '${mess.currencySymbol}${calculation.mealRate.major.toStringAsFixed(2)}',
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -109,15 +118,20 @@ class DashboardScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.lg),
-                      Text('Settlement', style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        'Settlement',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       for (final balance in calculation.memberBalances)
                         SettlementTile(
                           balance: balance,
                           onTap: () => Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  MemberDetailScreen(messId: mess.id, memberId: balance.memberId),
+                              builder: (_) => MemberDetailScreen(
+                                messId: mess.id,
+                                memberId: balance.memberId,
+                              ),
                             ),
                           ),
                         ),
@@ -125,7 +139,8 @@ class DashboardScreen extends ConsumerWidget {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) => const Center(child: Text("Couldn't load your mess data.")),
+                error: (_, _) =>
+                    const Center(child: Text("Couldn't load your mess data.")),
               ),
             ),
           ],

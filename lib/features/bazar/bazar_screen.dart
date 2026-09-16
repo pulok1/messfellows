@@ -12,6 +12,7 @@ import '../../providers/payment_providers.dart';
 import '../../providers/selection_providers.dart';
 import '../payments/add_edit_payment_screen.dart';
 import '../shared/widgets/empty_state.dart';
+import '../shared/widgets/page_header_card.dart';
 import 'add_edit_expense_screen.dart';
 import 'widgets/month_selector_bar.dart';
 
@@ -27,7 +28,8 @@ class BazarScreen extends ConsumerStatefulWidget {
   ConsumerState<BazarScreen> createState() => _BazarScreenState();
 }
 
-class _BazarScreenState extends ConsumerState<BazarScreen> with SingleTickerProviderStateMixin {
+class _BazarScreenState extends ConsumerState<BazarScreen>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   String? _filterMemberId;
 
@@ -49,73 +51,92 @@ class _BazarScreenState extends ConsumerState<BazarScreen> with SingleTickerProv
     final membersAsync = ref.watch(activeMembersProvider(widget.messId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bazar'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [Tab(text: 'Bazar'), Tab(text: 'Payments')],
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Add',
-            icon: const Icon(Icons.add),
-            onPressed: () => _tabController.index == 0 ? _addExpense() : _addPayment(),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          MonthSelectorBar(
-            year: selectedMonth.year,
-            month: selectedMonth.month,
-            onPrevious: () => ref.read(selectedMonthProvider.notifier).goToPreviousMonth(),
-            onNext: () => ref.read(selectedMonthProvider.notifier).goToNextMonth(),
-          ),
-          membersAsync.maybeWhen(
-            data: (members) => members.length > 1
-                ? _MemberFilterRow(
-                    members: members,
-                    selectedId: _filterMemberId,
-                    onChanged: (id) => setState(() => _filterMemberId = id),
-                  )
-                : const SizedBox.shrink(),
-            orElse: () => const SizedBox.shrink(),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _ExpenseList(
-                  messId: widget.messId,
-                  year: selectedMonth.year,
-                  month: selectedMonth.month,
-                  filterMemberId: _filterMemberId,
-                ),
-                _PaymentList(
-                  messId: widget.messId,
-                  year: selectedMonth.year,
-                  month: selectedMonth.month,
-                  filterMemberId: _filterMemberId,
+      body: SafeArea(
+        child: Column(
+          children: [
+            PageHeaderCard(
+              title: 'Bazar',
+              showBackButton: false,
+              actions: [
+                HeaderIconButton(
+                  icon: Icons.add,
+                  tooltip: 'Add',
+                  onPressed: () =>
+                      _tabController.index == 0 ? _addExpense() : _addPayment(),
                 ),
               ],
+              bottom: Column(
+                children: [
+                  TabBar(
+                    controller: _tabController,
+                    tabs: const [
+                      Tab(text: 'Bazar'),
+                      Tab(text: 'Payments'),
+                    ],
+                  ),
+                  MonthSelectorBar(
+                    year: selectedMonth.year,
+                    month: selectedMonth.month,
+                    onPrevious: () => ref
+                        .read(selectedMonthProvider.notifier)
+                        .goToPreviousMonth(),
+                    onNext: () => ref
+                        .read(selectedMonthProvider.notifier)
+                        .goToNextMonth(),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            membersAsync.maybeWhen(
+              data: (members) => members.length > 1
+                  ? _MemberFilterRow(
+                      members: members,
+                      selectedId: _filterMemberId,
+                      onChanged: (id) => setState(() => _filterMemberId = id),
+                    )
+                  : const SizedBox.shrink(),
+              orElse: () => const SizedBox.shrink(),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _ExpenseList(
+                    messId: widget.messId,
+                    year: selectedMonth.year,
+                    month: selectedMonth.month,
+                    filterMemberId: _filterMemberId,
+                  ),
+                  _PaymentList(
+                    messId: widget.messId,
+                    year: selectedMonth.year,
+                    month: selectedMonth.month,
+                    filterMemberId: _filterMemberId,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Future<void> _addExpense() async {
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => AddEditExpenseScreen(messId: widget.messId)));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AddEditExpenseScreen(messId: widget.messId),
+      ),
+    );
   }
 
   Future<void> _addPayment() async {
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => AddEditPaymentScreen(messId: widget.messId)));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AddEditPaymentScreen(messId: widget.messId),
+      ),
+    );
   }
 }
 
@@ -124,7 +145,11 @@ class _MemberFilterRow extends StatelessWidget {
   final String? selectedId;
   final ValueChanged<String?> onChanged;
 
-  const _MemberFilterRow({required this.members, required this.selectedId, required this.onChanged});
+  const _MemberFilterRow({
+    required this.members,
+    required this.selectedId,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -180,13 +205,16 @@ class _ExpenseList extends ConsumerWidget {
       data: (expenses) {
         final filtered = filterMemberId == null
             ? expenses
-            : expenses.where((e) => e.paidByMemberId == filterMemberId).toList();
+            : expenses
+                  .where((e) => e.paidByMemberId == filterMemberId)
+                  .toList();
 
         if (filtered.isEmpty) {
           return const EmptyState(
             icon: Icons.shopping_basket_outlined,
             title: 'No bazar entries',
-            message: 'Add a bazar entry to start tracking food expenses this month.',
+            message:
+                'Add a bazar entry to start tracking food expenses this month.',
           );
         }
 
@@ -198,11 +226,13 @@ class _ExpenseList extends ConsumerWidget {
             AppSpacing.xxl,
           ),
           itemCount: filtered.length,
-          itemBuilder: (context, index) => _ExpenseTile(messId: messId, expense: filtered[index]),
+          itemBuilder: (context, index) =>
+              _ExpenseTile(messId: messId, expense: filtered[index]),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => const Center(child: Text("Couldn't load bazar entries.")),
+      error: (_, _) =>
+          const Center(child: Text("Couldn't load bazar entries.")),
     );
   }
 }
@@ -216,17 +246,23 @@ class _ExpenseTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final members = ref.watch(allMembersProvider(messId)).value ?? const [];
-    final payer = members.firstWhereOrNull((m) => m.id == expense.paidByMemberId);
+    final payer = members.firstWhereOrNull(
+      (m) => m.id == expense.paidByMemberId,
+    );
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => AddEditExpenseScreen(messId: messId, existing: expense),
+            builder: (_) =>
+                AddEditExpenseScreen(messId: messId, existing: expense),
           ),
         ),
-        title: Text(expense.category, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(
+          expense.category,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         subtitle: Text(
           '${_formatDate(expense.date)} · ${payer?.name ?? "Unknown"}'
           '${expense.note == null || expense.note!.isEmpty ? "" : " · ${expense.note}"}',
@@ -270,7 +306,8 @@ class _PaymentList extends ConsumerWidget {
           return const EmptyState(
             icon: Icons.payments_outlined,
             title: 'No payments',
-            message: 'Record a payment when a member contributes money to the mess.',
+            message:
+                'Record a payment when a member contributes money to the mess.',
           );
         }
 
@@ -282,7 +319,8 @@ class _PaymentList extends ConsumerWidget {
             AppSpacing.xxl,
           ),
           itemCount: filtered.length,
-          itemBuilder: (context, index) => _PaymentTile(messId: messId, payment: filtered[index]),
+          itemBuilder: (context, index) =>
+              _PaymentTile(messId: messId, payment: filtered[index]),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -307,10 +345,14 @@ class _PaymentTile extends ConsumerWidget {
       child: ListTile(
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => AddEditPaymentScreen(messId: messId, existing: payment),
+            builder: (_) =>
+                AddEditPaymentScreen(messId: messId, existing: payment),
           ),
         ),
-        title: Text(member?.name ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(
+          member?.name ?? 'Unknown',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         subtitle: Text(
           '${_formatDate(payment.date)}'
           '${payment.note == null || payment.note!.isEmpty ? "" : " · ${payment.note}"}',
@@ -326,8 +368,18 @@ class _PaymentTile extends ConsumerWidget {
 
 String _formatDate(DateTime date) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   return '${date.day} ${months[date.month - 1]} ${date.year}';
 }

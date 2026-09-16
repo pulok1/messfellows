@@ -10,6 +10,7 @@ import '../../providers/repository_providers.dart';
 import '../../providers/selection_providers.dart';
 import '../members/add_edit_member_screen.dart';
 import '../shared/widgets/empty_state.dart';
+import '../shared/widgets/page_header_card.dart';
 import 'widgets/meal_day_row.dart';
 
 /// The daily meal tracker (sections 14/15) — the screen a manager is
@@ -20,7 +21,11 @@ class MealsScreen extends ConsumerWidget {
 
   const MealsScreen({super.key, required this.messId});
 
-  Future<void> _pickDate(BuildContext context, WidgetRef ref, DateTime current) async {
+  Future<void> _pickDate(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime current,
+  ) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: current,
@@ -36,84 +41,108 @@ class MealsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final date = ref.watch(selectedMealDateProvider);
     final membersAsync = ref.watch(activeMembersProvider(messId));
-    final mealsAsync = ref.watch(mealsForDateProvider((messId: messId, date: date)));
+    final mealsAsync = ref.watch(
+      mealsForDateProvider((messId: messId, date: date)),
+    );
     final isToday = _isSameDay(date, DateTime.now());
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Meals'),
-        actions: [
-          IconButton(
-            tooltip: 'Monthly totals',
-            icon: const Icon(Icons.bar_chart_outlined),
-            onPressed: () => _showMonthlyTotals(context, ref, date),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _DateBar(
-            date: date,
-            isToday: isToday,
-            onToday: () => ref.read(selectedMealDateProvider.notifier).goToToday(),
-            onPrevious: () => ref.read(selectedMealDateProvider.notifier).goToPreviousDay(),
-            onNext: () => ref.read(selectedMealDateProvider.notifier).goToNextDay(),
-            onPickDate: () => _pickDate(context, ref, date),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: membersAsync.when(
-              data: (members) {
-                if (members.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.group_outlined,
-                    title: 'No members yet',
-                    message: 'Add the people in your mess to start tracking meals.',
-                    actionLabel: 'Add Member',
-                    onAction: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => AddEditMemberScreen(messId: messId)),
-                    ),
-                  );
-                }
-
-                final meals = mealsAsync.value ?? const <MealEntry>[];
-                final mealsByMember = {for (final meal in meals) meal.memberId: meal};
-
-                return ListView.separated(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  itemCount: members.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, index) {
-                    final member = members[index];
-                    final meal = mealsByMember[member.id];
-                    return MealDayRow(
-                      member: member,
-                      breakfast: meal?.breakfast ?? false,
-                      lunch: meal?.lunch ?? false,
-                      dinner: meal?.dinner ?? false,
-                      onBreakfastChanged: (value) => ref
-                          .read(mealRepositoryProvider)
-                          .setMeal(
-                            messId: messId,
-                            memberId: member.id,
-                            date: date,
-                            breakfast: value,
-                          ),
-                      onLunchChanged: (value) => ref
-                          .read(mealRepositoryProvider)
-                          .setMeal(messId: messId, memberId: member.id, date: date, lunch: value),
-                      onDinnerChanged: (value) => ref
-                          .read(mealRepositoryProvider)
-                          .setMeal(messId: messId, memberId: member.id, date: date, dinner: value),
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => const Center(child: Text("Couldn't load members.")),
+      body: SafeArea(
+        child: Column(
+          children: [
+            PageHeaderCard(
+              title: 'Meals',
+              showBackButton: false,
+              actions: [
+                HeaderIconButton(
+                  icon: Icons.bar_chart_outlined,
+                  tooltip: 'Monthly totals',
+                  onPressed: () => _showMonthlyTotals(context, ref, date),
+                ),
+              ],
+              bottom: _DateBar(
+                date: date,
+                isToday: isToday,
+                onToday: () =>
+                    ref.read(selectedMealDateProvider.notifier).goToToday(),
+                onPrevious: () => ref
+                    .read(selectedMealDateProvider.notifier)
+                    .goToPreviousDay(),
+                onNext: () =>
+                    ref.read(selectedMealDateProvider.notifier).goToNextDay(),
+                onPickDate: () => _pickDate(context, ref, date),
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: membersAsync.when(
+                data: (members) {
+                  if (members.isEmpty) {
+                    return EmptyState(
+                      icon: Icons.group_outlined,
+                      title: 'No members yet',
+                      message: 'Add the people in your mess to start tracking meals.',
+                      actionLabel: 'Add Member',
+                      onAction: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => AddEditMemberScreen(messId: messId),
+                        ),
+                      ),
+                    );
+                  }
+
+                  final meals = mealsAsync.value ?? const <MealEntry>[];
+                  final mealsByMember = {
+                    for (final meal in meals) meal.memberId: meal,
+                  };
+
+                  return ListView.separated(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    itemCount: members.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.sm),
+                    itemBuilder: (context, index) {
+                      final member = members[index];
+                      final meal = mealsByMember[member.id];
+                      return MealDayRow(
+                        member: member,
+                        breakfast: meal?.breakfast ?? false,
+                        lunch: meal?.lunch ?? false,
+                        dinner: meal?.dinner ?? false,
+                        onBreakfastChanged: (value) => ref
+                            .read(mealRepositoryProvider)
+                            .setMeal(
+                              messId: messId,
+                              memberId: member.id,
+                              date: date,
+                              breakfast: value,
+                            ),
+                        onLunchChanged: (value) => ref
+                            .read(mealRepositoryProvider)
+                            .setMeal(
+                              messId: messId,
+                              memberId: member.id,
+                              date: date,
+                              lunch: value,
+                            ),
+                        onDinnerChanged: (value) => ref
+                            .read(mealRepositoryProvider)
+                            .setMeal(
+                              messId: messId,
+                              memberId: member.id,
+                              date: date,
+                              dinner: value,
+                            ),
+                      );
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, _) =>
+                    const Center(child: Text("Couldn't load members.")),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -124,11 +153,20 @@ class MealsScreen extends ConsumerWidget {
       showDragHandle: true,
       builder: (sheetContext) {
         final result = ref.watch(
-          monthCalculationProvider((messId: messId, year: date.year, month: date.month)),
+          monthCalculationProvider((
+            messId: messId,
+            year: date.year,
+            month: date.month,
+          )),
         );
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,10 +176,13 @@ class MealsScreen extends ConsumerWidget {
                   style: Theme.of(sheetContext).textTheme.titleMedium,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                if (result.memberBalances.isEmpty) const Text('No members yet.'),
+                if (result.memberBalances.isEmpty)
+                  const Text('No members yet.'),
                 for (final balance in result.memberBalances)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -182,7 +223,10 @@ class _DateBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       child: Row(
         children: [
           IconButton(
@@ -211,7 +255,11 @@ class _DateBar extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(onPressed: onNext, icon: const Icon(Icons.chevron_right), tooltip: 'Next day'),
+          IconButton(
+            onPressed: onNext,
+            icon: const Icon(Icons.chevron_right),
+            tooltip: 'Next day',
+          ),
           if (!isToday)
             TextButton(onPressed: onToday, child: const Text('Today')),
         ],
@@ -225,14 +273,32 @@ bool _isSameDay(DateTime a, DateTime b) {
 }
 
 String _weekdayLabel(DateTime date) {
-  const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const weekdays = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
   return weekdays[date.weekday - 1];
 }
 
 String _monthName(int month) {
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   return months[month - 1];
 }

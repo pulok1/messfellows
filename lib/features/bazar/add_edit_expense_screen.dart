@@ -10,6 +10,7 @@ import '../../models/member.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/repository_providers.dart';
 import '../shared/widgets/confirm_dialog.dart';
+import '../shared/widgets/page_header_card.dart';
 
 /// Add-or-edit form for a bazar/expense entry (section 16). Date defaults
 /// to today and the amount field opens the numeric keypad, per the UX spec.
@@ -20,7 +21,8 @@ class AddEditExpenseScreen extends ConsumerStatefulWidget {
   const AddEditExpenseScreen({super.key, required this.messId, this.existing});
 
   @override
-  ConsumerState<AddEditExpenseScreen> createState() => _AddEditExpenseScreenState();
+  ConsumerState<AddEditExpenseScreen> createState() =>
+      _AddEditExpenseScreenState();
 }
 
 class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
@@ -106,7 +108,9 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Couldn't save this bazar entry. Please try again.")),
+          const SnackBar(
+            content: Text("Couldn't save this bazar entry. Please try again."),
+          ),
         );
       }
     } finally {
@@ -121,7 +125,9 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
       message: 'This will remove it from the monthly calculation.',
     );
     if (!confirmed) return;
-    await ref.read(expenseRepositoryProvider).deleteExpense(widget.existing!.id);
+    await ref
+        .read(expenseRepositoryProvider)
+        .deleteExpense(widget.existing!.id);
     if (mounted) Navigator.of(context).pop(true);
   }
 
@@ -130,94 +136,115 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
     final membersAsync = ref.watch(activeMembersProvider(widget.messId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Bazar' : 'Add Bazar'),
-        actions: [
-          if (_isEditing)
-            IconButton(onPressed: _delete, icon: const Icon(Icons.delete_outline)),
-        ],
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                InkWell(
-                  onTap: _pickDate,
-                  borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-                  child: InputDecorator(
-                    decoration: const InputDecoration(labelText: 'Date'),
-                    child: Text(_formatDate(_date)),
+        child: Column(
+          children: [
+            PageHeaderCard(
+              title: _isEditing ? 'Edit Bazar' : 'Add Bazar',
+              actions: [
+                if (_isEditing)
+                  HeaderIconButton(
+                    icon: Icons.delete_outline,
+                    tooltip: 'Delete',
+                    onPressed: _delete,
+                    color: Theme.of(context).colorScheme.error,
                   ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
-                  decoration: InputDecoration(
-                    labelText: 'Amount',
-                    prefixText: '${AppConstants.defaultCurrencySymbol} ',
-                  ),
-                  validator: (value) {
-                    final parsed = double.tryParse((value ?? '').trim());
-                    if (parsed == null || parsed <= 0) return 'Enter a valid amount';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.md),
-                membersAsync.when(
-                  data: (members) => _PaidByField(
-                    members: members,
-                    selectedId: _paidByMemberId,
-                    onChanged: (id) => setState(() => _paidByMemberId = id),
-                  ),
-                  loading: () => const LinearProgressIndicator(),
-                  error: (_, _) => const Text("Couldn't load members."),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _categoryController,
-                  decoration: const InputDecoration(labelText: 'Category'),
-                  validator: (value) =>
-                      (value == null || value.trim().isEmpty) ? 'Enter a category' : null,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: AppConstants.expenseCategories
-                      .map(
-                        (category) => ActionChip(
-                          label: Text(category),
-                          onPressed: () => setState(() => _categoryController.text = category),
-                        ),
-                      )
-                      .toList(),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _noteController,
-                  decoration: const InputDecoration(labelText: 'Note (optional)'),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                FilledButton(
-                  onPressed: _isSaving ? null : _save,
-                  child: _isSaving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(_isEditing ? 'Save Changes' : 'Add Bazar'),
-                ),
               ],
             ),
-          ),
+            Expanded(child: _buildForm(membersAsync)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm(AsyncValue<List<Member>> membersAsync) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            InkWell(
+              onTap: _pickDate,
+              borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+              child: InputDecorator(
+                decoration: const InputDecoration(labelText: 'Date'),
+                child: Text(_formatDate(_date)),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextFormField(
+              controller: _amountController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+              ],
+              decoration: InputDecoration(
+                labelText: 'Amount',
+                prefixText: '${AppConstants.defaultCurrencySymbol} ',
+              ),
+              validator: (value) {
+                final parsed = double.tryParse((value ?? '').trim());
+                if (parsed == null || parsed <= 0) {
+                  return 'Enter a valid amount';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            membersAsync.when(
+              data: (members) => _PaidByField(
+                members: members,
+                selectedId: _paidByMemberId,
+                onChanged: (id) => setState(() => _paidByMemberId = id),
+              ),
+              loading: () => const LinearProgressIndicator(),
+              error: (_, _) => const Text("Couldn't load members."),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextFormField(
+              controller: _categoryController,
+              decoration: const InputDecoration(labelText: 'Category'),
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? 'Enter a category'
+                  : null,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: AppConstants.expenseCategories
+                  .map(
+                    (category) => ActionChip(
+                      label: Text(category),
+                      onPressed: () =>
+                          setState(() => _categoryController.text = category),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextFormField(
+              controller: _noteController,
+              decoration: const InputDecoration(labelText: 'Note (optional)'),
+              maxLines: 2,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            FilledButton(
+              onPressed: _isSaving ? null : _save,
+              child: _isSaving
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(_isEditing ? 'Save Changes' : 'Add Bazar'),
+            ),
+          ],
         ),
       ),
     );
@@ -229,7 +256,11 @@ class _PaidByField extends StatelessWidget {
   final String? selectedId;
   final ValueChanged<String?> onChanged;
 
-  const _PaidByField({required this.members, required this.selectedId, required this.onChanged});
+  const _PaidByField({
+    required this.members,
+    required this.selectedId,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +268,10 @@ class _PaidByField extends StatelessWidget {
       initialValue: members.any((m) => m.id == selectedId) ? selectedId : null,
       decoration: const InputDecoration(labelText: 'Paid by'),
       items: members
-          .map((member) => DropdownMenuItem(value: member.id, child: Text(member.name)))
+          .map(
+            (member) =>
+                DropdownMenuItem(value: member.id, child: Text(member.name)),
+          )
           .toList(),
       onChanged: onChanged,
     );
@@ -246,8 +280,18 @@ class _PaidByField extends StatelessWidget {
 
 String _formatDate(DateTime date) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   return '${date.day} ${months[date.month - 1]} ${date.year}';
 }

@@ -16,6 +16,7 @@ import '../../providers/selection_providers.dart';
 import '../../providers/settlement_providers.dart';
 import '../bazar/widgets/month_selector_bar.dart';
 import '../shared/widgets/balance_label.dart';
+import '../shared/widgets/page_header_card.dart';
 import 'month_history_screen.dart';
 import 'summary_text.dart';
 
@@ -31,49 +32,64 @@ class ReportScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedMonth = ref.watch(selectedMonthProvider);
     final settlement = ref.watch(
-      settlementForMonthProvider((messId: mess.id, year: selectedMonth.year, month: selectedMonth.month)),
+      settlementForMonthProvider((
+        messId: mess.id,
+        year: selectedMonth.year,
+        month: selectedMonth.month,
+      )),
     );
     final isClosed = settlement?.isClosed ?? false;
 
     final liveResult = ref.watch(
-      monthCalculationProvider((messId: mess.id, year: selectedMonth.year, month: selectedMonth.month)),
+      monthCalculationProvider((
+        messId: mess.id,
+        year: selectedMonth.year,
+        month: selectedMonth.month,
+      )),
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Report'),
-        actions: [
-          IconButton(
-            tooltip: 'Month history',
-            icon: const Icon(Icons.history),
-            onPressed: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => MonthHistoryScreen(mess: mess))),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          MonthSelectorBar(
-            year: selectedMonth.year,
-            month: selectedMonth.month,
-            onPrevious: () => ref.read(selectedMonthProvider.notifier).goToPreviousMonth(),
-            onNext: () => ref.read(selectedMonthProvider.notifier).goToNextMonth(),
-          ),
-          if (isClosed) const _ClosedBanner(),
-          const Divider(height: 1),
-          Expanded(
-            child: isClosed
-                ? _FrozenReportBody(mess: mess, settlement: settlement!)
-                : _LiveReportBody(
-                    mess: mess,
-                    year: selectedMonth.year,
-                    month: selectedMonth.month,
-                    result: liveResult,
-                    hasExistingSettlement: settlement != null,
+      body: SafeArea(
+        child: Column(
+          children: [
+            PageHeaderCard(
+              title: 'Report',
+              showBackButton: false,
+              actions: [
+                HeaderIconButton(
+                  icon: Icons.history,
+                  tooltip: 'Month history',
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => MonthHistoryScreen(mess: mess),
+                    ),
                   ),
-          ),
-        ],
+                ),
+              ],
+              bottom: MonthSelectorBar(
+                year: selectedMonth.year,
+                month: selectedMonth.month,
+                onPrevious: () => ref
+                    .read(selectedMonthProvider.notifier)
+                    .goToPreviousMonth(),
+                onNext: () =>
+                    ref.read(selectedMonthProvider.notifier).goToNextMonth(),
+              ),
+            ),
+            if (isClosed) const _ClosedBanner(),
+            Expanded(
+              child: isClosed
+                  ? _FrozenReportBody(mess: mess, settlement: settlement!)
+                  : _LiveReportBody(
+                      mess: mess,
+                      year: selectedMonth.year,
+                      month: selectedMonth.month,
+                      result: liveResult,
+                      hasExistingSettlement: settlement != null,
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -88,10 +104,17 @@ class _ClosedBanner extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: colorScheme.secondaryContainer,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       child: Row(
         children: [
-          Icon(Icons.lock_outline, size: 18, color: colorScheme.onSecondaryContainer),
+          Icon(
+            Icons.lock_outline,
+            size: 18,
+            color: colorScheme.onSecondaryContainer,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Text(
             'This month is closed. Numbers are frozen from when it was closed.',
@@ -168,9 +191,9 @@ class _LiveReportBody extends ConsumerWidget {
         );
 
     if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('${_monthName(month)} $year closed.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${_monthName(month)} $year closed.')),
+      );
     }
   }
 
@@ -184,7 +207,9 @@ class _LiveReportBody extends ConsumerWidget {
       footer: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: FilledButton.icon(
-          onPressed: result.memberBalances.isEmpty ? null : () => _closeMonth(context, ref),
+          onPressed: result.memberBalances.isEmpty
+              ? null
+              : () => _closeMonth(context, ref),
           icon: const Icon(Icons.lock_outline),
           label: Text(hasExistingSettlement ? 'Re-close Month' : 'Close Month'),
         ),
@@ -249,7 +274,9 @@ class _FrozenReportBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settlementMembersAsync = ref.watch(settlementMembersProvider(settlement.id));
+    final settlementMembersAsync = ref.watch(
+      settlementMembersProvider(settlement.id),
+    );
     final allMembers = ref.watch(allMembersProvider(mess.id)).value ?? const [];
 
     return settlementMembersAsync.when(
@@ -259,7 +286,10 @@ class _FrozenReportBody extends ConsumerWidget {
               (row) => MemberBalance(
                 memberId: row.memberId,
                 memberName:
-                    allMembers.firstWhereOrNull((m) => m.id == row.memberId)?.name ?? 'Unknown',
+                    allMembers
+                        .firstWhereOrNull((m) => m.id == row.memberId)
+                        ?.name ??
+                    'Unknown',
                 mealCount: row.mealCount,
                 mealCost: row.mealCost,
                 paidAmount: row.paidAmount,
@@ -291,7 +321,8 @@ class _FrozenReportBody extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => const Center(child: Text("Couldn't load this month's settlement.")),
+      error: (_, _) =>
+          const Center(child: Text("Couldn't load this month's settlement.")),
     );
   }
 }
@@ -314,16 +345,31 @@ class _ReportContent extends StatelessWidget {
   });
 
   void _copySummary(BuildContext context) {
-    final text = buildMonthlySummary(messName: mess.name, year: year, month: month, result: result);
+    final text = buildMonthlySummary(
+      messName: mess.name,
+      year: year,
+      month: month,
+      result: result,
+    );
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Summary copied to clipboard.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Summary copied to clipboard.')),
+    );
   }
 
   void _shareSummary(BuildContext context) {
-    final text = buildMonthlySummary(messName: mess.name, year: year, month: month, result: result);
-    SharePlus.instance.share(ShareParams(text: text, subject: '${mess.name} — ${_monthName(month)} $year'));
+    final text = buildMonthlySummary(
+      messName: mess.name,
+      year: year,
+      month: month,
+      result: result,
+    );
+    SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        subject: '${mess.name} — ${_monthName(month)} $year',
+      ),
+    );
   }
 
   @override
@@ -335,7 +381,9 @@ class _ReportContent extends StatelessWidget {
           child: Text(
             'No members yet — add members to see a report for this month.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       );
@@ -345,7 +393,12 @@ class _ReportContent extends StatelessWidget {
       children: [
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 0),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.md,
+              0,
+            ),
             children: [
               Card(
                 child: Padding(
@@ -353,11 +406,19 @@ class _ReportContent extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _StatLine(label: 'Total Food Cost', value: result.totalExpense.format()),
-                      _StatLine(label: 'Total Meals', value: '${result.totalMeals}'),
+                      _StatLine(
+                        label: 'Total Food Cost',
+                        value: result.totalExpense.format(),
+                      ),
+                      _StatLine(
+                        label: 'Total Meals',
+                        value: '${result.totalMeals}',
+                      ),
                       _StatLine(
                         label: 'Meal Rate',
-                        value: result.hasNoMeals ? 'No meals recorded yet' : result.mealRate.format(),
+                        value: result.hasNoMeals
+                            ? 'No meals recorded yet'
+                            : result.mealRate.format(),
                       ),
                     ],
                   ),
@@ -384,7 +445,10 @@ class _ReportContent extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Per Member', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'Per Member',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: AppSpacing.sm),
               for (final balance in result.memberBalances)
                 Card(
@@ -430,7 +494,12 @@ class _StatLine extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(
+            label,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),
@@ -440,8 +509,18 @@ class _StatLine extends StatelessWidget {
 
 String _monthName(int month) {
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   return months[month - 1];
 }

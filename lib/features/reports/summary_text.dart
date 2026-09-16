@@ -32,15 +32,29 @@ String buildMonthlySummary({
 }
 
 String _balanceLine(MemberBalance balance) {
-  if (balance.balance.isPositive) return 'Will receive: ${balance.balanceMagnitude.format()}';
-  if (balance.balance.isNegative) return 'Needs to pay: ${balance.balanceMagnitude.format()}';
+  if (balance.balance.isPositive) {
+    return 'Will receive: ${balance.balanceMagnitude.format()}';
+  }
+  if (balance.balance.isNegative) {
+    return 'Needs to pay: ${balance.balanceMagnitude.format()}';
+  }
   return 'Settled';
 }
 
 String _monthName(int month) {
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   return months[month - 1];
 }

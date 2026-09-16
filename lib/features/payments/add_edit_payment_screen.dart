@@ -10,6 +10,7 @@ import '../../models/payment.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/repository_providers.dart';
 import '../shared/widgets/confirm_dialog.dart';
+import '../shared/widgets/page_header_card.dart';
 
 /// Add-or-edit form for a member payment/contribution (section 17).
 class AddEditPaymentScreen extends ConsumerStatefulWidget {
@@ -27,7 +28,8 @@ class AddEditPaymentScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AddEditPaymentScreen> createState() => _AddEditPaymentScreenState();
+  ConsumerState<AddEditPaymentScreen> createState() =>
+      _AddEditPaymentScreenState();
 }
 
 class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
@@ -107,7 +109,9 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Couldn't save this payment. Please try again.")),
+          const SnackBar(
+            content: Text("Couldn't save this payment. Please try again."),
+          ),
         );
       }
     } finally {
@@ -122,7 +126,9 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
       message: 'This will remove it from the monthly calculation.',
     );
     if (!confirmed) return;
-    await ref.read(paymentRepositoryProvider).deletePayment(widget.existing!.id);
+    await ref
+        .read(paymentRepositoryProvider)
+        .deletePayment(widget.existing!.id);
     if (mounted) Navigator.of(context).pop(true);
   }
 
@@ -131,74 +137,93 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
     final membersAsync = ref.watch(activeMembersProvider(widget.messId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Payment' : 'Add Payment'),
-        actions: [
-          if (_isEditing)
-            IconButton(onPressed: _delete, icon: const Icon(Icons.delete_outline)),
-        ],
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                InkWell(
-                  onTap: _pickDate,
-                  borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-                  child: InputDecorator(
-                    decoration: const InputDecoration(labelText: 'Date'),
-                    child: Text(_formatDate(_date)),
+        child: Column(
+          children: [
+            PageHeaderCard(
+              title: _isEditing ? 'Edit Payment' : 'Add Payment',
+              actions: [
+                if (_isEditing)
+                  HeaderIconButton(
+                    icon: Icons.delete_outline,
+                    tooltip: 'Delete',
+                    onPressed: _delete,
+                    color: Theme.of(context).colorScheme.error,
                   ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                membersAsync.when(
-                  data: (members) => _MemberField(
-                    members: members,
-                    selectedId: _memberId,
-                    onChanged: (id) => setState(() => _memberId = id),
-                  ),
-                  loading: () => const LinearProgressIndicator(),
-                  error: (_, _) => const Text("Couldn't load members."),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
-                  decoration: InputDecoration(
-                    labelText: 'Amount',
-                    prefixText: '${AppConstants.defaultCurrencySymbol} ',
-                  ),
-                  validator: (value) {
-                    final parsed = double.tryParse((value ?? '').trim());
-                    if (parsed == null || parsed <= 0) return 'Enter a valid amount';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _noteController,
-                  decoration: const InputDecoration(labelText: 'Note (optional)'),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                FilledButton(
-                  onPressed: _isSaving ? null : _save,
-                  child: _isSaving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(_isEditing ? 'Save Changes' : 'Add Payment'),
-                ),
               ],
             ),
-          ),
+            Expanded(child: _buildForm(membersAsync)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm(AsyncValue<List<Member>> membersAsync) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            InkWell(
+              onTap: _pickDate,
+              borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+              child: InputDecorator(
+                decoration: const InputDecoration(labelText: 'Date'),
+                child: Text(_formatDate(_date)),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            membersAsync.when(
+              data: (members) => _MemberField(
+                members: members,
+                selectedId: _memberId,
+                onChanged: (id) => setState(() => _memberId = id),
+              ),
+              loading: () => const LinearProgressIndicator(),
+              error: (_, _) => const Text("Couldn't load members."),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextFormField(
+              controller: _amountController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+              ],
+              decoration: InputDecoration(
+                labelText: 'Amount',
+                prefixText: '${AppConstants.defaultCurrencySymbol} ',
+              ),
+              validator: (value) {
+                final parsed = double.tryParse((value ?? '').trim());
+                if (parsed == null || parsed <= 0) {
+                  return 'Enter a valid amount';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextFormField(
+              controller: _noteController,
+              decoration: const InputDecoration(labelText: 'Note (optional)'),
+              maxLines: 2,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            FilledButton(
+              onPressed: _isSaving ? null : _save,
+              child: _isSaving
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(_isEditing ? 'Save Changes' : 'Add Payment'),
+            ),
+          ],
         ),
       ),
     );
@@ -210,7 +235,11 @@ class _MemberField extends StatelessWidget {
   final String? selectedId;
   final ValueChanged<String?> onChanged;
 
-  const _MemberField({required this.members, required this.selectedId, required this.onChanged});
+  const _MemberField({
+    required this.members,
+    required this.selectedId,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +247,10 @@ class _MemberField extends StatelessWidget {
       initialValue: members.any((m) => m.id == selectedId) ? selectedId : null,
       decoration: const InputDecoration(labelText: 'Member'),
       items: members
-          .map((member) => DropdownMenuItem(value: member.id, child: Text(member.name)))
+          .map(
+            (member) =>
+                DropdownMenuItem(value: member.id, child: Text(member.name)),
+          )
           .toList(),
       onChanged: onChanged,
     );
@@ -227,8 +259,18 @@ class _MemberField extends StatelessWidget {
 
 String _formatDate(DateTime date) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   return '${date.day} ${months[date.month - 1]} ${date.year}';
 }
