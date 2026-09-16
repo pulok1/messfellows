@@ -59,6 +59,14 @@ class AppDatabase extends _$AppDatabase {
       native: const DriftNativeOptions(
         databaseDirectory: getApplicationSupportDirectory,
       ),
+      // Web is not a target platform for this app (section 31 — Android
+      // phones), but this keeps `flutter run -d chrome` usable for quick
+      // manual checks in environments without an Android emulator. Assets
+      // in web/ must match the pinned drift version (see pubspec.lock).
+      web: DriftWebOptions(
+        sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+        driftWorker: Uri.parse('drift_worker.js'),
+      ),
     );
   }
 }
