@@ -26,7 +26,11 @@ class LocalExpenseRepository implements ExpenseRepository {
   );
 
   @override
-  Stream<List<Expense>> watchExpensesForMonth(String messId, int year, int month) {
+  Stream<List<Expense>> watchExpensesForMonth(
+    String messId,
+    int year,
+    int month,
+  ) {
     final start = firstDayOfMonth(year, month);
     final end = firstDayOfNextMonth(year, month);
     final query = _db.select(_db.expenses)
@@ -43,7 +47,9 @@ class LocalExpenseRepository implements ExpenseRepository {
   @override
   Stream<List<Expense>> watchExpensesForMember(String messId, String memberId) {
     final query = _db.select(_db.expenses)
-      ..where((t) => t.messId.equals(messId) & t.paidByMemberId.equals(memberId))
+      ..where(
+        (t) => t.messId.equals(messId) & t.paidByMemberId.equals(memberId),
+      )
       ..orderBy([(t) => OrderingTerm.desc(t.date)]);
     return query.watch().map((rows) => rows.map(_toModel).toList());
   }

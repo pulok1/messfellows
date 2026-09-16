@@ -27,14 +27,22 @@ class DashboardHeaderCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.xs),
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.md,
+        AppSpacing.xs,
+      ),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppSpacing.sheetRadius),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [colorScheme.primaryContainer, colorScheme.surfaceContainerHigh],
+          colors: [
+            colorScheme.primaryContainer,
+            colorScheme.surfaceContainerHigh,
+          ],
         ),
         boxShadow: [
           BoxShadow(
@@ -57,7 +65,11 @@ class DashboardHeaderCard extends StatelessWidget {
                 colors: [colorScheme.primary, colorScheme.tertiary],
               ),
             ),
-            child: Icon(Icons.ramen_dining, color: colorScheme.onPrimary, size: 26),
+            child: Icon(
+              Icons.ramen_dining,
+              color: colorScheme.onPrimary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -116,8 +128,16 @@ class _ActionPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _PillButton(icon: Icons.group_outlined, tooltip: 'Members', onPressed: onMembers),
-          _PillButton(icon: Icons.settings_outlined, tooltip: 'Settings', onPressed: onSettings),
+          _PillButton(
+            icon: Icons.group_outlined,
+            tooltip: 'Members',
+            onPressed: onMembers,
+          ),
+          _PillButton(
+            icon: Icons.settings_outlined,
+            tooltip: 'Settings',
+            onPressed: onSettings,
+          ),
         ],
       ),
     );
@@ -129,7 +149,11 @@ class _PillButton extends StatelessWidget {
   final String tooltip;
   final VoidCallback onPressed;
 
-  const _PillButton({required this.icon, required this.tooltip, required this.onPressed});
+  const _PillButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -144,8 +168,18 @@ class _PillButton extends StatelessWidget {
 
 String _monthYear(DateTime date) {
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   return '${months[date.month - 1]} ${date.year}';
 }

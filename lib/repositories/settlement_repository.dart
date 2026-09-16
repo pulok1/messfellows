@@ -9,7 +9,9 @@ abstract interface class SettlementRepository {
 
   Future<MonthlySettlement?> getSettlement(String messId, int year, int month);
 
-  Stream<List<MonthlySettlementMember>> watchSettlementMembers(String settlementId);
+  Stream<List<MonthlySettlementMember>> watchSettlementMembers(
+    String settlementId,
+  );
 
   /// Freezes [balances] (already computed by [CalculationEngine]) into a
   /// settlement row + one member row each. Overwrites any existing

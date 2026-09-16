@@ -43,6 +43,7 @@ class SelectedMonthNotifier extends Notifier<SelectedMonth> {
   void goTo(int year, int month) => state = (year: year, month: month);
 }
 
-final selectedMonthProvider = NotifierProvider<SelectedMonthNotifier, SelectedMonth>(
-  SelectedMonthNotifier.new,
-);
+final selectedMonthProvider =
+    NotifierProvider<SelectedMonthNotifier, SelectedMonth>(
+      SelectedMonthNotifier.new,
+    );

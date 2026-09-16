@@ -23,7 +23,8 @@ class MealEntry {
   });
 
   /// Total meals eaten this day (0-3).
-  int get totalMeals => (breakfast ? 1 : 0) + (lunch ? 1 : 0) + (dinner ? 1 : 0);
+  int get totalMeals =>
+      (breakfast ? 1 : 0) + (lunch ? 1 : 0) + (dinner ? 1 : 0);
 
   MealEntry copyWith({
     bool? breakfast,

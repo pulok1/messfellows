@@ -21,8 +21,13 @@ class SettlementTile extends StatelessWidget {
           horizontal: AppSpacing.md,
           vertical: AppSpacing.xs,
         ),
-        title: Text(balance.memberName, style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text('${balance.mealCount} meals · Paid ${balance.paidAmount.format()}'),
+        title: Text(
+          balance.memberName,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          '${balance.mealCount} meals · Paid ${balance.paidAmount.format()}',
+        ),
         trailing: BalanceLabel(balance: balance),
       ),
     );

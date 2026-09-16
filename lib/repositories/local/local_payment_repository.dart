@@ -25,7 +25,11 @@ class LocalPaymentRepository implements PaymentRepository {
   );
 
   @override
-  Stream<List<Payment>> watchPaymentsForMonth(String messId, int year, int month) {
+  Stream<List<Payment>> watchPaymentsForMonth(
+    String messId,
+    int year,
+    int month,
+  ) {
     final start = firstDayOfMonth(year, month);
     final end = firstDayOfNextMonth(year, month);
     final query = _db.select(_db.payments)

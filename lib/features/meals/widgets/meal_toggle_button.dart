@@ -22,8 +22,12 @@ class MealToggleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final background = isOn ? colorScheme.primary : colorScheme.surfaceContainerHighest;
-    final foreground = isOn ? colorScheme.onPrimary : colorScheme.onSurfaceVariant;
+    final background = isOn
+        ? colorScheme.primary
+        : colorScheme.surfaceContainerHighest;
+    final foreground = isOn
+        ? colorScheme.onPrimary
+        : colorScheme.onSurfaceVariant;
 
     return Semantics(
       button: true,
@@ -33,7 +37,10 @@ class MealToggleButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
         child: Container(
           constraints: const BoxConstraints(minHeight: 56, minWidth: 72),
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm, horizontal: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.sm,
+            horizontal: AppSpacing.sm,
+          ),
           decoration: BoxDecoration(
             color: background,
             borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
@@ -45,7 +52,11 @@ class MealToggleButton extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 label,
-                style: TextStyle(color: foreground, fontSize: 12, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: foreground,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),

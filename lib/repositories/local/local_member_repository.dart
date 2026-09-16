@@ -89,9 +89,7 @@ class LocalMemberRepository implements MemberRepository {
     if (member.name.trim().isEmpty) {
       throw const ValidationException('Member name cannot be empty.');
     }
-    await (_db.update(
-      _db.members,
-    )..where((t) => t.id.equals(member.id))).write(
+    await (_db.update(_db.members)..where((t) => t.id.equals(member.id))).write(
       MembersCompanion(
         name: Value(member.name),
         phone: Value(member.phone),

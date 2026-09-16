@@ -50,16 +50,26 @@ class LocalSettlementRepository implements SettlementRepository {
   }
 
   @override
-  Future<MonthlySettlement?> getSettlement(String messId, int year, int month) async {
-    final row = await (_db.select(_db.monthlySettlements)..where(
-          (t) => t.messId.equals(messId) & t.year.equals(year) & t.month.equals(month),
-        ))
-        .getSingleOrNull();
+  Future<MonthlySettlement?> getSettlement(
+    String messId,
+    int year,
+    int month,
+  ) async {
+    final row =
+        await (_db.select(_db.monthlySettlements)..where(
+              (t) =>
+                  t.messId.equals(messId) &
+                  t.year.equals(year) &
+                  t.month.equals(month),
+            ))
+            .getSingleOrNull();
     return row == null ? null : _toModel(row);
   }
 
   @override
-  Stream<List<MonthlySettlementMember>> watchSettlementMembers(String settlementId) {
+  Stream<List<MonthlySettlementMember>> watchSettlementMembers(
+    String settlementId,
+  ) {
     final query = _db.select(_db.monthlySettlementMembers)
       ..where((t) => t.settlementId.equals(settlementId));
     return query.watch().map((rows) => rows.map(_memberToModel).toList());
@@ -78,10 +88,14 @@ class LocalSettlementRepository implements SettlementRepository {
     final now = DateTime.now();
 
     return _db.transaction(() async {
-      final existing = await (_db.select(_db.monthlySettlements)..where(
-            (t) => t.messId.equals(messId) & t.year.equals(year) & t.month.equals(month),
-          ))
-          .getSingleOrNull();
+      final existing =
+          await (_db.select(_db.monthlySettlements)..where(
+                (t) =>
+                    t.messId.equals(messId) &
+                    t.year.equals(year) &
+                    t.month.equals(month),
+              ))
+              .getSingleOrNull();
 
       final settlementId = existing?.id ?? IdGenerator.generate();
 

@@ -15,8 +15,9 @@ class MonthlySettlements extends Table {
   IntColumn get totalExpenseMinorUnits => integer()();
   IntColumn get totalMeals => integer()();
   IntColumn get mealRateMinorUnits => integer()();
-  TextColumn get status =>
-      textEnum<SettlementStatus>().withDefault(Constant(SettlementStatus.open.name))();
+  TextColumn get status => textEnum<SettlementStatus>().withDefault(
+    Constant(SettlementStatus.open.name),
+  )();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 

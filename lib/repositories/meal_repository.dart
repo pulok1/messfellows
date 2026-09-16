@@ -7,9 +7,17 @@ abstract interface class MealRepository {
 
   /// Every meal entry within [year]/[month] — the source for monthly totals
   /// and reports.
-  Stream<List<MealEntry>> watchMealsForMonth(String messId, int year, int month);
+  Stream<List<MealEntry>> watchMealsForMonth(
+    String messId,
+    int year,
+    int month,
+  );
 
-  Future<MealEntry?> getMealEntry(String messId, String memberId, DateTime date);
+  Future<MealEntry?> getMealEntry(
+    String messId,
+    String memberId,
+    DateTime date,
+  );
 
   /// Creates or updates the single meal record for [memberId] on [date].
   /// Only the meals explicitly passed are changed; omitted ones keep their

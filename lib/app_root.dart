@@ -16,8 +16,10 @@ class AppRoot extends ConsumerWidget {
     final messAsync = ref.watch(currentMessProvider);
 
     return messAsync.when(
-      data: (mess) => mess == null ? const OnboardingScreen() : HomeShell(mess: mess),
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      data: (mess) =>
+          mess == null ? const OnboardingScreen() : HomeShell(mess: mess),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (error, stackTrace) => Scaffold(
         body: Center(
           child: Padding(

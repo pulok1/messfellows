@@ -31,7 +31,10 @@ Future<void> showQuickAddSheet(
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: Text('Quick Add', style: Theme.of(sheetContext).textTheme.titleMedium),
+                child: Text(
+                  'Quick Add',
+                  style: Theme.of(sheetContext).textTheme.titleMedium,
+                ),
               ),
               _QuickAddOption(
                 icon: Icons.restaurant,

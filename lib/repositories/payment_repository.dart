@@ -2,7 +2,11 @@ import '../core/utils/money.dart';
 import '../models/payment.dart';
 
 abstract interface class PaymentRepository {
-  Stream<List<Payment>> watchPaymentsForMonth(String messId, int year, int month);
+  Stream<List<Payment>> watchPaymentsForMonth(
+    String messId,
+    int year,
+    int month,
+  );
 
   Stream<List<Payment>> watchPaymentsForMember(String messId, String memberId);
 

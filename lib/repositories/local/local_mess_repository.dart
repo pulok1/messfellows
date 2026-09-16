@@ -26,7 +26,9 @@ class LocalMessRepository implements MessRepository {
     final query = _db.select(_db.messes)
       ..orderBy([(t) => OrderingTerm.asc(t.createdAt)])
       ..limit(1);
-    return query.watch().map((rows) => rows.isEmpty ? null : _toModel(rows.first));
+    return query.watch().map(
+      (rows) => rows.isEmpty ? null : _toModel(rows.first),
+    );
   }
 
   @override

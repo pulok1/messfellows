@@ -34,7 +34,9 @@ class BackupService {
     final expenses = await _db.select(_db.expenses).get();
     final payments = await _db.select(_db.payments).get();
     final settlements = await _db.select(_db.monthlySettlements).get();
-    final settlementMembers = await _db.select(_db.monthlySettlementMembers).get();
+    final settlementMembers = await _db
+        .select(_db.monthlySettlementMembers)
+        .get();
 
     final document = {
       'schemaVersion': AppConstants.backupFormatVersion,
@@ -45,7 +47,9 @@ class BackupService {
       'expenses': expenses.map(_expenseToJson).toList(),
       'payments': payments.map(_paymentToJson).toList(),
       'settlements': settlements.map(_settlementToJson).toList(),
-      'settlementMembers': settlementMembers.map(_settlementMemberToJson).toList(),
+      'settlementMembers': settlementMembers
+          .map(_settlementMemberToJson)
+          .toList(),
     };
 
     return const JsonEncoder.withIndent('  ').convert(document);
@@ -59,11 +63,14 @@ class BackupService {
     try {
       document = jsonDecode(jsonString) as Map<String, dynamic>;
     } on FormatException {
-      throw const ImportException('This file is not a valid Mess Fellows backup.');
+      throw const ImportException(
+        'This file is not a valid Mess Fellows backup.',
+      );
     }
 
     final schemaVersion = document['schemaVersion'];
-    if (schemaVersion is! int || schemaVersion > AppConstants.backupFormatVersion) {
+    if (schemaVersion is! int ||
+        schemaVersion > AppConstants.backupFormatVersion) {
       throw const ImportException(
         'This backup was created by a newer version of the app and cannot be imported.',
       );
@@ -109,7 +116,8 @@ class BackupService {
           );
           batch.insertAll(
             _db.monthlySettlementMembers,
-            _listOf(document['settlementMembers']).map(_settlementMemberFromJson),
+            _listOf(document['settlementMembers'])
+                .map(_settlementMemberFromJson),
           );
         });
       });
@@ -138,14 +146,15 @@ class BackupService {
     'updatedAt': row.updatedAt.toIso8601String(),
   };
 
-  MessesCompanion _messFromJson(Map<String, dynamic> json) => MessesCompanion.insert(
-    id: json['id'] as String,
-    name: json['name'] as String,
-    currencyCode: Value(json['currencyCode'] as String),
-    currencySymbol: Value(json['currencySymbol'] as String),
-    createdAt: DateTime.parse(json['createdAt'] as String),
-    updatedAt: DateTime.parse(json['updatedAt'] as String),
-  );
+  MessesCompanion _messFromJson(Map<String, dynamic> json) =>
+      MessesCompanion.insert(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        currencyCode: Value(json['currencyCode'] as String),
+        currencySymbol: Value(json['currencySymbol'] as String),
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        updatedAt: DateTime.parse(json['updatedAt'] as String),
+      );
 
   // --- members ---
 
@@ -161,19 +170,22 @@ class BackupService {
     'updatedAt': row.updatedAt.toIso8601String(),
   };
 
-  MembersCompanion _memberFromJson(Map<String, dynamic> json) => MembersCompanion.insert(
-    id: json['id'] as String,
-    messId: json['messId'] as String,
-    name: json['name'] as String,
-    phone: Value(json['phone'] as String?),
-    joinedAt: DateTime.parse(json['joinedAt'] as String),
-    leftAt: Value(
-      json['leftAt'] == null ? null : DateTime.parse(json['leftAt'] as String),
-    ),
-    isActive: Value(json['isActive'] as bool),
-    createdAt: DateTime.parse(json['createdAt'] as String),
-    updatedAt: DateTime.parse(json['updatedAt'] as String),
-  );
+  MembersCompanion _memberFromJson(Map<String, dynamic> json) =>
+      MembersCompanion.insert(
+        id: json['id'] as String,
+        messId: json['messId'] as String,
+        name: json['name'] as String,
+        phone: Value(json['phone'] as String?),
+        joinedAt: DateTime.parse(json['joinedAt'] as String),
+        leftAt: Value(
+          json['leftAt'] == null
+              ? null
+              : DateTime.parse(json['leftAt'] as String),
+        ),
+        isActive: Value(json['isActive'] as bool),
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        updatedAt: DateTime.parse(json['updatedAt'] as String),
+      );
 
   // --- meal entries ---
 
@@ -216,17 +228,18 @@ class BackupService {
     'updatedAt': row.updatedAt.toIso8601String(),
   };
 
-  ExpensesCompanion _expenseFromJson(Map<String, dynamic> json) => ExpensesCompanion.insert(
-    id: json['id'] as String,
-    messId: json['messId'] as String,
-    date: DateTime.parse(json['date'] as String),
-    amountMinorUnits: json['amountMinorUnits'] as int,
-    paidByMemberId: json['paidByMemberId'] as String,
-    category: json['category'] as String,
-    note: Value(json['note'] as String?),
-    createdAt: DateTime.parse(json['createdAt'] as String),
-    updatedAt: DateTime.parse(json['updatedAt'] as String),
-  );
+  ExpensesCompanion _expenseFromJson(Map<String, dynamic> json) =>
+      ExpensesCompanion.insert(
+        id: json['id'] as String,
+        messId: json['messId'] as String,
+        date: DateTime.parse(json['date'] as String),
+        amountMinorUnits: json['amountMinorUnits'] as int,
+        paidByMemberId: json['paidByMemberId'] as String,
+        category: json['category'] as String,
+        note: Value(json['note'] as String?),
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        updatedAt: DateTime.parse(json['updatedAt'] as String),
+      );
 
   // --- payments ---
 
@@ -241,16 +254,17 @@ class BackupService {
     'updatedAt': row.updatedAt.toIso8601String(),
   };
 
-  PaymentsCompanion _paymentFromJson(Map<String, dynamic> json) => PaymentsCompanion.insert(
-    id: json['id'] as String,
-    messId: json['messId'] as String,
-    date: DateTime.parse(json['date'] as String),
-    memberId: json['memberId'] as String,
-    amountMinorUnits: json['amountMinorUnits'] as int,
-    note: Value(json['note'] as String?),
-    createdAt: DateTime.parse(json['createdAt'] as String),
-    updatedAt: DateTime.parse(json['updatedAt'] as String),
-  );
+  PaymentsCompanion _paymentFromJson(Map<String, dynamic> json) =>
+      PaymentsCompanion.insert(
+        id: json['id'] as String,
+        messId: json['messId'] as String,
+        date: DateTime.parse(json['date'] as String),
+        memberId: json['memberId'] as String,
+        amountMinorUnits: json['amountMinorUnits'] as int,
+        note: Value(json['note'] as String?),
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        updatedAt: DateTime.parse(json['updatedAt'] as String),
+      );
 
   // --- settlements ---
 
@@ -283,7 +297,9 @@ class BackupService {
 
   // --- settlement members ---
 
-  Map<String, dynamic> _settlementMemberToJson(MonthlySettlementMemberRow row) => {
+  Map<String, dynamic> _settlementMemberToJson(
+    MonthlySettlementMemberRow row,
+  ) => {
     'id': row.id,
     'settlementId': row.settlementId,
     'memberId': row.memberId,
@@ -294,15 +310,16 @@ class BackupService {
     'createdAt': row.createdAt.toIso8601String(),
   };
 
-  MonthlySettlementMembersCompanion _settlementMemberFromJson(Map<String, dynamic> json) =>
-      MonthlySettlementMembersCompanion.insert(
-        id: json['id'] as String,
-        settlementId: json['settlementId'] as String,
-        memberId: json['memberId'] as String,
-        mealCount: json['mealCount'] as int,
-        mealCostMinorUnits: json['mealCostMinorUnits'] as int,
-        paidAmountMinorUnits: json['paidAmountMinorUnits'] as int,
-        balanceMinorUnits: json['balanceMinorUnits'] as int,
-        createdAt: DateTime.parse(json['createdAt'] as String),
-      );
+  MonthlySettlementMembersCompanion _settlementMemberFromJson(
+    Map<String, dynamic> json,
+  ) => MonthlySettlementMembersCompanion.insert(
+    id: json['id'] as String,
+    settlementId: json['settlementId'] as String,
+    memberId: json['memberId'] as String,
+    mealCount: json['mealCount'] as int,
+    mealCostMinorUnits: json['mealCostMinorUnits'] as int,
+    paidAmountMinorUnits: json['paidAmountMinorUnits'] as int,
+    balanceMinorUnits: json['balanceMinorUnits'] as int,
+    createdAt: DateTime.parse(json['createdAt'] as String),
+  );
 }

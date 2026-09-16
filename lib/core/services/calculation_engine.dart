@@ -52,34 +52,42 @@ class CalculationEngine {
     // producing NaN/infinity.
     final mealRate = totalExpense.divide(totalMeals);
 
-    final balances = members.map((member) {
-      final memberMeals = mealEntries
-          .where((entry) => entry.memberId == member.id)
-          .fold<int>(0, (sum, entry) => sum + entry.totalMeals);
+    final balances = members
+        .map((member) {
+          final memberMeals = mealEntries
+              .where((entry) => entry.memberId == member.id)
+              .fold<int>(0, (sum, entry) => sum + entry.totalMeals);
 
-      final mealCost = mealRate * memberMeals;
+          final mealCost = mealRate * memberMeals;
 
-      final cashPaid = payments
-          .where((payment) => payment.memberId == member.id)
-          .fold<Money>(const Money.zero(), (sum, payment) => sum + payment.amount);
+          final cashPaid = payments
+              .where((payment) => payment.memberId == member.id)
+              .fold<Money>(
+                const Money.zero(),
+                (sum, payment) => sum + payment.amount,
+              );
 
-      final bazarPaid = expenses
-          .where((expense) => expense.paidByMemberId == member.id)
-          .fold<Money>(const Money.zero(), (sum, expense) => sum + expense.amount);
+          final bazarPaid = expenses
+              .where((expense) => expense.paidByMemberId == member.id)
+              .fold<Money>(
+                const Money.zero(),
+                (sum, expense) => sum + expense.amount,
+              );
 
-      final paidAmount = cashPaid + bazarPaid;
+          final paidAmount = cashPaid + bazarPaid;
 
-      final balance = paidAmount - mealCost;
+          final balance = paidAmount - mealCost;
 
-      return MemberBalance(
-        memberId: member.id,
-        memberName: member.name,
-        mealCount: memberMeals,
-        mealCost: mealCost,
-        paidAmount: paidAmount,
-        balance: balance,
-      );
-    }).toList(growable: false);
+          return MemberBalance(
+            memberId: member.id,
+            memberName: member.name,
+            mealCount: memberMeals,
+            mealCost: mealCost,
+            paidAmount: paidAmount,
+            balance: balance,
+          );
+        })
+        .toList(growable: false);
 
     return MonthCalculationResult(
       totalExpense: totalExpense,

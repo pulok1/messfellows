@@ -42,9 +42,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       // switch to the dashboard the moment this write lands.
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Couldn't create your mess. Please try again.")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Couldn't create your mess. Please try again."),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -67,22 +69,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(Icons.ramen_dining, size: 64, color: colorScheme.primary),
+                    Icon(
+                      Icons.ramen_dining,
+                      size: 64,
+                      color: colorScheme.primary,
+                    ),
                     const SizedBox(height: AppSpacing.lg),
                     Text(
                       'Welcome to ${AppConstants.appName}',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
                       'Manage your mess meals, bazar and monthly settlement in one place — '
                       'entirely on this device, no internet required.',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(color: colorScheme.onSurfaceVariant),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.xl),
@@ -103,9 +107,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     const SizedBox(height: AppSpacing.md),
                     Text(
                       'Currency: ${AppConstants.defaultCurrencySymbol} ${AppConstants.defaultCurrencyCode}',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     FilledButton(
