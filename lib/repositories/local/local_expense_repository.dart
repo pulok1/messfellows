@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/errors/app_exception.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/utils/id_generator.dart';
 import '../../core/utils/money.dart';
@@ -56,6 +57,10 @@ class LocalExpenseRepository implements ExpenseRepository {
     required String category,
     String? note,
   }) async {
+    if (amount.minorUnits <= 0) {
+      throw const ValidationException('Amount must be greater than zero.');
+    }
+
     final now = DateTime.now();
     final id = IdGenerator.generate();
     final day = dateOnly(date);
@@ -89,6 +94,9 @@ class LocalExpenseRepository implements ExpenseRepository {
 
   @override
   Future<void> updateExpense(Expense expense) async {
+    if (expense.amount.minorUnits <= 0) {
+      throw const ValidationException('Amount must be greater than zero.');
+    }
     await (_db.update(
       _db.expenses,
     )..where((t) => t.id.equals(expense.id))).write(

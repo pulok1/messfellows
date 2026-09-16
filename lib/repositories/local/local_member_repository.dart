@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/errors/app_exception.dart';
 import '../../core/utils/id_generator.dart';
 import '../../database/app_database.dart';
 import '../../models/member.dart';
@@ -52,6 +53,10 @@ class LocalMemberRepository implements MemberRepository {
     required String name,
     String? phone,
   }) async {
+    if (name.trim().isEmpty) {
+      throw const ValidationException('Member name cannot be empty.');
+    }
+
     final now = DateTime.now();
     final id = IdGenerator.generate();
     await _db
@@ -81,6 +86,9 @@ class LocalMemberRepository implements MemberRepository {
 
   @override
   Future<void> updateMember(Member member) async {
+    if (member.name.trim().isEmpty) {
+      throw const ValidationException('Member name cannot be empty.');
+    }
     await (_db.update(
       _db.members,
     )..where((t) => t.id.equals(member.id))).write(

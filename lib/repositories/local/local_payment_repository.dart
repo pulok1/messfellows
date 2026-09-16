@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/errors/app_exception.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/utils/id_generator.dart';
 import '../../core/utils/money.dart';
@@ -54,6 +55,10 @@ class LocalPaymentRepository implements PaymentRepository {
     required Money amount,
     String? note,
   }) async {
+    if (amount.minorUnits <= 0) {
+      throw const ValidationException('Amount must be greater than zero.');
+    }
+
     final now = DateTime.now();
     final id = IdGenerator.generate();
     final day = dateOnly(date);
@@ -85,6 +90,9 @@ class LocalPaymentRepository implements PaymentRepository {
 
   @override
   Future<void> updatePayment(Payment payment) async {
+    if (payment.amount.minorUnits <= 0) {
+      throw const ValidationException('Amount must be greater than zero.');
+    }
     await (_db.update(
       _db.payments,
     )..where((t) => t.id.equals(payment.id))).write(
