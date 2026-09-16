@@ -46,8 +46,18 @@ class AppTheme {
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
-        scrolledUnderElevation: 1,
+        scrolledUnderElevation: 2,
+        surfaceTintColor: colorScheme.surfaceTint,
         centerTitle: false,
+        titleSpacing: AppSpacing.md,
+        titleTextStyle: TextStyle(
+          color: colorScheme.onSurface,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.2,
+        ),
+        iconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
+        actionsIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
       ),
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(

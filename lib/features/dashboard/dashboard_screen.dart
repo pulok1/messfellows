@@ -29,24 +29,61 @@ class DashboardScreen extends ConsumerWidget {
       monthCalculationProvider((messId: mess.id, year: now.year, month: now.month)),
     );
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(mess.name),
+        toolbarHeight: 68,
+        titleSpacing: AppSpacing.md,
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: colorScheme.primaryContainer,
+              foregroundColor: colorScheme.onPrimaryContainer,
+              child: const Icon(Icons.ramen_dining),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    mess.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    _monthYear(now),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         actions: [
-          IconButton(
+          _TopBarAction(
             tooltip: 'Members',
-            icon: const Icon(Icons.group_outlined),
+            icon: Icons.group_outlined,
             onPressed: () => Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (_) => MembersScreen(messId: mess.id))),
           ),
-          IconButton(
+          _TopBarAction(
             tooltip: 'Settings',
-            icon: const Icon(Icons.settings_outlined),
+            icon: Icons.settings_outlined,
             onPressed: () => Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (_) => SettingsScreen(mess: mess))),
           ),
+          const SizedBox(width: AppSpacing.xs),
         ],
       ),
       body: membersAsync.when(
@@ -71,13 +108,6 @@ class DashboardScreen extends ConsumerWidget {
               AppSpacing.xxl,
             ),
             children: [
-              Text(
-                _monthYear(now),
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: AppSpacing.sm),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
@@ -128,6 +158,32 @@ class DashboardScreen extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const Center(child: Text("Couldn't load your mess data.")),
+      ),
+    );
+  }
+}
+
+/// A rounded, tonal top-bar icon button — reads as more modern than a bare
+/// [IconButton] and gives the action a visible tap target/background.
+class _TopBarAction extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  const _TopBarAction({required this.icon, required this.tooltip, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: IconButton(
+        tooltip: tooltip,
+        icon: Icon(icon),
+        onPressed: onPressed,
+        style: IconButton.styleFrom(
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          shape: const CircleBorder(),
+        ),
       ),
     );
   }
