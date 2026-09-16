@@ -17,6 +17,14 @@ import '../utils/money.dart';
 /// `total food expense / total meals`. No carry-forward, guest meals, or
 /// other adjustments are applied — those are out of scope for this engine
 /// until the product spec defines them.
+///
+/// A member's contribution is the sum of their [Payment]s *plus* the sum
+/// of any [Expense]s they personally paid for (bazar). Buying groceries
+/// with your own money is money out of your pocket for the group just
+/// like handing cash to the manager is — both must offset the same
+/// member's meal cost, or someone who only ever buys bazar and never
+/// makes a separate cash payment would incorrectly show up as owing
+/// money they've already spent.
 class CalculationEngine {
   const CalculationEngine();
 
@@ -51,9 +59,15 @@ class CalculationEngine {
 
       final mealCost = mealRate * memberMeals;
 
-      final paidAmount = payments
+      final cashPaid = payments
           .where((payment) => payment.memberId == member.id)
           .fold<Money>(const Money.zero(), (sum, payment) => sum + payment.amount);
+
+      final bazarPaid = expenses
+          .where((expense) => expense.paidByMemberId == member.id)
+          .fold<Money>(const Money.zero(), (sum, expense) => sum + expense.amount);
+
+      final paidAmount = cashPaid + bazarPaid;
 
       final balance = paidAmount - mealCost;
 

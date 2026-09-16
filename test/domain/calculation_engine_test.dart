@@ -43,7 +43,11 @@ MealEntry _meal(
   );
 }
 
-Expense _expense(String id, Money amount, {String paidBy = 'm1'}) {
+// Defaults to a payer outside the `members` list under test, so tests that
+// don't care who paid the bazar (most of them) aren't accidentally coupled
+// to the "bazar counts as a contribution" rule — see the dedicated tests
+// for that below.
+Expense _expense(String id, Money amount, {String paidBy = 'external-payer'}) {
   final now = DateTime(2026, 9, 1);
   return Expense(
     id: id,
@@ -235,6 +239,71 @@ void main() {
     expect(balance.balance, const Money(-30000));
     expect(balance.status, BalanceStatus.needsToPay);
   });
+
+  test('a member who buys bazar with their own money gets credit for it, '
+      'even with no separate payment', () {
+    final m1 = _member('m1');
+    final result = engine.calculateMonth(
+      members: [m1],
+      mealEntries: [_meal('m1', d1, lunch: true)], // 1 meal
+      expenses: [_expense('e1', const Money(30000), paidBy: 'm1')], // rate = ৳300/meal
+      payments: const [],
+    );
+
+    final balance = result.memberBalances.single;
+    expect(balance.mealCost, const Money(30000));
+    expect(balance.paidAmount, const Money(30000)); // credited for the bazar they paid for
+    expect(balance.balance, const Money.zero());
+    expect(balance.status, BalanceStatus.settled);
+  });
+
+  test("a member's contribution combines cash payments and bazar they paid for", () {
+    final m1 = _member('m1');
+    final result = engine.calculateMonth(
+      members: [m1],
+      mealEntries: [_meal('m1', d1, lunch: true)], // 1 meal -> rate ৳100/meal
+      expenses: [_expense('e1', const Money(10000), paidBy: 'm1')],
+      payments: [_payment('p1', 'm1', const Money(20000))],
+    );
+
+    final balance = result.memberBalances.single;
+    expect(balance.mealCost, const Money(10000));
+    expect(balance.paidAmount, const Money(30000)); // ৳100 bazar + ৳200 cash
+    expect(balance.balance, const Money(20000));
+    expect(balance.status, BalanceStatus.willReceive);
+  });
+
+  test(
+    'bazar paid by one member only credits that member, not everyone who ate',
+    () {
+      final m1 = _member('m1', name: 'Rahim');
+      final m2 = _member('m2', name: 'Karim');
+      final result = engine.calculateMonth(
+        members: [m1, m2],
+        mealEntries: [
+          _meal('m1', d1, lunch: true),
+          _meal('m2', d1, lunch: true),
+        ], // 2 meals -> rate ৳100/meal
+        expenses: [_expense('e1', const Money(20000), paidBy: 'm1')], // Rahim buys the bazar
+        payments: const [],
+      );
+
+      final rahim = result.memberBalances.firstWhere((b) => b.memberId == 'm1');
+      final karim = result.memberBalances.firstWhere((b) => b.memberId == 'm2');
+
+      // Rahim advanced the full ৳200 bazar cost, but only owes his own ৳100
+      // meal cost, so he's credited the ৳100 difference.
+      expect(rahim.paidAmount, const Money(20000));
+      expect(rahim.balance, const Money(10000));
+      expect(rahim.status, BalanceStatus.willReceive);
+
+      // Karim ate but neither paid cash nor bought bazar, so he owes his
+      // full meal cost.
+      expect(karim.paidAmount, const Money.zero());
+      expect(karim.balance, const Money(-10000));
+      expect(karim.status, BalanceStatus.needsToPay);
+    },
+  );
 
   test('decimal meal rate rounds to the nearest poisha', () {
     final m1 = _member('m1');

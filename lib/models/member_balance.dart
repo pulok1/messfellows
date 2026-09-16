@@ -11,6 +11,10 @@ class MemberBalance {
   final String memberName;
   final int mealCount;
   final Money mealCost;
+
+  /// This member's total contribution: cash [Payment]s plus any [Expense]s
+  /// (bazar) they personally paid for — see CalculationEngine for why both
+  /// count.
   final Money paidAmount;
   final Money balance;
 
