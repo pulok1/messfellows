@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/member.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/month_calculation_provider.dart';
@@ -22,6 +23,7 @@ class MembersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final allMembersAsync = ref.watch(allMembersProvider(messId));
     final calculation = ref.watch(
@@ -40,21 +42,21 @@ class MembersScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showAddEditMemberDialog(context, messId: messId),
         icon: const Icon(Icons.person_add_alt),
-        label: const Text('Add Member'),
+        label: Text(l10n.addMember),
       ),
       body: SafeArea(
         child: Column(
           children: [
-            const PageHeaderCard(title: 'Members'),
+            PageHeaderCard(title: l10n.membersLabel),
             Expanded(
               child: allMembersAsync.when(
                 data: (members) {
                   if (members.isEmpty) {
                     return EmptyState(
                       icon: Icons.group_outlined,
-                      title: 'No members yet',
-                      message: 'Add the people in your mess to start tracking meals and bazar.',
-                      actionLabel: 'Add Member',
+                      title: l10n.noMembersYetTitle,
+                      message: l10n.addMembersToTrackMealsAndBazar,
+                      actionLabel: l10n.addMember,
                       onAction: () =>
                           showAddEditMemberDialog(context, messId: messId),
                     );
@@ -88,7 +90,7 @@ class MembersScreen extends ConsumerWidget {
                             AppSpacing.sm,
                           ),
                           child: Text(
-                            'Archived',
+                            l10n.archivedSectionHeader,
                             style: Theme.of(context).textTheme.labelLarge
                                 ?.copyWith(
                                   color: Theme.of(context).colorScheme.outline,
@@ -114,8 +116,7 @@ class MembersScreen extends ConsumerWidget {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) =>
-                    const Center(child: Text("Couldn't load members.")),
+                error: (_, _) => Center(child: Text(l10n.couldntLoadMembers)),
               ),
             ),
           ],
@@ -138,6 +139,7 @@ class _MemberTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
@@ -157,19 +159,16 @@ class _MemberTile extends ConsumerWidget {
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
-          member.isActive ? '$mealCount meals this month' : 'Archived',
+          member.isActive ? l10n.mealsThisMonth(mealCount) : l10n.archivedSectionHeader,
         ),
         trailing: PopupMenuButton<String>(
           onSelected: (value) => _handleAction(context, ref, value),
           itemBuilder: (context) => [
-            const PopupMenuItem(value: 'edit', child: Text('Edit')),
+            PopupMenuItem(value: 'edit', child: Text(l10n.editMenuItem)),
             if (member.isActive)
-              const PopupMenuItem(value: 'archive', child: Text('Archive'))
+              PopupMenuItem(value: 'archive', child: Text(l10n.archiveMenuItem))
             else
-              const PopupMenuItem(
-                value: 'reactivate',
-                child: Text('Reactivate'),
-              ),
+              PopupMenuItem(value: 'reactivate', child: Text(l10n.reactivateMenuItem)),
           ],
         ),
       ),
@@ -181,6 +180,7 @@ class _MemberTile extends ConsumerWidget {
     WidgetRef ref,
     String action,
   ) async {
+    final l10n = AppLocalizations.of(context);
     switch (action) {
       case 'edit':
         await showAddEditMemberDialog(
@@ -191,9 +191,9 @@ class _MemberTile extends ConsumerWidget {
       case 'archive':
         final confirmed = await confirmDestructiveAction(
           context,
-          title: 'Archive ${member.name}?',
-          message: 'They will no longer appear in meal/bazar/payment entry, but their history is kept.',
-          confirmLabel: 'Archive',
+          title: l10n.archiveConfirmTitle(member.name),
+          message: l10n.archiveConfirmMessage,
+          confirmLabel: l10n.archiveMenuItem,
         );
         if (confirmed) {
           await ref.read(memberRepositoryProvider).archiveMember(member.id);

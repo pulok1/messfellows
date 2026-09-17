@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/member.dart';
 import '../../providers/repository_providers.dart';
 
@@ -93,9 +94,7 @@ class _AddEditMemberDialogState extends ConsumerState<AddEditMemberDialog> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Couldn't save this member. Please try again."),
-          ),
+          SnackBar(content: Text(AppLocalizations.of(context).couldntSaveMember)),
         );
       }
     } finally {
@@ -105,8 +104,9 @@ class _AddEditMemberDialogState extends ConsumerState<AddEditMemberDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: Text(_isEditing ? 'Edit Member' : 'Add Member'),
+      title: Text(_isEditing ? l10n.editMemberTitle : l10n.addMember),
       content: Form(
         key: _formKey,
         child: Column(
@@ -118,10 +118,10 @@ class _AddEditMemberDialogState extends ConsumerState<AddEditMemberDialog> {
               autofocus: true,
               textCapitalization: TextCapitalization.words,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(labelText: 'Name'),
+              decoration: InputDecoration(labelText: l10n.nameLabel),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a name';
+                  return l10n.nameValidator;
                 }
                 return null;
               },
@@ -131,14 +131,14 @@ class _AddEditMemberDialogState extends ConsumerState<AddEditMemberDialog> {
               controller: _phoneController,
               keyboardType: TextInputType.phone,
               textInputAction: TextInputAction.done,
-              decoration: const InputDecoration(labelText: 'Phone (optional)'),
+              decoration: InputDecoration(labelText: l10n.phoneOptionalLabel),
               onFieldSubmitted: (_) => _save(),
             ),
             if (!_isEditing) ...[
               const SizedBox(height: AppSpacing.sm),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Add another after saving'),
+                title: Text(l10n.addAnotherAfterSaving),
                 value: _addAnother,
                 onChanged: (value) => setState(() => _addAnother = value),
               ),
@@ -149,7 +149,7 @@ class _AddEditMemberDialogState extends ConsumerState<AddEditMemberDialog> {
       actions: [
         TextButton(
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: _isSaving ? null : _save,
@@ -159,7 +159,7 @@ class _AddEditMemberDialogState extends ConsumerState<AddEditMemberDialog> {
                   width: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text(_isEditing ? 'Save' : 'Add'),
+              : Text(_isEditing ? l10n.save : l10n.add),
         ),
       ],
     );

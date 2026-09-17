@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/localized_date.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../providers/expense_providers.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/month_calculation_provider.dart';
@@ -25,6 +27,7 @@ class MemberDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final membersAsync = ref.watch(allMembersProvider(messId));
     final member = membersAsync.value
         ?.where((m) => m.id == memberId)
@@ -56,12 +59,12 @@ class MemberDetailScreen extends ConsumerWidget {
           ),
         ),
         icon: const Icon(Icons.payments_outlined),
-        label: const Text('Add Payment'),
+        label: Text(l10n.addPaymentTitle),
       ),
       body: SafeArea(
         child: Column(
           children: [
-            PageHeaderCard(title: member?.name ?? 'Member'),
+            PageHeaderCard(title: member?.name ?? l10n.memberFallback),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(
@@ -79,20 +82,20 @@ class MemberDetailScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'This month',
+                              l10n.thisMonthLabel,
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             _StatRow(
-                              label: 'Meals eaten',
+                              label: l10n.mealsEatenLabel,
                               value: '${balance.mealCount}',
                             ),
                             _StatRow(
-                              label: 'Meal cost',
+                              label: l10n.mealCostLabel,
                               value: balance.mealCost.format(),
                             ),
                             _StatRow(
-                              label: 'Paid',
+                              label: l10n.paidLabel,
                               value: balance.paidAmount.format(),
                             ),
                             const Divider(height: AppSpacing.lg),
@@ -106,17 +109,17 @@ class MemberDetailScreen extends ConsumerWidget {
                     ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
-                    'Bazar history',
+                    l10n.bazarHistoryLabel,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   expenses.when(
                     data: (list) => list.isEmpty
-                        ? const Padding(
-                            padding: EdgeInsets.symmetric(
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(
                               vertical: AppSpacing.sm,
                             ),
-                            child: Text('No bazar entries yet.'),
+                            child: Text(l10n.noBazarEntriesYet),
                           )
                         : Column(
                             children: [
@@ -127,7 +130,9 @@ class MemberDetailScreen extends ConsumerWidget {
                                   ),
                                   child: ListTile(
                                     title: Text(expense.category),
-                                    subtitle: Text(_formatDate(expense.date)),
+                                    subtitle: Text(
+                                      formatShortDate(context, expense.date),
+                                    ),
                                     trailing: Text(
                                       expense.amount.format(),
                                       style: const TextStyle(
@@ -139,21 +144,21 @@ class MemberDetailScreen extends ConsumerWidget {
                             ],
                           ),
                     loading: () => const LinearProgressIndicator(),
-                    error: (_, _) => const Text("Couldn't load bazar history."),
+                    error: (_, _) => Text(l10n.couldntLoadBazarHistory),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
-                    'Payment history',
+                    l10n.paymentHistoryLabel,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   payments.when(
                     data: (list) => list.isEmpty
-                        ? const Padding(
-                            padding: EdgeInsets.symmetric(
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(
                               vertical: AppSpacing.sm,
                             ),
-                            child: Text('No payments yet.'),
+                            child: Text(l10n.noPaymentsYet),
                           )
                         : Column(
                             children: [
@@ -164,7 +169,9 @@ class MemberDetailScreen extends ConsumerWidget {
                                   ),
                                   child: ListTile(
                                     title: Text(payment.amount.format()),
-                                    subtitle: Text(_formatDate(payment.date)),
+                                    subtitle: Text(
+                                      formatShortDate(context, payment.date),
+                                    ),
                                     trailing: payment.note == null
                                         ? null
                                         : Text(payment.note!),
@@ -173,8 +180,7 @@ class MemberDetailScreen extends ConsumerWidget {
                             ],
                           ),
                     loading: () => const LinearProgressIndicator(),
-                    error: (_, _) =>
-                        const Text("Couldn't load payment history."),
+                    error: (_, _) => Text(l10n.couldntLoadPaymentHistory),
                   ),
                 ],
               ),
@@ -210,22 +216,4 @@ class _StatRow extends StatelessWidget {
       ),
     );
   }
-}
-
-String _formatDate(DateTime date) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${date.day} ${months[date.month - 1]} ${date.year}';
 }
