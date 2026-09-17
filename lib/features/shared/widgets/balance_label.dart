@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/gen/app_localizations.dart';
 import '../../../models/balance_status.dart';
 import '../../../models/member_balance.dart';
 
@@ -15,16 +16,17 @@ class BalanceLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final (text, color) = switch (balance.status) {
       BalanceStatus.willReceive => (
-        'Will receive ${balance.balanceMagnitude.format()}',
+        l10n.willReceiveAmount(balance.balanceMagnitude.format()),
         AppBalanceColors.willReceive,
       ),
       BalanceStatus.needsToPay => (
-        'Needs to pay ${balance.balanceMagnitude.format()}',
+        l10n.needsToPayAmount(balance.balanceMagnitude.format()),
         AppBalanceColors.needsToPay,
       ),
-      BalanceStatus.settled => ('Settled', AppBalanceColors.settled),
+      BalanceStatus.settled => (l10n.settled, AppBalanceColors.settled),
     };
 
     return Text(

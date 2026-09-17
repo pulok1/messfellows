@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/mess.dart';
 import '../bazar/bazar_screen.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -28,6 +29,7 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final tabs = [
       DashboardScreen(mess: widget.mess),
       MealsScreen(messId: widget.mess.id),
@@ -43,7 +45,7 @@ class _HomeShellState extends State<HomeShell> {
           messId: widget.mess.id,
           onSelectMeal: _goToMealsTab,
         ),
-        tooltip: 'Quick Add',
+        tooltip: l10n.quickAddTooltip,
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -57,14 +59,14 @@ class _HomeShellState extends State<HomeShell> {
             _NavItem(
               icon: Icons.home_outlined,
               selectedIcon: Icons.home,
-              label: 'Home',
+              label: l10n.navHome,
               isSelected: _currentIndex == 0,
               onTap: () => setState(() => _currentIndex = 0),
             ),
             _NavItem(
               icon: Icons.restaurant_outlined,
               selectedIcon: Icons.restaurant,
-              label: 'Meals',
+              label: l10n.navMeals,
               isSelected: _currentIndex == 1,
               onTap: () => setState(() => _currentIndex = 1),
             ),
@@ -72,14 +74,14 @@ class _HomeShellState extends State<HomeShell> {
             _NavItem(
               icon: Icons.shopping_basket_outlined,
               selectedIcon: Icons.shopping_basket,
-              label: 'Bazar',
+              label: l10n.navBazar,
               isSelected: _currentIndex == 2,
               onTap: () => setState(() => _currentIndex = 2),
             ),
             _NavItem(
               icon: Icons.receipt_long_outlined,
               selectedIcon: Icons.receipt_long,
-              label: 'Report',
+              label: l10n.navReport,
               isSelected: _currentIndex == 3,
               onTap: () => setState(() => _currentIndex = 3),
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/gen/app_localizations.dart';
 
 /// The shared "floating card" top bar used by every screen instead of a
 /// flat [AppBar] — a rounded, softly-shadowed card containing the title,
@@ -66,7 +67,7 @@ class PageHeaderCard extends StatelessWidget {
               if (canPop) ...[
                 _HeaderIconButton(
                   icon: Icons.arrow_back,
-                  tooltip: 'Back',
+                  tooltip: AppLocalizations.of(context).back,
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 const SizedBox(width: AppSpacing.xs),

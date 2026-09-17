@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/gen/app_localizations.dart';
 import '../../bazar/add_edit_expense_screen.dart';
 import '../../payments/add_edit_payment_screen.dart';
 
@@ -18,6 +19,7 @@ Future<void> showQuickAddSheet(
     context: context,
     showDragHandle: true,
     builder: (sheetContext) {
+      final l10n = AppLocalizations.of(sheetContext);
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
@@ -32,14 +34,14 @@ Future<void> showQuickAddSheet(
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                 child: Text(
-                  'Quick Add',
+                  l10n.quickAddTitle,
                   style: Theme.of(sheetContext).textTheme.titleMedium,
                 ),
               ),
               _QuickAddOption(
                 icon: Icons.restaurant,
-                label: 'Meal',
-                subtitle: 'Mark breakfast, lunch or dinner',
+                label: l10n.quickAddMealLabel,
+                subtitle: l10n.quickAddMealSubtitle,
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onSelectMeal();
@@ -47,8 +49,8 @@ Future<void> showQuickAddSheet(
               ),
               _QuickAddOption(
                 icon: Icons.shopping_basket_outlined,
-                label: 'Bazar',
-                subtitle: 'Record a food/grocery expense',
+                label: l10n.navBazar,
+                subtitle: l10n.quickAddBazarSubtitle,
                 onTap: () async {
                   Navigator.of(sheetContext).pop();
                   await Navigator.of(context).push(
@@ -60,8 +62,8 @@ Future<void> showQuickAddSheet(
               ),
               _QuickAddOption(
                 icon: Icons.payments_outlined,
-                label: 'Payment',
-                subtitle: "Record a member's contribution",
+                label: l10n.quickAddPaymentLabel,
+                subtitle: l10n.quickAddPaymentSubtitle,
                 onTap: () async {
                   Navigator.of(sheetContext).pop();
                   await Navigator.of(context).push(
