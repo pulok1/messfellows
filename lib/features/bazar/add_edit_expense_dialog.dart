@@ -12,22 +12,36 @@ import '../../models/member.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/repository_providers.dart';
 import '../shared/widgets/confirm_dialog.dart';
-import '../shared/widgets/page_header_card.dart';
 
-/// Add-or-edit form for a bazar/expense entry (section 16). Date defaults
-/// to today and the amount field opens the numeric keypad, per the UX spec.
-class AddEditExpenseScreen extends ConsumerStatefulWidget {
+/// Shows the add/edit bazar dialog. Resolves to `true` if a save or
+/// delete happened, `false`/`null` if cancelled.
+Future<bool?> showAddEditExpenseDialog(
+  BuildContext context, {
+  required String messId,
+  Expense? existing,
+}) {
+  return showDialog<bool>(
+    context: context,
+    builder: (_) => AddEditExpenseDialog(messId: messId, existing: existing),
+  );
+}
+
+/// Add-or-edit form for a bazar/expense entry (section 16), as a standard
+/// popup dialog rather than a full page — recording a bazar entry is a
+/// quick, frequent action that shouldn't require navigating away and back.
+/// Date defaults to today and the amount field opens the numeric keypad,
+/// per the UX spec.
+class AddEditExpenseDialog extends ConsumerStatefulWidget {
   final String messId;
   final Expense? existing;
 
-  const AddEditExpenseScreen({super.key, required this.messId, this.existing});
+  const AddEditExpenseDialog({super.key, required this.messId, this.existing});
 
   @override
-  ConsumerState<AddEditExpenseScreen> createState() =>
-      _AddEditExpenseScreenState();
+  ConsumerState<AddEditExpenseDialog> createState() => _AddEditExpenseDialogState();
 }
 
-class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
+class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
   final _formKey = GlobalKey<FormState>();
   late DateTime _date;
   late final TextEditingController _amountController;
@@ -70,6 +84,7 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
   }
 
   Future<void> _save() async {
+    if (_isSaving) return;
     if (!_formKey.currentState!.validate()) return;
     if (_paidByMemberId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -126,9 +141,7 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
       message: l10n.removeFromMonthlyCalcMessage,
     );
     if (!confirmed) return;
-    await ref
-        .read(expenseRepositoryProvider)
-        .deleteExpense(widget.existing!.id);
+    await ref.read(expenseRepositoryProvider).deleteExpense(widget.existing!.id);
     if (mounted) Navigator.of(context).pop(true);
   }
 
@@ -137,120 +150,119 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
     final l10n = AppLocalizations.of(context);
     final membersAsync = ref.watch(activeMembersProvider(widget.messId));
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            PageHeaderCard(
-              title: _isEditing ? l10n.editBazarTitle : l10n.addBazarTitle,
-              actions: [
-                if (_isEditing)
-                  HeaderIconButton(
-                    icon: Icons.delete_outline,
-                    tooltip: l10n.deleteTooltip,
-                    onPressed: _delete,
-                    color: Theme.of(context).colorScheme.error,
+    return AlertDialog(
+      title: Text(_isEditing ? l10n.editBazarTitle : l10n.addBazarTitle),
+      content: SizedBox(
+        width: 400,
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                InkWell(
+                  onTap: _pickDate,
+                  borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+                  child: InputDecorator(
+                    decoration: InputDecoration(labelText: l10n.dateLabel),
+                    child: Text(formatShortDate(context, _date)),
                   ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: _amountController,
+                  autofocus: !_isEditing,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: l10n.amountLabel,
+                    prefixText: '${AppConstants.defaultCurrencySymbol} ',
+                  ),
+                  validator: (value) {
+                    final parsed = double.tryParse((value ?? '').trim());
+                    if (parsed == null || parsed <= 0) {
+                      return l10n.enterValidAmount;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSpacing.md),
+                membersAsync.when(
+                  data: (members) => _PaidByField(
+                    members: members,
+                    selectedId: _paidByMemberId,
+                    onChanged: (id) => setState(() => _paidByMemberId = id),
+                  ),
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, _) => Text(l10n.couldntLoadMembers),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: _categoryController,
+                  decoration: InputDecoration(labelText: l10n.categoryLabel),
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? l10n.enterCategoryValidator
+                      : null,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: AppConstants.expenseCategoryKeys
+                      .map(
+                        (key) => ActionChip(
+                          label: Text(_categoryLabel(l10n, key)),
+                          onPressed: () => setState(
+                            () => _categoryController.text = _categoryLabel(l10n, key),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: _noteController,
+                  decoration: InputDecoration(labelText: l10n.noteOptionalLabel),
+                  maxLines: 2,
+                ),
               ],
             ),
-            Expanded(child: _buildForm(membersAsync)),
-          ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildForm(AsyncValue<List<Member>> membersAsync) {
-    final l10n = AppLocalizations.of(context);
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      actionsAlignment: MainAxisAlignment.spaceBetween,
+      actions: [
+        if (_isEditing)
+          TextButton(
+            onPressed: _isSaving ? null : _delete,
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            child: Text(l10n.delete),
+          )
+        else
+          const SizedBox.shrink(),
+        Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            InkWell(
-              onTap: _pickDate,
-              borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-              child: InputDecorator(
-                decoration: InputDecoration(labelText: l10n.dateLabel),
-                child: Text(formatShortDate(context, _date)),
-              ),
+            TextButton(
+              onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
+              child: Text(l10n.cancel),
             ),
-            const SizedBox(height: AppSpacing.md),
-            TextFormField(
-              controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-              ],
-              decoration: InputDecoration(
-                labelText: l10n.amountLabel,
-                prefixText: '${AppConstants.defaultCurrencySymbol} ',
-              ),
-              validator: (value) {
-                final parsed = double.tryParse((value ?? '').trim());
-                if (parsed == null || parsed <= 0) {
-                  return l10n.enterValidAmount;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: AppSpacing.md),
-            membersAsync.when(
-              data: (members) => _PaidByField(
-                members: members,
-                selectedId: _paidByMemberId,
-                onChanged: (id) => setState(() => _paidByMemberId = id),
-              ),
-              loading: () => const LinearProgressIndicator(),
-              error: (_, _) => Text(l10n.couldntLoadMembers),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextFormField(
-              controller: _categoryController,
-              decoration: InputDecoration(labelText: l10n.categoryLabel),
-              validator: (value) => (value == null || value.trim().isEmpty)
-                  ? l10n.enterCategoryValidator
-                  : null,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: AppConstants.expenseCategoryKeys
-                  .map(
-                    (key) => ActionChip(
-                      label: Text(_categoryLabel(l10n, key)),
-                      onPressed: () => setState(
-                        () => _categoryController.text = _categoryLabel(l10n, key),
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextFormField(
-              controller: _noteController,
-              decoration: InputDecoration(labelText: l10n.noteOptionalLabel),
-              maxLines: 2,
-            ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(width: AppSpacing.xs),
             FilledButton(
               onPressed: _isSaving ? null : _save,
               child: _isSaving
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: 18,
+                      width: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : Text(_isEditing ? l10n.saveChanges : l10n.addBazarTitle),
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 }
@@ -289,8 +301,7 @@ class _PaidByField extends StatelessWidget {
       decoration: InputDecoration(labelText: AppLocalizations.of(context).paidByLabel),
       items: members
           .map(
-            (member) =>
-                DropdownMenuItem(value: member.id, child: Text(member.name)),
+            (member) => DropdownMenuItem(value: member.id, child: Text(member.name)),
           )
           .toList(),
       onChanged: onChanged,

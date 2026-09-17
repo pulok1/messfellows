@@ -12,7 +12,7 @@ import '../../providers/member_providers.dart';
 import '../../providers/selection_providers.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/page_header_card.dart';
-import 'add_edit_expense_screen.dart';
+import 'add_edit_expense_dialog.dart';
 import 'widgets/month_selector_bar.dart';
 
 /// The Bazar tab (section 16): expense history for the selected month.
@@ -86,11 +86,7 @@ class _BazarScreenState extends ConsumerState<BazarScreen> {
   }
 
   Future<void> _addExpense() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => AddEditExpenseScreen(messId: widget.messId),
-      ),
-    );
+    await showAddEditExpenseDialog(context, messId: widget.messId);
   }
 }
 
@@ -207,12 +203,7 @@ class _ExpenseTile extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) =>
-                AddEditExpenseScreen(messId: messId, existing: expense),
-          ),
-        ),
+        onTap: () => showAddEditExpenseDialog(context, messId: messId, existing: expense),
         title: Text(
           expense.category,
           style: const TextStyle(fontWeight: FontWeight.w600),

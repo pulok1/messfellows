@@ -15,7 +15,7 @@ class AppConstants {
   /// Suggested category keys for a bazar/expense entry. The field itself is
   /// free text, so a manager can type anything — these just seed quick-pick
   /// chips. Kept as keys (not literal English words) so the chip labels can
-  /// be localized; see `AddEditExpenseScreen._categoryLabel`.
+  /// be localized; see `AddEditExpenseDialog._categoryLabel`.
   static const List<String> expenseCategoryKeys = [
     'grocery',
     'vegetables',

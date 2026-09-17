@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/gen/app_localizations.dart';
-import '../../bazar/add_edit_expense_screen.dart';
+import '../../bazar/add_edit_expense_dialog.dart';
 import '../../payments/add_edit_payment_screen.dart';
 
 /// The core Quick Add UX (section 13): one tap from anywhere in the app to
@@ -53,11 +53,7 @@ Future<void> showQuickAddSheet(
                 subtitle: l10n.quickAddBazarSubtitle,
                 onTap: () async {
                   Navigator.of(sheetContext).pop();
-                  await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => AddEditExpenseScreen(messId: messId),
-                    ),
-                  );
+                  await showAddEditExpenseDialog(context, messId: messId);
                 },
               ),
               _QuickAddOption(
