@@ -49,3 +49,9 @@ app.*.map.json
 
 # Claude Code session runtime state (not project content)
 .claude/
+
+# Generated localization code (regenerated automatically by `flutter pub
+# get`/`flutter run` via the `generate: true` flag in pubspec.yaml — unlike
+# Drift's build_runner output, this needs no manual build step, so there's
+# no reason to commit it).
+/lib/l10n/gen/
