@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/localized_date.dart';
+import '../../core/utils/money.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/expense.dart';
 import '../../models/member.dart';
@@ -70,6 +71,11 @@ class _BazarScreenState extends ConsumerState<BazarScreen> {
                   : const SizedBox.shrink(),
               orElse: () => const SizedBox.shrink(),
             ),
+            _MemberTotalsRow(
+              messId: widget.messId,
+              year: selectedMonth.year,
+              month: selectedMonth.month,
+            ),
             const Divider(height: 1),
             Expanded(
               child: _ExpenseList(
@@ -128,6 +134,131 @@ class _MemberFilterRow extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Shows each member's total bazar spend for the selected month — so the
+/// manager can see who's been buying groceries without opening the
+/// monthly report, which only shows this alongside every other figure.
+class _MemberTotalsRow extends ConsumerWidget {
+  final String messId;
+  final int year;
+  final int month;
+
+  const _MemberTotalsRow({
+    required this.messId,
+    required this.year,
+    required this.month,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final expensesAsync = ref.watch(
+      expensesForMonthProvider((messId: messId, year: year, month: month)),
+    );
+    final allMembers = ref.watch(allMembersProvider(messId)).value ?? const [];
+
+    return expensesAsync.maybeWhen(
+      data: (expenses) {
+        if (expenses.isEmpty) return const SizedBox.shrink();
+
+        final totalsByMember = <String, Money>{};
+        for (final expense in expenses) {
+          totalsByMember.update(
+            expense.paidByMemberId,
+            (total) => total + expense.amount,
+            ifAbsent: () => expense.amount,
+          );
+        }
+
+        // Everyone who's active, plus any archived member who still has a
+        // total this month (see monthCalculationProvider for the same
+        // reasoning: don't drop a leaver's historical contribution).
+        final relevantMembers =
+            allMembers
+                .where((m) => m.isActive || totalsByMember.containsKey(m.id))
+                .toList()
+              ..sort((a, b) {
+                final totalA = totalsByMember[a.id] ?? const Money.zero();
+                final totalB = totalsByMember[b.id] ?? const Money.zero();
+                final byTotal = totalB.compareTo(totalA);
+                return byTotal != 0 ? byTotal : a.name.compareTo(b.name);
+              });
+
+        if (relevantMembers.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.md,
+                0,
+              ),
+              child: Text(
+                AppLocalizations.of(context).perMemberLabel,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 60,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                children: [
+                  for (final member in relevantMembers)
+                    Container(
+                      margin: const EdgeInsets.only(right: AppSpacing.sm),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.chipRadius,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            member.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                          Text(
+                            (totalsByMember[member.id] ?? const Money.zero())
+                                .format(),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }
@@ -203,7 +334,11 @@ class _ExpenseTile extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        onTap: () => showAddEditExpenseDialog(context, messId: messId, existing: expense),
+        onTap: () => showAddEditExpenseDialog(
+          context,
+          messId: messId,
+          existing: expense,
+        ),
         title: Text(
           expense.category,
           style: const TextStyle(fontWeight: FontWeight.w600),
