@@ -20,8 +20,16 @@ class StorageException extends AppException {
   const StorageException(super.message);
 }
 
+/// Why an import failed. The UI maps this to a localized message rather
+/// than showing [ImportException.message] directly, since that message is
+/// English-only and this is one of the few exceptions actually surfaced to
+/// the user verbatim.
+enum ImportFailureReason { malformed, unsupportedVersion, missingMessData, unreadable }
+
 /// An import file was missing, malformed, or from an incompatible schema
 /// version.
 class ImportException extends AppException {
-  const ImportException(super.message);
+  final ImportFailureReason reason;
+
+  const ImportException(this.reason, String debugMessage) : super(debugMessage);
 }

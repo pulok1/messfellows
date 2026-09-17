@@ -64,6 +64,7 @@ class BackupService {
       document = jsonDecode(jsonString) as Map<String, dynamic>;
     } on FormatException {
       throw const ImportException(
+        ImportFailureReason.malformed,
         'This file is not a valid Mess Fellows backup.',
       );
     }
@@ -72,13 +73,17 @@ class BackupService {
     if (schemaVersion is! int ||
         schemaVersion > AppConstants.backupFormatVersion) {
       throw const ImportException(
+        ImportFailureReason.unsupportedVersion,
         'This backup was created by a newer version of the app and cannot be imported.',
       );
     }
 
     final messJson = document['mess'];
     if (messJson is! Map<String, dynamic>) {
-      throw const ImportException('This backup file is missing mess data.');
+      throw const ImportException(
+        ImportFailureReason.missingMessData,
+        'This backup file is missing mess data.',
+      );
     }
 
     try {
@@ -125,6 +130,7 @@ class BackupService {
       rethrow;
     } catch (_) {
       throw const ImportException(
+        ImportFailureReason.unreadable,
         "This backup file couldn't be read. Your existing data has not been changed.",
       );
     }
