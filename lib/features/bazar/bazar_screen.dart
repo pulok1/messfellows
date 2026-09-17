@@ -206,12 +206,12 @@ class _MemberTotalsRow extends ConsumerWidget {
               ),
             ),
             SizedBox(
-              height: 60,
+              height: 68,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
                 ),
                 children: [
                   for (final member in relevantMembers)
@@ -231,23 +231,29 @@ class _MemberTotalsRow extends ConsumerWidget {
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             member.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
+                            style: TextStyle(
+                              fontSize: 11,
+                              height: 1.2,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                           ),
                           Text(
                             (totalsByMember[member.id] ?? const Money.zero())
                                 .format(),
-                            style: const TextStyle(fontWeight: FontWeight.w700),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              height: 1.2,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ],
                       ),
