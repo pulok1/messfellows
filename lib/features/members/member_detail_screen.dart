@@ -13,6 +13,7 @@ import '../payments/add_edit_payment_screen.dart';
 import '../shared/widgets/balance_label.dart';
 import '../shared/widgets/labeled_value_row.dart';
 import '../shared/widgets/page_header_card.dart';
+import '../shared/widgets/section_header.dart';
 
 /// A member's detail view (section 19's "View details"): this month's
 /// meals/cost/balance plus their full bazar and payment history.
@@ -109,10 +110,7 @@ class MemberDetailScreen extends ConsumerWidget {
                       ),
                     ),
                   const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    l10n.bazarHistoryLabel,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  SectionHeader(l10n.bazarHistoryLabel),
                   const SizedBox(height: AppSpacing.sm),
                   expenses.when(
                     data: (list) => list.isEmpty
@@ -148,10 +146,7 @@ class MemberDetailScreen extends ConsumerWidget {
                     error: (_, _) => Text(l10n.couldntLoadBazarHistory),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    l10n.paymentHistoryLabel,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  SectionHeader(l10n.paymentHistoryLabel),
                   const SizedBox(height: AppSpacing.sm),
                   payments.when(
                     data: (list) => list.isEmpty

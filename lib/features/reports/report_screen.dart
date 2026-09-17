@@ -20,6 +20,7 @@ import '../bazar/widgets/month_selector_bar.dart';
 import '../shared/widgets/balance_label.dart';
 import '../shared/widgets/labeled_value_row.dart';
 import '../shared/widgets/page_header_card.dart';
+import '../shared/widgets/section_header.dart';
 import 'month_history_screen.dart';
 import 'summary_text.dart';
 
@@ -441,10 +442,7 @@ class _ReportContent extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text(
-                l10n.perMemberLabel,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              SectionHeader(l10n.perMemberLabel),
               const SizedBox(height: AppSpacing.sm),
               for (final balance in result.memberBalances)
                 Card(

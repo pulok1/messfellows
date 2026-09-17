@@ -11,6 +11,7 @@ import '../members/member_detail_screen.dart';
 import '../members/members_screen.dart';
 import '../settings/settings_screen.dart';
 import '../shared/widgets/empty_state.dart';
+import '../shared/widgets/section_header.dart';
 import 'widgets/dashboard_header_card.dart';
 import 'widgets/settlement_tile.dart';
 import 'widgets/stat_tile.dart';
@@ -117,10 +118,7 @@ class DashboardScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.lg),
-                      Text(
-                        l10n.settlementLabel,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
+                      SectionHeader(l10n.settlementLabel),
                       const SizedBox(height: AppSpacing.sm),
                       for (final balance in calculation.memberBalances)
                         SettlementTile(

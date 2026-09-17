@@ -17,6 +17,7 @@ import '../../providers/repository_providers.dart';
 import '../members/members_screen.dart';
 import '../shared/widgets/confirm_dialog.dart';
 import '../shared/widgets/page_header_card.dart';
+import '../shared/widgets/section_header.dart';
 
 /// Settings (section 41): mess name, a link to member management, local
 /// backup export/import, and full data deletion. There is deliberately no
@@ -205,7 +206,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: ListView(
                   children: [
                     if (_isBusy) const LinearProgressIndicator(),
-                    _SectionHeader(l10n.messSectionHeader),
+                    SectionHeader(l10n.messSectionHeader, padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xs)),
                     ListTile(
                       leading: const Icon(Icons.edit_outlined),
                       title: Text(l10n.messNameLabel),
@@ -239,7 +240,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       onTap: _pickLanguage,
                     ),
                     const Divider(),
-                    _SectionHeader(l10n.localDataSectionHeader),
+                    SectionHeader(l10n.localDataSectionHeader, padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xs)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                       child: Text(l10n.localDataExplain),
@@ -271,7 +272,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       onTap: _deleteAllData,
                     ),
                     const Divider(),
-                    _SectionHeader(l10n.aboutSectionHeader),
+                    SectionHeader(l10n.aboutSectionHeader, padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xs)),
                     ListTile(
                       leading: const Icon(Icons.info_outline),
                       title: const Text(AppConstants.appName),
@@ -283,29 +284,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-
-  const _SectionHeader(this.title);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.xs,
-      ),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelLarge
-            ?.copyWith(color: Theme.of(context).colorScheme.primary),
       ),
     );
   }
