@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/localized_date.dart';
 import '../../core/utils/money.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/expense.dart';
 import '../../models/member.dart';
 import '../../providers/member_providers.dart';
@@ -70,9 +72,9 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_paidByMemberId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please choose who paid.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).pleaseChooseWhoPaid)),
+      );
       return;
     }
 
@@ -108,9 +110,7 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Couldn't save this bazar entry. Please try again."),
-          ),
+          SnackBar(content: Text(AppLocalizations.of(context).couldntSaveBazarEntry)),
         );
       }
     } finally {
@@ -119,10 +119,11 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
   }
 
   Future<void> _delete() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await confirmDestructiveAction(
       context,
-      title: 'Delete this bazar entry?',
-      message: 'This will remove it from the monthly calculation.',
+      title: l10n.deleteBazarEntryConfirmTitle,
+      message: l10n.removeFromMonthlyCalcMessage,
     );
     if (!confirmed) return;
     await ref
@@ -133,6 +134,7 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final membersAsync = ref.watch(activeMembersProvider(widget.messId));
 
     return Scaffold(
@@ -140,12 +142,12 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
         child: Column(
           children: [
             PageHeaderCard(
-              title: _isEditing ? 'Edit Bazar' : 'Add Bazar',
+              title: _isEditing ? l10n.editBazarTitle : l10n.addBazarTitle,
               actions: [
                 if (_isEditing)
                   HeaderIconButton(
                     icon: Icons.delete_outline,
-                    tooltip: 'Delete',
+                    tooltip: l10n.deleteTooltip,
                     onPressed: _delete,
                     color: Theme.of(context).colorScheme.error,
                   ),
@@ -159,6 +161,7 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
   }
 
   Widget _buildForm(AsyncValue<List<Member>> membersAsync) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Form(
@@ -170,8 +173,8 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
               child: InputDecorator(
-                decoration: const InputDecoration(labelText: 'Date'),
-                child: Text(_formatDate(_date)),
+                decoration: InputDecoration(labelText: l10n.dateLabel),
+                child: Text(formatShortDate(context, _date)),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -184,13 +187,13 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
               ],
               decoration: InputDecoration(
-                labelText: 'Amount',
+                labelText: l10n.amountLabel,
                 prefixText: '${AppConstants.defaultCurrencySymbol} ',
               ),
               validator: (value) {
                 final parsed = double.tryParse((value ?? '').trim());
                 if (parsed == null || parsed <= 0) {
-                  return 'Enter a valid amount';
+                  return l10n.enterValidAmount;
                 }
                 return null;
               },
@@ -203,26 +206,27 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
                 onChanged: (id) => setState(() => _paidByMemberId = id),
               ),
               loading: () => const LinearProgressIndicator(),
-              error: (_, _) => const Text("Couldn't load members."),
+              error: (_, _) => Text(l10n.couldntLoadMembers),
             ),
             const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _categoryController,
-              decoration: const InputDecoration(labelText: 'Category'),
+              decoration: InputDecoration(labelText: l10n.categoryLabel),
               validator: (value) => (value == null || value.trim().isEmpty)
-                  ? 'Enter a category'
+                  ? l10n.enterCategoryValidator
                   : null,
             ),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
-              children: AppConstants.expenseCategories
+              children: AppConstants.expenseCategoryKeys
                   .map(
-                    (category) => ActionChip(
-                      label: Text(category),
-                      onPressed: () =>
-                          setState(() => _categoryController.text = category),
+                    (key) => ActionChip(
+                      label: Text(_categoryLabel(l10n, key)),
+                      onPressed: () => setState(
+                        () => _categoryController.text = _categoryLabel(l10n, key),
+                      ),
                     ),
                   )
                   .toList(),
@@ -230,7 +234,7 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
             const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _noteController,
-              decoration: const InputDecoration(labelText: 'Note (optional)'),
+              decoration: InputDecoration(labelText: l10n.noteOptionalLabel),
               maxLines: 2,
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -242,13 +246,29 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEditing ? 'Save Changes' : 'Add Bazar'),
+                  : Text(_isEditing ? l10n.saveChanges : l10n.addBazarTitle),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+/// Maps a category key (see [AppConstants.expenseCategoryKeys]) to its
+/// localized chip label.
+String _categoryLabel(AppLocalizations l10n, String key) {
+  return switch (key) {
+    'grocery' => l10n.categoryGrocery,
+    'vegetables' => l10n.categoryVegetables,
+    'fish' => l10n.categoryFish,
+    'meat' => l10n.categoryMeat,
+    'eggDairy' => l10n.categoryEggDairy,
+    'spices' => l10n.categorySpices,
+    'gas' => l10n.categoryGas,
+    'utensils' => l10n.categoryUtensils,
+    _ => l10n.categoryOther,
+  };
 }
 
 class _PaidByField extends StatelessWidget {
@@ -266,7 +286,7 @@ class _PaidByField extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       initialValue: members.any((m) => m.id == selectedId) ? selectedId : null,
-      decoration: const InputDecoration(labelText: 'Paid by'),
+      decoration: InputDecoration(labelText: AppLocalizations.of(context).paidByLabel),
       items: members
           .map(
             (member) =>
@@ -276,22 +296,4 @@ class _PaidByField extends StatelessWidget {
       onChanged: onChanged,
     );
   }
-}
-
-String _formatDate(DateTime date) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${date.day} ${months[date.month - 1]} ${date.year}';
 }

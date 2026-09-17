@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/localized_date.dart';
+import '../../../l10n/gen/app_localizations.dart';
 
 /// Shared month-navigation header for the Bazar and Report screens: prev /
 /// month name / next, with a leading "current" affordance.
@@ -20,49 +22,28 @@ class MonthSelectorBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
             onPressed: onPrevious,
             icon: const Icon(Icons.chevron_left),
-            tooltip: 'Previous month',
+            tooltip: l10n.previousMonthTooltip,
           ),
           Text(
-            '${_monthName(month)} $year',
-            style: Theme.of(context).textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.w600),
+            formatMonthYear(context, year, month),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           IconButton(
             onPressed: onNext,
             icon: const Icon(Icons.chevron_right),
-            tooltip: 'Next month',
+            tooltip: l10n.nextMonthTooltip,
           ),
         ],
       ),
     );
   }
-}
-
-String _monthName(int month) {
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  return months[month - 1];
 }

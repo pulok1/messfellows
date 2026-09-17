@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/localized_date.dart';
 import '../../core/utils/money.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/member.dart';
 import '../../models/payment.dart';
 import '../../providers/member_providers.dart';
@@ -74,9 +76,9 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_memberId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please choose a member.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).pleaseChooseMember)),
+      );
       return;
     }
 
@@ -109,9 +111,7 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Couldn't save this payment. Please try again."),
-          ),
+          SnackBar(content: Text(AppLocalizations.of(context).couldntSavePayment)),
         );
       }
     } finally {
@@ -120,10 +120,11 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
   }
 
   Future<void> _delete() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await confirmDestructiveAction(
       context,
-      title: 'Delete this payment?',
-      message: 'This will remove it from the monthly calculation.',
+      title: l10n.deletePaymentConfirmTitle,
+      message: l10n.removeFromMonthlyCalcMessage,
     );
     if (!confirmed) return;
     await ref
@@ -134,6 +135,7 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final membersAsync = ref.watch(activeMembersProvider(widget.messId));
 
     return Scaffold(
@@ -141,12 +143,12 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
         child: Column(
           children: [
             PageHeaderCard(
-              title: _isEditing ? 'Edit Payment' : 'Add Payment',
+              title: _isEditing ? l10n.editPaymentTitle : l10n.addPaymentTitle,
               actions: [
                 if (_isEditing)
                   HeaderIconButton(
                     icon: Icons.delete_outline,
-                    tooltip: 'Delete',
+                    tooltip: l10n.deleteTooltip,
                     onPressed: _delete,
                     color: Theme.of(context).colorScheme.error,
                   ),
@@ -160,6 +162,7 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
   }
 
   Widget _buildForm(AsyncValue<List<Member>> membersAsync) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Form(
@@ -171,8 +174,8 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
               child: InputDecorator(
-                decoration: const InputDecoration(labelText: 'Date'),
-                child: Text(_formatDate(_date)),
+                decoration: InputDecoration(labelText: l10n.dateLabel),
+                child: Text(formatShortDate(context, _date)),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -183,7 +186,7 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
                 onChanged: (id) => setState(() => _memberId = id),
               ),
               loading: () => const LinearProgressIndicator(),
-              error: (_, _) => const Text("Couldn't load members."),
+              error: (_, _) => Text(l10n.couldntLoadMembers),
             ),
             const SizedBox(height: AppSpacing.md),
             TextFormField(
@@ -195,13 +198,13 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
               ],
               decoration: InputDecoration(
-                labelText: 'Amount',
+                labelText: l10n.amountLabel,
                 prefixText: '${AppConstants.defaultCurrencySymbol} ',
               ),
               validator: (value) {
                 final parsed = double.tryParse((value ?? '').trim());
                 if (parsed == null || parsed <= 0) {
-                  return 'Enter a valid amount';
+                  return l10n.enterValidAmount;
                 }
                 return null;
               },
@@ -209,7 +212,7 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
             const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _noteController,
-              decoration: const InputDecoration(labelText: 'Note (optional)'),
+              decoration: InputDecoration(labelText: l10n.noteOptionalLabel),
               maxLines: 2,
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -221,7 +224,7 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEditing ? 'Save Changes' : 'Add Payment'),
+                  : Text(_isEditing ? l10n.saveChanges : l10n.addPaymentTitle),
             ),
           ],
         ),
@@ -245,7 +248,7 @@ class _MemberField extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       initialValue: members.any((m) => m.id == selectedId) ? selectedId : null,
-      decoration: const InputDecoration(labelText: 'Member'),
+      decoration: InputDecoration(labelText: AppLocalizations.of(context).memberLabel),
       items: members
           .map(
             (member) =>
@@ -255,22 +258,4 @@ class _MemberField extends StatelessWidget {
       onChanged: onChanged,
     );
   }
-}
-
-String _formatDate(DateTime date) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${date.day} ${months[date.month - 1]} ${date.year}';
 }

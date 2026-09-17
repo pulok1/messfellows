@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/localized_date.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/expense.dart';
 import '../../models/member.dart';
 import '../../providers/expense_providers.dart';
@@ -30,6 +32,7 @@ class _BazarScreenState extends ConsumerState<BazarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final selectedMonth = ref.watch(selectedMonthProvider);
     final membersAsync = ref.watch(activeMembersProvider(widget.messId));
 
@@ -38,12 +41,12 @@ class _BazarScreenState extends ConsumerState<BazarScreen> {
         child: Column(
           children: [
             PageHeaderCard(
-              title: 'Bazar',
+              title: l10n.navBazar,
               showBackButton: false,
               actions: [
                 HeaderIconButton(
                   icon: Icons.add,
-                  tooltip: 'Add',
+                  tooltip: l10n.addTooltip,
                   onPressed: _addExpense,
                 ),
               ],
@@ -113,7 +116,7 @@ class _MemberFilterRow extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: ChoiceChip(
-              label: const Text('All'),
+              label: Text(AppLocalizations.of(context).allChip),
               selected: selectedId == null,
               onSelected: (_) => onChanged(null),
             ),
@@ -148,6 +151,7 @@ class _ExpenseList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final expensesAsync = ref.watch(
       expensesForMonthProvider((messId: messId, year: year, month: month)),
     );
@@ -161,11 +165,10 @@ class _ExpenseList extends ConsumerWidget {
                   .toList();
 
         if (filtered.isEmpty) {
-          return const EmptyState(
+          return EmptyState(
             icon: Icons.shopping_basket_outlined,
-            title: 'No bazar entries',
-            message:
-                'Add a bazar entry to start tracking food expenses this month.',
+            title: l10n.noBazarEntriesTitle,
+            message: l10n.noBazarEntriesMessage,
           );
         }
 
@@ -182,8 +185,7 @@ class _ExpenseList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) =>
-          const Center(child: Text("Couldn't load bazar entries.")),
+      error: (_, _) => Center(child: Text(l10n.couldntLoadBazarEntries)),
     );
   }
 }
@@ -196,6 +198,7 @@ class _ExpenseTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final members = ref.watch(allMembersProvider(messId)).value ?? const [];
     final payer = members.firstWhereOrNull(
       (m) => m.id == expense.paidByMemberId,
@@ -215,7 +218,7 @@ class _ExpenseTile extends ConsumerWidget {
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
-          '${_formatDate(expense.date)} · ${payer?.name ?? "Unknown"}'
+          '${formatShortDate(context, expense.date)} · ${payer?.name ?? l10n.unknown}'
           '${expense.note == null || expense.note!.isEmpty ? "" : " · ${expense.note}"}',
         ),
         isThreeLine: false,
@@ -226,22 +229,4 @@ class _ExpenseTile extends ConsumerWidget {
       ),
     );
   }
-}
-
-String _formatDate(DateTime date) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${date.day} ${months[date.month - 1]} ${date.year}';
 }
