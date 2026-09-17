@@ -21,6 +21,7 @@ import '../shared/widgets/balance_label.dart';
 import '../shared/widgets/labeled_value_row.dart';
 import '../shared/widgets/page_header_card.dart';
 import '../shared/widgets/section_header.dart';
+import '../shared/widgets/stat_tile.dart';
 import 'month_history_screen.dart';
 import 'summary_text.dart';
 
@@ -403,23 +404,39 @@ class _ReportContent extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _StatLine(
-                        label: l10n.totalFoodCost,
-                        value: result.totalExpense.format(),
+                      Text(
+                        l10n.mealRateUpperLabel,
+                        style: Theme.of(context).textTheme.labelMedium,
                       ),
-                      _StatLine(
-                        label: l10n.totalMeals,
-                        value: '${result.totalMeals}',
-                      ),
-                      _StatLine(
-                        label: l10n.mealRateUpperLabel,
-                        value: result.hasNoMeals
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        result.hasNoMeals
                             ? l10n.noMealsRecordedYet
                             : result.mealRate.format(),
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                 ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: StatTile(
+                      label: l10n.totalFoodCost,
+                      value: result.totalExpense.format(),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: StatTile(
+                      label: l10n.totalMeals,
+                      value: '${result.totalMeals}',
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.md),
               Row(
@@ -475,28 +492,3 @@ class _ReportContent extends StatelessWidget {
   }
 }
 
-class _StatLine extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatLine({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
-        ],
-      ),
-    );
-  }
-}

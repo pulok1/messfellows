@@ -12,9 +12,9 @@ import '../members/members_screen.dart';
 import '../settings/settings_screen.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/section_header.dart';
+import '../shared/widgets/stat_tile.dart';
 import 'widgets/dashboard_header_card.dart';
 import 'widgets/settlement_tile.dart';
-import 'widgets/stat_tile.dart';
 
 /// The Home tab (section 11): always shows the current, still-open month —
 /// meal rate, totals, and each member's live balance. Month navigation and
