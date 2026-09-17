@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/localized_date.dart';
+import '../../../l10n/gen/app_localizations.dart';
 import '../../../models/mess.dart';
 
 /// The Dashboard's header, rendered as its own floating card rather than a
@@ -89,7 +91,7 @@ class DashboardHeaderCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _monthYear(month),
+                  formatMonthYear(context, month.year, month.month),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.bodyMedium?.copyWith(
@@ -130,12 +132,12 @@ class _ActionPill extends StatelessWidget {
         children: [
           _PillButton(
             icon: Icons.group_outlined,
-            tooltip: 'Members',
+            tooltip: AppLocalizations.of(context).membersLabel,
             onPressed: onMembers,
           ),
           _PillButton(
             icon: Icons.settings_outlined,
-            tooltip: 'Settings',
+            tooltip: AppLocalizations.of(context).settingsLabel,
             onPressed: onSettings,
           ),
         ],
@@ -164,22 +166,4 @@ class _PillButton extends StatelessWidget {
       onPressed: onPressed,
     );
   }
-}
-
-String _monthYear(DateTime date) {
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  return '${months[date.month - 1]} ${date.year}';
 }

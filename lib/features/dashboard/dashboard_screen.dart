@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/mess.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/month_calculation_provider.dart';
@@ -24,6 +25,7 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final membersAsync = ref.watch(activeMembersProvider(mess.id));
     final calculation = ref.watch(
@@ -56,9 +58,9 @@ class DashboardScreen extends ConsumerWidget {
                   if (members.isEmpty) {
                     return EmptyState(
                       icon: Icons.group_outlined,
-                      title: 'No members yet',
-                      message: 'Add the people in your mess to start tracking meals and bazar.',
-                      actionLabel: 'Add Member',
+                      title: l10n.noMembersYetTitle,
+                      message: l10n.addMembersToTrackMealsAndBazar,
+                      actionLabel: l10n.addMember,
                       onAction: () =>
                           showAddEditMemberDialog(context, messId: mess.id),
                     );
@@ -79,13 +81,13 @@ class DashboardScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Current Meal Rate',
+                                l10n.currentMealRate,
                                 style: Theme.of(context).textTheme.labelMedium,
                               ),
                               const SizedBox(height: AppSpacing.xs),
                               Text(
                                 calculation.hasNoMeals
-                                    ? 'No meals recorded yet'
+                                    ? l10n.noMealsRecordedYet
                                     : '${mess.currencySymbol}${calculation.mealRate.major.toStringAsFixed(2)}',
                                 style: Theme.of(context)
                                     .textTheme
@@ -101,14 +103,14 @@ class DashboardScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: StatTile(
-                              label: 'Total Bazar',
+                              label: l10n.totalBazar,
                               value: calculation.totalExpense.format(),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: StatTile(
-                              label: 'Total Meals',
+                              label: l10n.totalMeals,
                               value: '${calculation.totalMeals}',
                             ),
                           ),
@@ -116,7 +118,7 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Settlement',
+                        l10n.settlementLabel,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: AppSpacing.sm),
@@ -136,8 +138,7 @@ class DashboardScreen extends ConsumerWidget {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) =>
-                    const Center(child: Text("Couldn't load your mess data.")),
+                error: (_, _) => Center(child: Text(l10n.couldntLoadMessData)),
               ),
             ),
           ],

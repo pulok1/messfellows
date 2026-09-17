@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/localized_date.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/meal_entry.dart';
 import '../../providers/meal_providers.dart';
 import '../../providers/member_providers.dart';
@@ -21,11 +23,7 @@ class MealsScreen extends ConsumerWidget {
 
   const MealsScreen({super.key, required this.messId});
 
-  Future<void> _pickDate(
-    BuildContext context,
-    WidgetRef ref,
-    DateTime current,
-  ) async {
+  Future<void> _pickDate(BuildContext context, WidgetRef ref, DateTime current) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: current,
@@ -39,11 +37,10 @@ class MealsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final date = ref.watch(selectedMealDateProvider);
     final membersAsync = ref.watch(activeMembersProvider(messId));
-    final mealsAsync = ref.watch(
-      mealsForDateProvider((messId: messId, date: date)),
-    );
+    final mealsAsync = ref.watch(mealsForDateProvider((messId: messId, date: date)));
     final isToday = _isSameDay(date, DateTime.now());
 
     return Scaffold(
@@ -51,25 +48,21 @@ class MealsScreen extends ConsumerWidget {
         child: Column(
           children: [
             PageHeaderCard(
-              title: 'Meals',
+              title: l10n.navMeals,
               showBackButton: false,
               actions: [
                 HeaderIconButton(
                   icon: Icons.bar_chart_outlined,
-                  tooltip: 'Monthly totals',
+                  tooltip: l10n.monthlyTotalsTooltip,
                   onPressed: () => _showMonthlyTotals(context, ref, date),
                 ),
               ],
               bottom: _DateBar(
                 date: date,
                 isToday: isToday,
-                onToday: () =>
-                    ref.read(selectedMealDateProvider.notifier).goToToday(),
-                onPrevious: () => ref
-                    .read(selectedMealDateProvider.notifier)
-                    .goToPreviousDay(),
-                onNext: () =>
-                    ref.read(selectedMealDateProvider.notifier).goToNextDay(),
+                onToday: () => ref.read(selectedMealDateProvider.notifier).goToToday(),
+                onPrevious: () => ref.read(selectedMealDateProvider.notifier).goToPreviousDay(),
+                onNext: () => ref.read(selectedMealDateProvider.notifier).goToNextDay(),
                 onPickDate: () => _pickDate(context, ref, date),
               ),
             ),
@@ -79,24 +72,20 @@ class MealsScreen extends ConsumerWidget {
                   if (members.isEmpty) {
                     return EmptyState(
                       icon: Icons.group_outlined,
-                      title: 'No members yet',
-                      message: 'Add the people in your mess to start tracking meals.',
-                      actionLabel: 'Add Member',
-                      onAction: () =>
-                          showAddEditMemberDialog(context, messId: messId),
+                      title: l10n.noMembersYetTitle,
+                      message: l10n.addMembersToTrackMeals,
+                      actionLabel: l10n.addMember,
+                      onAction: () => showAddEditMemberDialog(context, messId: messId),
                     );
                   }
 
                   final meals = mealsAsync.value ?? const <MealEntry>[];
-                  final mealsByMember = {
-                    for (final meal in meals) meal.memberId: meal,
-                  };
+                  final mealsByMember = {for (final meal in meals) meal.memberId: meal};
 
                   return ListView.separated(
                     padding: const EdgeInsets.all(AppSpacing.md),
                     itemCount: members.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: AppSpacing.sm),
+                    separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
                     itemBuilder: (context, index) {
                       final member = members[index];
                       final meal = mealsByMember[member.id];
@@ -134,8 +123,7 @@ class MealsScreen extends ConsumerWidget {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) =>
-                    const Center(child: Text("Couldn't load members.")),
+                error: (_, _) => Center(child: Text(l10n.couldntLoadMembers)),
               ),
             ),
           ],
@@ -149,43 +137,34 @@ class MealsScreen extends ConsumerWidget {
       context: context,
       showDragHandle: true,
       builder: (sheetContext) {
+        final l10n = AppLocalizations.of(sheetContext);
         final result = ref.watch(
-          monthCalculationProvider((
-            messId: messId,
-            year: date.year,
-            month: date.month,
-          )),
+          monthCalculationProvider((messId: messId, year: date.year, month: date.month)),
         );
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              0,
-              AppSpacing.lg,
-              AppSpacing.lg,
-            ),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${_monthName(date.month)} ${date.year} · Meal counts',
+                  l10n.monthlyMealCountsTitle(
+                    formatMonthYear(sheetContext, date.year, date.month),
+                  ),
                   style: Theme.of(sheetContext).textTheme.titleMedium,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                if (result.memberBalances.isEmpty)
-                  const Text('No members yet.'),
+                if (result.memberBalances.isEmpty) Text(l10n.noMembersYetInline),
                 for (final balance in result.memberBalances)
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.xs,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(balance.memberName),
                         Text(
-                          '${balance.mealCount} meals',
+                          l10n.mealsCount(balance.mealCount),
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -219,17 +198,15 @@ class _DateBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       child: Row(
         children: [
           IconButton(
             onPressed: onPrevious,
             icon: const Icon(Icons.chevron_left),
-            tooltip: 'Previous day',
+            tooltip: l10n.previousDayTooltip,
           ),
           Expanded(
             child: InkWell(
@@ -240,11 +217,11 @@ class _DateBar extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      isToday ? 'Today' : _weekdayLabel(date),
+                      isToday ? l10n.todayLabel : formatWeekday(context, date),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      '${date.day} ${_monthName(date.month)} ${date.year}',
+                      formatFullDate(context, date),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -255,10 +232,9 @@ class _DateBar extends StatelessWidget {
           IconButton(
             onPressed: onNext,
             icon: const Icon(Icons.chevron_right),
-            tooltip: 'Next day',
+            tooltip: l10n.nextDayTooltip,
           ),
-          if (!isToday)
-            TextButton(onPressed: onToday, child: const Text('Today')),
+          if (!isToday) TextButton(onPressed: onToday, child: Text(l10n.todayLabel)),
         ],
       ),
     );
@@ -267,35 +243,4 @@ class _DateBar extends StatelessWidget {
 
 bool _isSameDay(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month && a.day == b.day;
-}
-
-String _weekdayLabel(DateTime date) {
-  const weekdays = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ];
-  return weekdays[date.weekday - 1];
-}
-
-String _monthName(int month) {
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  return months[month - 1];
 }

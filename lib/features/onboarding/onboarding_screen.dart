@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../providers/repository_providers.dart';
 
 /// First-run experience: a short welcome, then a single form to create the
@@ -43,9 +44,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Couldn't create your mess. Please try again."),
-          ),
+          SnackBar(content: Text(AppLocalizations.of(context).couldntCreateMess)),
         );
       }
     } finally {
@@ -56,6 +55,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -76,15 +76,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     Text(
-                      'Welcome to ${AppConstants.appName}',
+                      l10n.onboardingWelcome(AppConstants.appName),
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      'Manage your mess meals, bazar and monthly settlement in one place — '
-                      'entirely on this device, no internet required.',
+                      l10n.onboardingDescription,
                       style: Theme.of(context).textTheme.bodyMedium
                           ?.copyWith(color: colorScheme.onSurfaceVariant),
                       textAlign: TextAlign.center,
@@ -93,20 +92,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     TextFormField(
                       controller: _nameController,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Mess name',
-                        hintText: 'e.g. Green Road Mess',
+                      decoration: InputDecoration(
+                        labelText: l10n.messNameLabel,
+                        hintText: l10n.messNameHint,
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a name for your mess';
+                          return l10n.messNameValidator;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
-                      'Currency: ${AppConstants.defaultCurrencySymbol} ${AppConstants.defaultCurrencyCode}',
+                      l10n.currencyDisplay(
+                        AppConstants.defaultCurrencySymbol,
+                        AppConstants.defaultCurrencyCode,
+                      ),
                       style: Theme.of(context).textTheme.bodySmall
                           ?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
@@ -119,7 +121,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Create Mess'),
+                          : Text(l10n.createMess),
                     ),
                   ],
                 ),

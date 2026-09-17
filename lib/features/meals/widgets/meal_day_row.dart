@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/gen/app_localizations.dart';
 import '../../../models/member.dart';
 import 'meal_toggle_button.dart';
 
@@ -28,6 +29,7 @@ class MealDayRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -45,7 +47,7 @@ class MealDayRow extends StatelessWidget {
                 Expanded(
                   child: MealToggleButton(
                     icon: Icons.wb_twilight,
-                    label: 'Breakfast',
+                    label: l10n.breakfastLabel,
                     isOn: breakfast,
                     onTap: () => onBreakfastChanged(!breakfast),
                   ),
@@ -54,7 +56,7 @@ class MealDayRow extends StatelessWidget {
                 Expanded(
                   child: MealToggleButton(
                     icon: Icons.wb_sunny_outlined,
-                    label: 'Lunch',
+                    label: l10n.lunchLabel,
                     isOn: lunch,
                     onTap: () => onLunchChanged(!lunch),
                   ),
@@ -63,7 +65,7 @@ class MealDayRow extends StatelessWidget {
                 Expanded(
                   child: MealToggleButton(
                     icon: Icons.nightlight_outlined,
-                    label: 'Dinner',
+                    label: l10n.dinnerLabel,
                     isOn: dinner,
                     onTap: () => onDinnerChanged(!dinner),
                   ),

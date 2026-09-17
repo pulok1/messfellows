@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/gen/app_localizations.dart';
 import '../../../models/member_balance.dart';
 import '../../shared/widgets/balance_label.dart';
 
@@ -26,7 +27,10 @@ class SettlementTile extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
-          '${balance.mealCount} meals · Paid ${balance.paidAmount.format()}',
+          AppLocalizations.of(context).mealsCountPaid(
+            balance.mealCount,
+            balance.paidAmount.format(),
+          ),
         ),
         trailing: BalanceLabel(balance: balance),
       ),

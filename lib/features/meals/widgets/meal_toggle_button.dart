@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/gen/app_localizations.dart';
 
 /// A single large, tappable meal toggle (Breakfast/Lunch/Dinner). No
 /// confirmation dialog — tapping immediately flips the state, per section
@@ -29,9 +30,10 @@ class MealToggleButton extends StatelessWidget {
         ? colorScheme.onPrimary
         : colorScheme.onSurfaceVariant;
 
+    final l10n = AppLocalizations.of(context);
     return Semantics(
       button: true,
-      label: '$label, ${isOn ? "eaten" : "off"}',
+      label: l10n.mealSemanticsLabel(label, isOn ? l10n.mealStateEaten : l10n.mealStateOff),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
