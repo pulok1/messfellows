@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/localized_date.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/member_balance.dart';
 import '../../models/mess.dart';
 import '../../models/month_calculation_result.dart';
@@ -30,6 +32,7 @@ class ReportScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final selectedMonth = ref.watch(selectedMonthProvider);
     final settlement = ref.watch(
       settlementForMonthProvider((
@@ -53,12 +56,12 @@ class ReportScreen extends ConsumerWidget {
         child: Column(
           children: [
             PageHeaderCard(
-              title: 'Report',
+              title: l10n.navReport,
               showBackButton: false,
               actions: [
                 HeaderIconButton(
                   icon: Icons.history,
-                  tooltip: 'Month history',
+                  tooltip: l10n.monthHistoryTooltip,
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => MonthHistoryScreen(mess: mess),
@@ -117,7 +120,7 @@ class _ClosedBanner extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Text(
-            'This month is closed. Numbers are frozen from when it was closed.',
+            AppLocalizations.of(context).monthClosedBanner,
             style: TextStyle(color: colorScheme.onSecondaryContainer),
           ),
         ],
@@ -143,35 +146,34 @@ class _LiveReportBody extends ConsumerWidget {
   });
 
   Future<void> _closeMonth(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final monthYear = formatMonthYear(context, year, month);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Review ${_monthName(month)} $year'),
+        title: Text(l10n.reviewMonthTitle(monthYear)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _ReviewRow(label: 'Total meals', value: '${result.totalMeals}'),
-            _ReviewRow(label: 'Food cost', value: result.totalExpense.format()),
+            _ReviewRow(label: l10n.totalMealsLowerLabel, value: '${result.totalMeals}'),
+            _ReviewRow(label: l10n.foodCostLabel, value: result.totalExpense.format()),
             _ReviewRow(
-              label: 'Meal rate',
-              value: result.hasNoMeals ? 'N/A' : result.mealRate.format(),
+              label: l10n.mealRateLowerLabel,
+              value: result.hasNoMeals ? l10n.notApplicable : result.mealRate.format(),
             ),
             const SizedBox(height: AppSpacing.sm),
-            const Text(
-              'This freezes the settlement for this month. You can reopen it later if you need '
-              'to make changes.',
-            ),
+            Text(l10n.closeMonthExplain),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Close Month'),
+            child: Text(l10n.closeMonthButton),
           ),
         ],
       ),
@@ -192,13 +194,14 @@ class _LiveReportBody extends ConsumerWidget {
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${_monthName(month)} $year closed.')),
+        SnackBar(content: Text(l10n.monthClosedSnackbar(monthYear))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     return _ReportContent(
       mess: mess,
       year: year,
@@ -211,7 +214,7 @@ class _LiveReportBody extends ConsumerWidget {
               ? null
               : () => _closeMonth(context, ref),
           icon: const Icon(Icons.lock_outline),
-          label: Text(hasExistingSettlement ? 'Re-close Month' : 'Close Month'),
+          label: Text(hasExistingSettlement ? l10n.recloseMonthButton : l10n.closeMonthButton),
         ),
       ),
     );
@@ -248,22 +251,20 @@ class _FrozenReportBody extends ConsumerWidget {
   const _FrozenReportBody({required this.mess, required this.settlement});
 
   Future<void> _reopenMonth(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reopen this month?'),
-        content: const Text(
-          'You can edit meals, bazar and payments again. Close the month once more when '
-          "you're done to refresh the settlement.",
-        ),
+        title: Text(l10n.reopenMonthConfirmTitle),
+        content: Text(l10n.reopenMonthConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Reopen'),
+            child: Text(l10n.reopenButton),
           ),
         ],
       ),
@@ -274,6 +275,7 @@ class _FrozenReportBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settlementMembersAsync = ref.watch(
       settlementMembersProvider(settlement.id),
     );
@@ -289,7 +291,7 @@ class _FrozenReportBody extends ConsumerWidget {
                     allMembers
                         .firstWhereOrNull((m) => m.id == row.memberId)
                         ?.name ??
-                    'Unknown',
+                    l10n.unknown,
                 mealCount: row.mealCount,
                 mealCost: row.mealCost,
                 paidAmount: row.paidAmount,
@@ -315,14 +317,13 @@ class _FrozenReportBody extends ConsumerWidget {
             child: OutlinedButton.icon(
               onPressed: () => _reopenMonth(context, ref),
               icon: const Icon(Icons.lock_open),
-              label: const Text('Reopen Month'),
+              label: Text(l10n.reopenMonthButton),
             ),
           ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) =>
-          const Center(child: Text("Couldn't load this month's settlement.")),
+      error: (_, _) => Center(child: Text(l10n.couldntLoadSettlement)),
     );
   }
 }
@@ -345,7 +346,9 @@ class _ReportContent extends StatelessWidget {
   });
 
   void _copySummary(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final text = buildMonthlySummary(
+      context: context,
       messName: mess.name,
       year: year,
       month: month,
@@ -353,12 +356,14 @@ class _ReportContent extends StatelessWidget {
     );
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Summary copied to clipboard.')),
+      SnackBar(content: Text(l10n.summaryCopiedSnackbar)),
     );
   }
 
   void _shareSummary(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final text = buildMonthlySummary(
+      context: context,
       messName: mess.name,
       year: year,
       month: month,
@@ -367,19 +372,20 @@ class _ReportContent extends StatelessWidget {
     SharePlus.instance.share(
       ShareParams(
         text: text,
-        subject: '${mess.name} — ${_monthName(month)} $year',
+        subject: l10n.shareSubject(mess.name, formatMonthYear(context, year, month)),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (result.memberBalances.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Text(
-            'No members yet — add members to see a report for this month.',
+            l10n.noMembersReportMessage,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -407,17 +413,17 @@ class _ReportContent extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _StatLine(
-                        label: 'Total Food Cost',
+                        label: l10n.totalFoodCost,
                         value: result.totalExpense.format(),
                       ),
                       _StatLine(
-                        label: 'Total Meals',
+                        label: l10n.totalMeals,
                         value: '${result.totalMeals}',
                       ),
                       _StatLine(
-                        label: 'Meal Rate',
+                        label: l10n.mealRateUpperLabel,
                         value: result.hasNoMeals
-                            ? 'No meals recorded yet'
+                            ? l10n.noMealsRecordedYet
                             : result.mealRate.format(),
                       ),
                     ],
@@ -431,7 +437,7 @@ class _ReportContent extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => _copySummary(context),
                       icon: const Icon(Icons.copy_outlined),
-                      label: const Text('Copy Summary'),
+                      label: Text(l10n.copySummaryButton),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -439,14 +445,14 @@ class _ReportContent extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => _shareSummary(context),
                       icon: const Icon(Icons.share_outlined),
-                      label: const Text('Share'),
+                      label: Text(l10n.shareButton),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Per Member',
+                l10n.perMemberLabel,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -463,9 +469,9 @@ class _ReportContent extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: AppSpacing.xs),
-                        Text('${balance.mealCount} meals'),
-                        Text('Meal Cost: ${balance.mealCost.format()}'),
-                        Text('Paid: ${balance.paidAmount.format()}'),
+                        Text(l10n.mealsCount(balance.mealCount)),
+                        Text(l10n.mealCostLine(balance.mealCost.format())),
+                        Text(l10n.paidLine(balance.paidAmount.format())),
                         const SizedBox(height: AppSpacing.xs),
                         BalanceLabel(balance: balance),
                       ],
@@ -505,22 +511,4 @@ class _StatLine extends StatelessWidget {
       ),
     );
   }
-}
-
-String _monthName(int month) {
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  return months[month - 1];
 }

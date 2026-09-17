@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/localized_date.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/mess.dart';
 import '../../providers/selection_providers.dart';
 import '../../providers/settlement_providers.dart';
@@ -17,21 +19,22 @@ class MonthHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settlementsAsync = ref.watch(settlementsProvider(mess.id));
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            const PageHeaderCard(title: 'Month History'),
+            PageHeaderCard(title: l10n.monthHistoryTitle),
             Expanded(
               child: settlementsAsync.when(
                 data: (settlements) {
                   if (settlements.isEmpty) {
-                    return const EmptyState(
+                    return EmptyState(
                       icon: Icons.history,
-                      title: 'No closed months yet',
-                      message: 'Closed months will show up here once you close your first month.',
+                      title: l10n.noClosedMonthsTitle,
+                      message: l10n.noClosedMonthsMessage,
                     );
                   }
                   return ListView.separated(
@@ -44,15 +47,18 @@ class MonthHistoryScreen extends ConsumerWidget {
                       return Card(
                         child: ListTile(
                           title: Text(
-                            _monthYear(settlement.year, settlement.month),
+                            formatMonthYear(context, settlement.year, settlement.month),
                           ),
                           subtitle: Text(
-                            '${settlement.totalMeals} meals · ${settlement.totalExpense.format()} · '
-                            'Rate ${settlement.mealRate.format()}',
+                            l10n.monthHistorySubtitle(
+                              settlement.totalMeals,
+                              settlement.totalExpense.format(),
+                              settlement.mealRate.format(),
+                            ),
                           ),
                           trailing: Chip(
                             label: Text(
-                              settlement.isClosed ? 'Closed' : 'Open',
+                              settlement.isClosed ? l10n.closedLabel : l10n.openLabel,
                             ),
                             avatar: Icon(
                               settlement.isClosed
@@ -73,8 +79,7 @@ class MonthHistoryScreen extends ConsumerWidget {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) =>
-                    const Center(child: Text("Couldn't load month history.")),
+                error: (_, _) => Center(child: Text(l10n.couldntLoadMonthHistory)),
               ),
             ),
           ],
@@ -82,22 +87,4 @@ class MonthHistoryScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-String _monthYear(int year, int month) {
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  return '${months[month - 1]} $year';
 }
