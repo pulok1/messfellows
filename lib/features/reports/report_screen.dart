@@ -18,6 +18,7 @@ import '../../providers/selection_providers.dart';
 import '../../providers/settlement_providers.dart';
 import '../bazar/widgets/month_selector_bar.dart';
 import '../shared/widgets/balance_label.dart';
+import '../shared/widgets/labeled_value_row.dart';
 import '../shared/widgets/page_header_card.dart';
 import 'month_history_screen.dart';
 import 'summary_text.dart';
@@ -156,11 +157,20 @@ class _LiveReportBody extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _ReviewRow(label: l10n.totalMealsLowerLabel, value: '${result.totalMeals}'),
-            _ReviewRow(label: l10n.foodCostLabel, value: result.totalExpense.format()),
-            _ReviewRow(
+            LabeledValueRow(
+              label: l10n.totalMealsLowerLabel,
+              value: '${result.totalMeals}',
+              mutedLabel: false,
+            ),
+            LabeledValueRow(
+              label: l10n.foodCostLabel,
+              value: result.totalExpense.format(),
+              mutedLabel: false,
+            ),
+            LabeledValueRow(
               label: l10n.mealRateLowerLabel,
               value: result.hasNoMeals ? l10n.notApplicable : result.mealRate.format(),
+              mutedLabel: false,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(l10n.closeMonthExplain),
@@ -221,26 +231,6 @@ class _LiveReportBody extends ConsumerWidget {
   }
 }
 
-class _ReviewRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _ReviewRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-}
 
 /// Renders a closed month from its frozen settlement rows, with a Reopen
 /// action.

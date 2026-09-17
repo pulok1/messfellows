@@ -11,6 +11,7 @@ import '../../providers/month_calculation_provider.dart';
 import '../../providers/payment_providers.dart';
 import '../payments/add_edit_payment_screen.dart';
 import '../shared/widgets/balance_label.dart';
+import '../shared/widgets/labeled_value_row.dart';
 import '../shared/widgets/page_header_card.dart';
 
 /// A member's detail view (section 19's "View details"): this month's
@@ -86,15 +87,15 @@ class MemberDetailScreen extends ConsumerWidget {
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                             const SizedBox(height: AppSpacing.sm),
-                            _StatRow(
+                            LabeledValueRow(
                               label: l10n.mealsEatenLabel,
                               value: '${balance.mealCount}',
                             ),
-                            _StatRow(
+                            LabeledValueRow(
                               label: l10n.mealCostLabel,
                               value: balance.mealCost.format(),
                             ),
-                            _StatRow(
+                            LabeledValueRow(
                               label: l10n.paidLabel,
                               value: balance.paidAmount.format(),
                             ),
@@ -187,32 +188,6 @@ class MemberDetailScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _StatRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
       ),
     );
   }
