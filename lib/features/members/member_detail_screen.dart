@@ -125,17 +125,22 @@ class MemberDetailScreen extends ConsumerWidget {
                               for (final expense in list)
                                 Card(
                                   margin: const EdgeInsets.only(
-                                    bottom: AppSpacing.xs,
+                                    bottom: AppSpacing.sm,
                                   ),
                                   child: ListTile(
-                                    title: Text(expense.category),
+                                    title: Text(
+                                      expense.category,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                     subtitle: Text(
                                       formatShortDate(context, expense.date),
                                     ),
                                     trailing: Text(
                                       expense.amount.format(),
                                       style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),
@@ -161,10 +166,15 @@ class MemberDetailScreen extends ConsumerWidget {
                               for (final payment in list)
                                 Card(
                                   margin: const EdgeInsets.only(
-                                    bottom: AppSpacing.xs,
+                                    bottom: AppSpacing.sm,
                                   ),
                                   child: ListTile(
-                                    title: Text(payment.amount.format()),
+                                    title: Text(
+                                      payment.amount.format(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
                                     subtitle: Text(
                                       formatShortDate(context, payment.date),
                                     ),
