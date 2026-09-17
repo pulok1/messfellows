@@ -116,6 +116,17 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
         ),
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: colorScheme.surfaceContainerHigh,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.sheetRadius),
+        ),
+      ),
+      datePickerTheme: DatePickerThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.sheetRadius),
+        ),
+      ),
     );
   }
 }
