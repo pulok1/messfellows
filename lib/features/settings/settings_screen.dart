@@ -192,6 +192,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
+  static const _sectionHeaderPadding = EdgeInsets.fromLTRB(
+    AppSpacing.xs,
+    0,
+    AppSpacing.xs,
+    AppSpacing.sm,
+  );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -204,79 +211,129 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: AbsorbPointer(
                 absorbing: _isBusy,
                 child: ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.sm,
+                    AppSpacing.md,
+                    AppSpacing.xxl,
+                  ),
                   children: [
-                    if (_isBusy) const LinearProgressIndicator(),
-                    SectionHeader(l10n.messSectionHeader, padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xs)),
-                    ListTile(
-                      leading: const Icon(Icons.edit_outlined),
-                      title: Text(l10n.messNameLabel),
-                      subtitle: Text(widget.mess.name),
-                      onTap: _renameMess,
+                    if (_isBusy) ...[
+                      const LinearProgressIndicator(),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
+                    SectionHeader(
+                      l10n.messSectionHeader,
+                      padding: _sectionHeaderPadding,
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.currency_exchange),
-                      title: Text(l10n.currencyListTile),
-                      subtitle: Text(
-                        '${widget.mess.currencySymbol} ${widget.mess.currencyCode}',
+                    Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.edit_outlined),
+                            title: Text(l10n.messNameLabel),
+                            subtitle: Text(widget.mess.name),
+                            onTap: _renameMess,
+                          ),
+                          const Divider(height: 1, indent: 56),
+                          ListTile(
+                            leading: const Icon(Icons.currency_exchange),
+                            title: Text(l10n.currencyListTile),
+                            subtitle: Text(
+                              '${widget.mess.currencySymbol} ${widget.mess.currencyCode}',
+                            ),
+                          ),
+                          const Divider(height: 1, indent: 56),
+                          ListTile(
+                            leading: const Icon(Icons.group_outlined),
+                            title: Text(l10n.membersLabel),
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    MembersScreen(messId: widget.mess.id),
+                              ),
+                            ),
+                          ),
+                          const Divider(height: 1, indent: 56),
+                          ListTile(
+                            leading: const Icon(Icons.language_outlined),
+                            title: Text(l10n.languageLabel),
+                            subtitle: Text(
+                              ref.watch(localeProvider).languageCode == 'bn'
+                                  ? l10n.languageBangla
+                                  : l10n.languageEnglish,
+                            ),
+                            onTap: _pickLanguage,
+                          ),
+                        ],
                       ),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.group_outlined),
-                      title: Text(l10n.membersLabel),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => MembersScreen(messId: widget.mess.id),
-                        ),
-                      ),
+                    const SizedBox(height: AppSpacing.lg),
+                    SectionHeader(
+                      l10n.localDataSectionHeader,
+                      padding: _sectionHeaderPadding,
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.language_outlined),
-                      title: Text(l10n.languageLabel),
-                      subtitle: Text(
-                        ref.watch(localeProvider).languageCode == 'bn'
-                            ? l10n.languageBangla
-                            : l10n.languageEnglish,
-                      ),
-                      onTap: _pickLanguage,
-                    ),
-                    const Divider(),
-                    SectionHeader(l10n.localDataSectionHeader, padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xs)),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                      child: Text(l10n.localDataExplain),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    ListTile(
-                      leading: const Icon(Icons.upload_outlined),
-                      title: Text(l10n.exportDataTitle),
-                      subtitle: Text(l10n.exportDataSubtitle),
-                      onTap: _exportData,
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.download_outlined),
-                      title: Text(l10n.importDataTitle),
-                      subtitle: Text(l10n.importDataSubtitle),
-                      onTap: _importData,
-                    ),
-                    ListTile(
-                      leading: Icon(
-                        Icons.delete_forever_outlined,
-                        color: Theme.of(context).colorScheme.error,
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.xs,
+                        0,
+                        AppSpacing.xs,
+                        AppSpacing.sm,
                       ),
-                      title: Text(
-                        l10n.deleteAllDataTitle,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
+                      child: Text(
+                        l10n.localDataExplain,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      onTap: _deleteAllData,
                     ),
-                    const Divider(),
-                    SectionHeader(l10n.aboutSectionHeader, padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xs)),
-                    ListTile(
-                      leading: const Icon(Icons.info_outline),
-                      title: const Text(AppConstants.appName),
-                      subtitle: Text(l10n.aboutVersionSubtitle),
+                    Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.upload_outlined),
+                            title: Text(l10n.exportDataTitle),
+                            subtitle: Text(l10n.exportDataSubtitle),
+                            onTap: _exportData,
+                          ),
+                          const Divider(height: 1, indent: 56),
+                          ListTile(
+                            leading: const Icon(Icons.download_outlined),
+                            title: Text(l10n.importDataTitle),
+                            subtitle: Text(l10n.importDataSubtitle),
+                            onTap: _importData,
+                          ),
+                          const Divider(height: 1, indent: 56),
+                          ListTile(
+                            leading: Icon(
+                              Icons.delete_forever_outlined,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            title: Text(
+                              l10n.deleteAllDataTitle,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                            onTap: _deleteAllData,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    SectionHeader(
+                      l10n.aboutSectionHeader,
+                      padding: _sectionHeaderPadding,
+                    ),
+                    Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: ListTile(
+                        leading: const Icon(Icons.info_outline),
+                        title: const Text(AppConstants.appName),
+                        subtitle: Text(l10n.aboutVersionSubtitle),
+                      ),
                     ),
                   ],
                 ),
