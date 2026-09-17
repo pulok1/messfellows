@@ -238,22 +238,22 @@ class _MemberTotalsRow extends ConsumerWidget {
                             member.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11,
-                              height: 1.2,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  height: 1.2,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
                           ),
                           Text(
                             (totalsByMember[member.id] ?? const Money.zero())
                                 .format(),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              height: 1.2,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  height: 1.2,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                         ],
                       ),
