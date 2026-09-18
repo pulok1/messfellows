@@ -8,7 +8,7 @@ class Expense {
   final DateTime date;
   final Money amount;
   final String paidByMemberId;
-  final String category;
+  final String bazarList;
   final String? note;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -19,7 +19,7 @@ class Expense {
     required this.date,
     required this.amount,
     required this.paidByMemberId,
-    required this.category,
+    required this.bazarList,
     this.note,
     required this.createdAt,
     required this.updatedAt,
@@ -29,7 +29,7 @@ class Expense {
     DateTime? date,
     Money? amount,
     String? paidByMemberId,
-    String? category,
+    String? bazarList,
     String? note,
     bool clearNote = false,
     DateTime? updatedAt,
@@ -40,7 +40,7 @@ class Expense {
       date: date ?? this.date,
       amount: amount ?? this.amount,
       paidByMemberId: paidByMemberId ?? this.paidByMemberId,
-      category: category ?? this.category,
+      bazarList: bazarList ?? this.bazarList,
       note: clearNote ? null : (note ?? this.note),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

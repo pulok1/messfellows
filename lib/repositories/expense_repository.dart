@@ -17,7 +17,7 @@ abstract interface class ExpenseRepository {
     required DateTime date,
     required Money amount,
     required String paidByMemberId,
-    required String category,
+    required String bazarList,
     String? note,
   });
 
