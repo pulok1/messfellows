@@ -20,13 +20,13 @@ class BalanceLabel extends StatelessWidget {
     final (text, color) = switch (balance.status) {
       BalanceStatus.willReceive => (
         l10n.willReceiveAmount(balance.balanceMagnitude.format()),
-        AppBalanceColors.willReceive,
+        AppBalanceColors.willReceive(context),
       ),
       BalanceStatus.needsToPay => (
         l10n.needsToPayAmount(balance.balanceMagnitude.format()),
-        AppBalanceColors.needsToPay,
+        AppBalanceColors.needsToPay(context),
       ),
-      BalanceStatus.settled => (l10n.settled, AppBalanceColors.settled),
+      BalanceStatus.settled => (l10n.settled, AppBalanceColors.settled(context)),
     };
 
     return Text(

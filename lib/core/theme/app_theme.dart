@@ -6,12 +6,31 @@ import 'app_spacing.dart';
 /// member detail so "will receive" / "needs to pay" always look the same.
 /// Financial state is still spelled out in text everywhere it's shown — see
 /// section 32 of the product spec — these colors are a secondary cue only.
+///
+/// Each state has a light- and dark-mode variant: the light-mode shades are
+/// too low-contrast to read on a dark surface, so [of] picks the right one
+/// for the current [Brightness] instead of using one fixed color everywhere.
 class AppBalanceColors {
   AppBalanceColors._();
 
-  static const Color willReceive = Color(0xFF2E7D32);
-  static const Color needsToPay = Color(0xFFC62828);
-  static const Color settled = Color(0xFF616161);
+  static const Color _willReceiveLight = Color(0xFF2E7D32);
+  static const Color _willReceiveDark = Color(0xFF81C784);
+  static const Color _needsToPayLight = Color(0xFFC62828);
+  static const Color _needsToPayDark = Color(0xFFEF9A9A);
+  static const Color _settledLight = Color(0xFF616161);
+  static const Color _settledDark = Color(0xFFBDBDBD);
+
+  static Color willReceive(BuildContext context) =>
+      _of(context, _willReceiveLight, _willReceiveDark);
+
+  static Color needsToPay(BuildContext context) =>
+      _of(context, _needsToPayLight, _needsToPayDark);
+
+  static Color settled(BuildContext context) =>
+      _of(context, _settledLight, _settledDark);
+
+  static Color _of(BuildContext context, Color light, Color dark) =>
+      Theme.of(context).brightness == Brightness.dark ? dark : light;
 }
 
 /// Centralized Material 3 theme. Keep every screen on this rather than
