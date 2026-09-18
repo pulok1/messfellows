@@ -129,7 +129,7 @@ class MemberDetailScreen extends ConsumerWidget {
                                   ),
                                   child: ListTile(
                                     title: Text(
-                                      expense.category,
+                                      expense.bazarList,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w600,
                                       ),

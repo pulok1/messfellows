@@ -45,7 +45,7 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
   final _formKey = GlobalKey<FormState>();
   late DateTime _date;
   late final TextEditingController _amountController;
-  late final TextEditingController _categoryController;
+  late final TextEditingController _bazarListController;
   late final TextEditingController _noteController;
   String? _paidByMemberId;
   bool _isSaving = false;
@@ -60,7 +60,7 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
     _amountController = TextEditingController(
       text: existing == null ? '' : existing.amount.major.toStringAsFixed(2),
     );
-    _categoryController = TextEditingController(text: existing?.category ?? '');
+    _bazarListController = TextEditingController(text: existing?.bazarList ?? '');
     _noteController = TextEditingController(text: existing?.note ?? '');
     _paidByMemberId = existing?.paidByMemberId;
   }
@@ -68,7 +68,7 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
   @override
   void dispose() {
     _amountController.dispose();
-    _categoryController.dispose();
+    _bazarListController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -95,7 +95,7 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
 
     setState(() => _isSaving = true);
     final amount = Money.fromMajor(double.parse(_amountController.text.trim()));
-    final category = _categoryController.text.trim();
+    final bazarList = _bazarListController.text.trim();
     final note = _noteController.text.trim();
 
     try {
@@ -106,7 +106,7 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
             date: _date,
             amount: amount,
             paidByMemberId: _paidByMemberId,
-            category: category,
+            bazarList: bazarList,
             note: note,
             clearNote: note.isEmpty,
           ),
@@ -117,7 +117,7 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
           date: _date,
           amount: amount,
           paidByMemberId: _paidByMemberId!,
-          category: category,
+          bazarList: bazarList,
           note: note.isEmpty ? null : note,
         );
       }
@@ -200,26 +200,12 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
-                  controller: _categoryController,
-                  decoration: InputDecoration(labelText: l10n.categoryLabel),
+                  controller: _bazarListController,
+                  decoration: InputDecoration(labelText: l10n.bazarListLabel),
+                  maxLines: 3,
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? l10n.enterCategoryValidator
+                      ? l10n.enterBazarListValidator
                       : null,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: AppConstants.expenseCategoryKeys
-                      .map(
-                        (key) => ActionChip(
-                          label: Text(_categoryLabel(l10n, key)),
-                          onPressed: () => setState(
-                            () => _categoryController.text = _categoryLabel(l10n, key),
-                          ),
-                        ),
-                      )
-                      .toList(),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
@@ -265,22 +251,6 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
       ],
     );
   }
-}
-
-/// Maps a category key (see [AppConstants.expenseCategoryKeys]) to its
-/// localized chip label.
-String _categoryLabel(AppLocalizations l10n, String key) {
-  return switch (key) {
-    'grocery' => l10n.categoryGrocery,
-    'vegetables' => l10n.categoryVegetables,
-    'fish' => l10n.categoryFish,
-    'meat' => l10n.categoryMeat,
-    'eggDairy' => l10n.categoryEggDairy,
-    'spices' => l10n.categorySpices,
-    'gas' => l10n.categoryGas,
-    'utensils' => l10n.categoryUtensils,
-    _ => l10n.categoryOther,
-  };
 }
 
 class _PaidByField extends StatelessWidget {

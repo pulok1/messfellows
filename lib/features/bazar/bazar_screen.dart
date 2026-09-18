@@ -346,7 +346,7 @@ class _ExpenseTile extends ConsumerWidget {
           existing: expense,
         ),
         title: Text(
-          expense.category,
+          expense.bazarList,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
