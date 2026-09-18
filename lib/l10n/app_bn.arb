@@ -67,6 +67,8 @@
   "mealStateEaten": "খাওয়া হয়েছে",
   "mealStateOff": "বন্ধ",
   "mealSemanticsLabel": "{label}, {state}",
+  "mealCountDialogTitle": "{meal} সংখ্যা",
+  "mealCountDialogHint": "অতিথি বা দ্বিতীয়বার খেলে অতিরিক্ত মিল যোগ করুন।",
 
   "couldntSaveMember": "সদস্যকে সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
   "editMemberTitle": "সদস্য সম্পাদনা করুন",

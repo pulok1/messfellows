@@ -14,9 +14,11 @@ import '../utils/money.dart';
 /// output into a [MonthlySettlement][../../models/settlement.dart]).
 ///
 /// Accounting rule (section 10/11): meal rate is strictly
-/// `total food expense / total meals`. No carry-forward, guest meals, or
-/// other adjustments are applied — those are out of scope for this engine
-/// until the product spec defines them.
+/// `total food expense / total meals`. No carry-forward or other
+/// adjustments are applied — those are out of scope for this engine until
+/// the product spec defines them. An extra/guest meal is just a meal count
+/// above 1 in one slot (see [MealEntry.totalMeals]) and is already included
+/// in "total meals" like any other meal.
 ///
 /// A member's contribution is the sum of their [Payment]s *plus* the sum
 /// of any [Expense]s they personally paid for (bazar). Buying groceries

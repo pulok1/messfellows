@@ -74,6 +74,9 @@
   "mealStateOff": "off",
   "mealSemanticsLabel": "{label}, {state}",
   "@mealSemanticsLabel": {"placeholders": {"label": {"type": "String"}, "state": {"type": "String"}}},
+  "mealCountDialogTitle": "{meal} count",
+  "@mealCountDialogTitle": {"placeholders": {"meal": {"type": "String"}}},
+  "mealCountDialogHint": "Add extra meals for a guest or a second helping.",
 
   "couldntSaveMember": "Couldn't save this member. Please try again.",
   "editMemberTitle": "Edit Member",

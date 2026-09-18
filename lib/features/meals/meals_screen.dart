@@ -91,9 +91,9 @@ class MealsScreen extends ConsumerWidget {
                       final meal = mealsByMember[member.id];
                       return MealDayRow(
                         member: member,
-                        breakfast: meal?.breakfast ?? false,
-                        lunch: meal?.lunch ?? false,
-                        dinner: meal?.dinner ?? false,
+                        breakfast: meal?.breakfast ?? 0,
+                        lunch: meal?.lunch ?? 0,
+                        dinner: meal?.dinner ?? 0,
                         onBreakfastChanged: (value) => ref
                             .read(mealRepositoryProvider)
                             .setMeal(

@@ -6,15 +6,16 @@ import '../../../models/member.dart';
 import 'meal_toggle_button.dart';
 
 /// One member's row on the daily meal tracker: name plus three
-/// independently-tappable meal toggles.
+/// independently-tappable meal toggles. Tap flips a slot off/on; long-press
+/// opens a count picker for an extra/guest meal (2 or more) in that slot.
 class MealDayRow extends StatelessWidget {
   final Member member;
-  final bool breakfast;
-  final bool lunch;
-  final bool dinner;
-  final ValueChanged<bool> onBreakfastChanged;
-  final ValueChanged<bool> onLunchChanged;
-  final ValueChanged<bool> onDinnerChanged;
+  final int breakfast;
+  final int lunch;
+  final int dinner;
+  final ValueChanged<int> onBreakfastChanged;
+  final ValueChanged<int> onLunchChanged;
+  final ValueChanged<int> onDinnerChanged;
 
   const MealDayRow({
     super.key,
@@ -48,8 +49,14 @@ class MealDayRow extends StatelessWidget {
                   child: MealToggleButton(
                     icon: Icons.wb_twilight,
                     label: l10n.breakfastLabel,
-                    isOn: breakfast,
-                    onTap: () => onBreakfastChanged(!breakfast),
+                    count: breakfast,
+                    onTap: () => onBreakfastChanged(breakfast > 0 ? 0 : 1),
+                    onLongPress: () => _showMealCountDialog(
+                      context,
+                      label: l10n.breakfastLabel,
+                      current: breakfast,
+                      onChanged: onBreakfastChanged,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -57,8 +64,14 @@ class MealDayRow extends StatelessWidget {
                   child: MealToggleButton(
                     icon: Icons.wb_sunny_outlined,
                     label: l10n.lunchLabel,
-                    isOn: lunch,
-                    onTap: () => onLunchChanged(!lunch),
+                    count: lunch,
+                    onTap: () => onLunchChanged(lunch > 0 ? 0 : 1),
+                    onLongPress: () => _showMealCountDialog(
+                      context,
+                      label: l10n.lunchLabel,
+                      current: lunch,
+                      onChanged: onLunchChanged,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -66,8 +79,14 @@ class MealDayRow extends StatelessWidget {
                   child: MealToggleButton(
                     icon: Icons.nightlight_outlined,
                     label: l10n.dinnerLabel,
-                    isOn: dinner,
-                    onTap: () => onDinnerChanged(!dinner),
+                    count: dinner,
+                    onTap: () => onDinnerChanged(dinner > 0 ? 0 : 1),
+                    onLongPress: () => _showMealCountDialog(
+                      context,
+                      label: l10n.dinnerLabel,
+                      current: dinner,
+                      onChanged: onDinnerChanged,
+                    ),
                   ),
                 ),
               ],
@@ -77,4 +96,72 @@ class MealDayRow extends StatelessWidget {
       ),
     );
   }
+}
+
+const _maxMealCount = 9;
+
+Future<void> _showMealCountDialog(
+  BuildContext context, {
+  required String label,
+  required int current,
+  required ValueChanged<int> onChanged,
+}) async {
+  final l10n = AppLocalizations.of(context);
+  final result = await showDialog<int>(
+    context: context,
+    builder: (context) {
+      var count = current;
+      return StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(l10n.mealCountDialogTitle(label)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.mealCountDialogHint,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: count > 0 ? () => setState(() => count--) : null,
+                    icon: const Icon(Icons.remove_circle_outline),
+                  ),
+                  SizedBox(
+                    width: 48,
+                    child: Text(
+                      '$count',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: count < _maxMealCount
+                        ? () => setState(() => count++)
+                        : null,
+                    icon: const Icon(Icons.add_circle_outline),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(count),
+              child: Text(l10n.save),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+  if (result != null && result != current) onChanged(result);
 }
