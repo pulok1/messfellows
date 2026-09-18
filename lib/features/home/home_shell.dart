@@ -32,7 +32,7 @@ class _HomeShellState extends State<HomeShell> {
     final l10n = AppLocalizations.of(context);
     final tabs = [
       DashboardScreen(mess: widget.mess),
-      MealsScreen(messId: widget.mess.id),
+      MealsScreen(mess: widget.mess),
       BazarScreen(messId: widget.mess.id),
       ReportScreen(mess: widget.mess),
     ];

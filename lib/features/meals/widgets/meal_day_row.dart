@@ -13,6 +13,9 @@ class MealDayRow extends StatelessWidget {
   final int breakfast;
   final int lunch;
   final int dinner;
+  final bool showBreakfast;
+  final bool showLunch;
+  final bool showDinner;
   final ValueChanged<int> onBreakfastChanged;
   final ValueChanged<int> onLunchChanged;
   final ValueChanged<int> onDinnerChanged;
@@ -23,6 +26,9 @@ class MealDayRow extends StatelessWidget {
     required this.breakfast,
     required this.lunch,
     required this.dinner,
+    this.showBreakfast = true,
+    this.showLunch = true,
+    this.showDinner = true,
     required this.onBreakfastChanged,
     required this.onLunchChanged,
     required this.onDinnerChanged,
@@ -43,58 +49,74 @@ class MealDayRow extends StatelessWidget {
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                Expanded(
-                  child: MealToggleButton(
-                    icon: Icons.wb_twilight,
-                    label: l10n.breakfastLabel,
-                    count: breakfast,
-                    onTap: () => onBreakfastChanged(breakfast > 0 ? 0 : 1),
-                    onLongPress: () => _showMealCountDialog(
-                      context,
-                      label: l10n.breakfastLabel,
-                      current: breakfast,
-                      onChanged: onBreakfastChanged,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: MealToggleButton(
-                    icon: Icons.wb_sunny_outlined,
-                    label: l10n.lunchLabel,
-                    count: lunch,
-                    onTap: () => onLunchChanged(lunch > 0 ? 0 : 1),
-                    onLongPress: () => _showMealCountDialog(
-                      context,
-                      label: l10n.lunchLabel,
-                      current: lunch,
-                      onChanged: onLunchChanged,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: MealToggleButton(
-                    icon: Icons.nightlight_outlined,
-                    label: l10n.dinnerLabel,
-                    count: dinner,
-                    onTap: () => onDinnerChanged(dinner > 0 ? 0 : 1),
-                    onLongPress: () => _showMealCountDialog(
-                      context,
-                      label: l10n.dinnerLabel,
-                      current: dinner,
-                      onChanged: onDinnerChanged,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            Row(children: _buildSlots(context, l10n)),
           ],
         ),
       ),
     );
+  }
+
+  /// One [MealToggleButton] per slot this mess tracks, separated by gaps —
+  /// built as a list rather than a fixed 3-wide Row so a mess that only
+  /// tracks lunch & dinner doesn't show an empty breakfast button.
+  List<Widget> _buildSlots(BuildContext context, AppLocalizations l10n) {
+    final slots = <Widget>[];
+
+    void addSlot(Widget button) {
+      if (slots.isNotEmpty) slots.add(const SizedBox(width: AppSpacing.sm));
+      slots.add(Expanded(child: button));
+    }
+
+    if (showBreakfast) {
+      addSlot(
+        MealToggleButton(
+          icon: Icons.wb_twilight,
+          label: l10n.breakfastLabel,
+          count: breakfast,
+          onTap: () => onBreakfastChanged(breakfast > 0 ? 0 : 1),
+          onLongPress: () => _showMealCountDialog(
+            context,
+            label: l10n.breakfastLabel,
+            current: breakfast,
+            onChanged: onBreakfastChanged,
+          ),
+        ),
+      );
+    }
+    if (showLunch) {
+      addSlot(
+        MealToggleButton(
+          icon: Icons.wb_sunny_outlined,
+          label: l10n.lunchLabel,
+          count: lunch,
+          onTap: () => onLunchChanged(lunch > 0 ? 0 : 1),
+          onLongPress: () => _showMealCountDialog(
+            context,
+            label: l10n.lunchLabel,
+            current: lunch,
+            onChanged: onLunchChanged,
+          ),
+        ),
+      );
+    }
+    if (showDinner) {
+      addSlot(
+        MealToggleButton(
+          icon: Icons.nightlight_outlined,
+          label: l10n.dinnerLabel,
+          count: dinner,
+          onTap: () => onDinnerChanged(dinner > 0 ? 0 : 1),
+          onLongPress: () => _showMealCountDialog(
+            context,
+            label: l10n.dinnerLabel,
+            current: dinner,
+            onChanged: onDinnerChanged,
+          ),
+        ),
+      );
+    }
+
+    return slots;
   }
 }
 

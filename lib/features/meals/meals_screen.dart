@@ -5,6 +5,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/utils/localized_date.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/meal_entry.dart';
+import '../../models/mess.dart';
 import '../../providers/meal_providers.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/month_calculation_provider.dart';
@@ -19,9 +20,11 @@ import 'widgets/meal_day_row.dart';
 /// expected to open several times a day, so it defaults to today and
 /// requires no navigation or confirmation to mark a meal off.
 class MealsScreen extends ConsumerWidget {
-  final String messId;
+  final Mess mess;
 
-  const MealsScreen({super.key, required this.messId});
+  const MealsScreen({super.key, required this.mess});
+
+  String get messId => mess.id;
 
   Future<void> _pickDate(BuildContext context, WidgetRef ref, DateTime current) async {
     final picked = await showDatePicker(
@@ -94,6 +97,9 @@ class MealsScreen extends ConsumerWidget {
                         breakfast: meal?.breakfast ?? 0,
                         lunch: meal?.lunch ?? 0,
                         dinner: meal?.dinner ?? 0,
+                        showBreakfast: mess.trackBreakfast,
+                        showLunch: mess.trackLunch,
+                        showDinner: mess.trackDinner,
                         onBreakfastChanged: (value) => ref
                             .read(mealRepositoryProvider)
                             .setMeal(
