@@ -228,7 +228,7 @@ class BackupService {
     'date': row.date.toIso8601String(),
     'amountMinorUnits': row.amountMinorUnits,
     'paidByMemberId': row.paidByMemberId,
-    'category': row.category,
+    'bazarList': row.bazarList,
     'note': row.note,
     'createdAt': row.createdAt.toIso8601String(),
     'updatedAt': row.updatedAt.toIso8601String(),
@@ -241,7 +241,9 @@ class BackupService {
         date: DateTime.parse(json['date'] as String),
         amountMinorUnits: json['amountMinorUnits'] as int,
         paidByMemberId: json['paidByMemberId'] as String,
-        category: json['category'] as String,
+        // Fall back to the old 'category' key so backups exported before
+        // the category -> bazarList rename (schemaVersion 1) still import.
+        bazarList: (json['bazarList'] ?? json['category'] ?? '') as String,
         note: Value(json['note'] as String?),
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
