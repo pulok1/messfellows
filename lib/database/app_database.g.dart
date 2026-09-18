@@ -1035,42 +1035,33 @@ class $MealEntriesTable extends MealEntries
     'breakfast',
   );
   @override
-  late final GeneratedColumn<bool> breakfast = GeneratedColumn<bool>(
+  late final GeneratedColumn<int> breakfast = GeneratedColumn<int>(
     'breakfast',
     aliasedName,
     false,
-    type: DriftSqlType.bool,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("breakfast" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
+    defaultValue: const Constant(0),
   );
   static const VerificationMeta _lunchMeta = const VerificationMeta('lunch');
   @override
-  late final GeneratedColumn<bool> lunch = GeneratedColumn<bool>(
+  late final GeneratedColumn<int> lunch = GeneratedColumn<int>(
     'lunch',
     aliasedName,
     false,
-    type: DriftSqlType.bool,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("lunch" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
+    defaultValue: const Constant(0),
   );
   static const VerificationMeta _dinnerMeta = const VerificationMeta('dinner');
   @override
-  late final GeneratedColumn<bool> dinner = GeneratedColumn<bool>(
+  late final GeneratedColumn<int> dinner = GeneratedColumn<int>(
     'dinner',
     aliasedName,
     false,
-    type: DriftSqlType.bool,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("dinner" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
+    defaultValue: const Constant(0),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -1211,15 +1202,15 @@ class $MealEntriesTable extends MealEntries
         data['${effectivePrefix}date'],
       )!,
       breakfast: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
+        DriftSqlType.int,
         data['${effectivePrefix}breakfast'],
       )!,
       lunch: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
+        DriftSqlType.int,
         data['${effectivePrefix}lunch'],
       )!,
       dinner: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
+        DriftSqlType.int,
         data['${effectivePrefix}dinner'],
       )!,
       createdAt: attachedDatabase.typeMapping.read(
@@ -1244,9 +1235,9 @@ class MealEntryRow extends DataClass implements Insertable<MealEntryRow> {
   final String messId;
   final String memberId;
   final DateTime date;
-  final bool breakfast;
-  final bool lunch;
-  final bool dinner;
+  final int breakfast;
+  final int lunch;
+  final int dinner;
   final DateTime createdAt;
   final DateTime updatedAt;
   const MealEntryRow({
@@ -1267,9 +1258,9 @@ class MealEntryRow extends DataClass implements Insertable<MealEntryRow> {
     map['mess_id'] = Variable<String>(messId);
     map['member_id'] = Variable<String>(memberId);
     map['date'] = Variable<DateTime>(date);
-    map['breakfast'] = Variable<bool>(breakfast);
-    map['lunch'] = Variable<bool>(lunch);
-    map['dinner'] = Variable<bool>(dinner);
+    map['breakfast'] = Variable<int>(breakfast);
+    map['lunch'] = Variable<int>(lunch);
+    map['dinner'] = Variable<int>(dinner);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -1299,9 +1290,9 @@ class MealEntryRow extends DataClass implements Insertable<MealEntryRow> {
       messId: serializer.fromJson<String>(json['messId']),
       memberId: serializer.fromJson<String>(json['memberId']),
       date: serializer.fromJson<DateTime>(json['date']),
-      breakfast: serializer.fromJson<bool>(json['breakfast']),
-      lunch: serializer.fromJson<bool>(json['lunch']),
-      dinner: serializer.fromJson<bool>(json['dinner']),
+      breakfast: serializer.fromJson<int>(json['breakfast']),
+      lunch: serializer.fromJson<int>(json['lunch']),
+      dinner: serializer.fromJson<int>(json['dinner']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -1314,9 +1305,9 @@ class MealEntryRow extends DataClass implements Insertable<MealEntryRow> {
       'messId': serializer.toJson<String>(messId),
       'memberId': serializer.toJson<String>(memberId),
       'date': serializer.toJson<DateTime>(date),
-      'breakfast': serializer.toJson<bool>(breakfast),
-      'lunch': serializer.toJson<bool>(lunch),
-      'dinner': serializer.toJson<bool>(dinner),
+      'breakfast': serializer.toJson<int>(breakfast),
+      'lunch': serializer.toJson<int>(lunch),
+      'dinner': serializer.toJson<int>(dinner),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -1327,9 +1318,9 @@ class MealEntryRow extends DataClass implements Insertable<MealEntryRow> {
     String? messId,
     String? memberId,
     DateTime? date,
-    bool? breakfast,
-    bool? lunch,
-    bool? dinner,
+    int? breakfast,
+    int? lunch,
+    int? dinner,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => MealEntryRow(
@@ -1405,9 +1396,9 @@ class MealEntriesCompanion extends UpdateCompanion<MealEntryRow> {
   final Value<String> messId;
   final Value<String> memberId;
   final Value<DateTime> date;
-  final Value<bool> breakfast;
-  final Value<bool> lunch;
-  final Value<bool> dinner;
+  final Value<int> breakfast;
+  final Value<int> lunch;
+  final Value<int> dinner;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -1445,9 +1436,9 @@ class MealEntriesCompanion extends UpdateCompanion<MealEntryRow> {
     Expression<String>? messId,
     Expression<String>? memberId,
     Expression<DateTime>? date,
-    Expression<bool>? breakfast,
-    Expression<bool>? lunch,
-    Expression<bool>? dinner,
+    Expression<int>? breakfast,
+    Expression<int>? lunch,
+    Expression<int>? dinner,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -1471,9 +1462,9 @@ class MealEntriesCompanion extends UpdateCompanion<MealEntryRow> {
     Value<String>? messId,
     Value<String>? memberId,
     Value<DateTime>? date,
-    Value<bool>? breakfast,
-    Value<bool>? lunch,
-    Value<bool>? dinner,
+    Value<int>? breakfast,
+    Value<int>? lunch,
+    Value<int>? dinner,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -1508,13 +1499,13 @@ class MealEntriesCompanion extends UpdateCompanion<MealEntryRow> {
       map['date'] = Variable<DateTime>(date.value);
     }
     if (breakfast.present) {
-      map['breakfast'] = Variable<bool>(breakfast.value);
+      map['breakfast'] = Variable<int>(breakfast.value);
     }
     if (lunch.present) {
-      map['lunch'] = Variable<bool>(lunch.value);
+      map['lunch'] = Variable<int>(lunch.value);
     }
     if (dinner.present) {
-      map['dinner'] = Variable<bool>(dinner.value);
+      map['dinner'] = Variable<int>(dinner.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -5348,9 +5339,9 @@ typedef $$MealEntriesTableCreateCompanionBuilder =
       required String messId,
       required String memberId,
       required DateTime date,
-      Value<bool> breakfast,
-      Value<bool> lunch,
-      Value<bool> dinner,
+      Value<int> breakfast,
+      Value<int> lunch,
+      Value<int> dinner,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<int> rowid,
@@ -5361,9 +5352,9 @@ typedef $$MealEntriesTableUpdateCompanionBuilder =
       Value<String> messId,
       Value<String> memberId,
       Value<DateTime> date,
-      Value<bool> breakfast,
-      Value<bool> lunch,
-      Value<bool> dinner,
+      Value<int> breakfast,
+      Value<int> lunch,
+      Value<int> dinner,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -5427,17 +5418,17 @@ class $$MealEntriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get breakfast => $composableBuilder(
+  ColumnFilters<int> get breakfast => $composableBuilder(
     column: $table.breakfast,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get lunch => $composableBuilder(
+  ColumnFilters<int> get lunch => $composableBuilder(
     column: $table.lunch,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get dinner => $composableBuilder(
+  ColumnFilters<int> get dinner => $composableBuilder(
     column: $table.dinner,
     builder: (column) => ColumnFilters(column),
   );
@@ -5518,17 +5509,17 @@ class $$MealEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get breakfast => $composableBuilder(
+  ColumnOrderings<int> get breakfast => $composableBuilder(
     column: $table.breakfast,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get lunch => $composableBuilder(
+  ColumnOrderings<int> get lunch => $composableBuilder(
     column: $table.lunch,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get dinner => $composableBuilder(
+  ColumnOrderings<int> get dinner => $composableBuilder(
     column: $table.dinner,
     builder: (column) => ColumnOrderings(column),
   );
@@ -5605,13 +5596,13 @@ class $$MealEntriesTableAnnotationComposer
   GeneratedColumn<DateTime> get date =>
       $composableBuilder(column: $table.date, builder: (column) => column);
 
-  GeneratedColumn<bool> get breakfast =>
+  GeneratedColumn<int> get breakfast =>
       $composableBuilder(column: $table.breakfast, builder: (column) => column);
 
-  GeneratedColumn<bool> get lunch =>
+  GeneratedColumn<int> get lunch =>
       $composableBuilder(column: $table.lunch, builder: (column) => column);
 
-  GeneratedColumn<bool> get dinner =>
+  GeneratedColumn<int> get dinner =>
       $composableBuilder(column: $table.dinner, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
@@ -5699,9 +5690,9 @@ class $$MealEntriesTableTableManager
                 Value<String> messId = const Value.absent(),
                 Value<String> memberId = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
-                Value<bool> breakfast = const Value.absent(),
-                Value<bool> lunch = const Value.absent(),
-                Value<bool> dinner = const Value.absent(),
+                Value<int> breakfast = const Value.absent(),
+                Value<int> lunch = const Value.absent(),
+                Value<int> dinner = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -5723,9 +5714,9 @@ class $$MealEntriesTableTableManager
                 required String messId,
                 required String memberId,
                 required DateTime date,
-                Value<bool> breakfast = const Value.absent(),
-                Value<bool> lunch = const Value.absent(),
-                Value<bool> dinner = const Value.absent(),
+                Value<int> breakfast = const Value.absent(),
+                Value<int> lunch = const Value.absent(),
+                Value<int> dinner = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),

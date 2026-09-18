@@ -13,9 +13,11 @@ class MealEntries extends Table {
   TextColumn get messId => text().references(Messes, #id)();
   TextColumn get memberId => text().references(Members, #id)();
   DateTimeColumn get date => dateTime()();
-  BoolColumn get breakfast => boolean().withDefault(const Constant(false))();
-  BoolColumn get lunch => boolean().withDefault(const Constant(false))();
-  BoolColumn get dinner => boolean().withDefault(const Constant(false))();
+  // A meal count rather than a plain yes/no so a slot can hold 2+ when an
+  // extra/guest meal is recorded under this member.
+  IntColumn get breakfast => integer().withDefault(const Constant(0))();
+  IntColumn get lunch => integer().withDefault(const Constant(0))();
+  IntColumn get dinner => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 

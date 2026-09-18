@@ -38,7 +38,7 @@ class AppDatabase extends _$AppDatabase {
   // changes. Future sync-metadata columns (syncStatus, remoteId, ...) will
   // land as additive migrations here rather than a rewrite.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -56,6 +56,13 @@ class AppDatabase extends _$AppDatabase {
             newColumns: [expenses.bazarList],
           ),
         );
+      }
+      if (from < 3) {
+        // mealEntries.breakfast/lunch/dinner: bool -> int (a meal count, so
+        // a slot can be 2+ for an extra/guest meal). SQLite has no native
+        // boolean type — Drift's boolean() columns are already stored as
+        // plain 0/1 INTEGER — so existing data needs no conversion, only
+        // the Dart-side column type changes. No SQL step needed here.
       }
     },
     beforeOpen: (details) async {
