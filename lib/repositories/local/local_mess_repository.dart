@@ -17,6 +17,9 @@ class LocalMessRepository implements MessRepository {
     name: row.name,
     currencyCode: row.currencyCode,
     currencySymbol: row.currencySymbol,
+    trackBreakfast: row.trackBreakfast,
+    trackLunch: row.trackLunch,
+    trackDinner: row.trackDinner,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   );
@@ -68,6 +71,9 @@ class LocalMessRepository implements MessRepository {
         name: Value(mess.name),
         currencyCode: Value(mess.currencyCode),
         currencySymbol: Value(mess.currencySymbol),
+        trackBreakfast: Value(mess.trackBreakfast),
+        trackLunch: Value(mess.trackLunch),
+        trackDinner: Value(mess.trackDinner),
         updatedAt: Value(DateTime.now()),
       ),
     );

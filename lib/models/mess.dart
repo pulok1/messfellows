@@ -6,6 +6,9 @@ class Mess {
   final String name;
   final String currencyCode;
   final String currencySymbol;
+  final bool trackBreakfast;
+  final bool trackLunch;
+  final bool trackDinner;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -14,6 +17,9 @@ class Mess {
     required this.name,
     required this.currencyCode,
     required this.currencySymbol,
+    this.trackBreakfast = true,
+    this.trackLunch = true,
+    this.trackDinner = true,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -22,6 +28,9 @@ class Mess {
     String? name,
     String? currencyCode,
     String? currencySymbol,
+    bool? trackBreakfast,
+    bool? trackLunch,
+    bool? trackDinner,
     DateTime? updatedAt,
   }) {
     return Mess(
@@ -29,6 +38,9 @@ class Mess {
       name: name ?? this.name,
       currencyCode: currencyCode ?? this.currencyCode,
       currencySymbol: currencySymbol ?? this.currencySymbol,
+      trackBreakfast: trackBreakfast ?? this.trackBreakfast,
+      trackLunch: trackLunch ?? this.trackLunch,
+      trackDinner: trackDinner ?? this.trackDinner,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
