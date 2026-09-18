@@ -148,6 +148,9 @@ class BackupService {
     'name': row.name,
     'currencyCode': row.currencyCode,
     'currencySymbol': row.currencySymbol,
+    'trackBreakfast': row.trackBreakfast,
+    'trackLunch': row.trackLunch,
+    'trackDinner': row.trackDinner,
     'createdAt': row.createdAt.toIso8601String(),
     'updatedAt': row.updatedAt.toIso8601String(),
   };
@@ -158,6 +161,11 @@ class BackupService {
         name: json['name'] as String,
         currencyCode: Value(json['currencyCode'] as String),
         currencySymbol: Value(json['currencySymbol'] as String),
+        // Older backups predate these fields; default to true so a
+        // restored mess still shows all three meal slots.
+        trackBreakfast: Value(json['trackBreakfast'] as bool? ?? true),
+        trackLunch: Value(json['trackLunch'] as bool? ?? true),
+        trackDinner: Value(json['trackDinner'] as bool? ?? true),
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
       );

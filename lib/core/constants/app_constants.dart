@@ -7,7 +7,7 @@ class AppConstants {
 
   /// Bumped whenever the JSON backup format changes shape; import rejects
   /// files from a newer version than this app understands.
-  static const int backupFormatVersion = 3;
+  static const int backupFormatVersion = 4;
 
   static const String defaultCurrencySymbol = '৳';
   static const String defaultCurrencyCode = 'BDT';
