@@ -53,6 +53,17 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
+      // Without this, BottomAppBar falls back to colorScheme.surface, i.e.
+      // exactly the scaffold background — the bottom nav would be visually
+      // indistinguishable from the page body. Matching PageHeaderCard's
+      // surfaceContainerHigh here makes the header and bottom nav read as
+      // one consistent "chrome" layer, clearly separated from content.
+      bottomAppBarTheme: BottomAppBarThemeData(
+        color: colorScheme.surfaceContainerHigh,
+        surfaceTintColor: Colors.transparent,
+        elevation: 3,
+        shadowColor: colorScheme.shadow.withValues(alpha: 0.08),
+      ),
       cardTheme: CardThemeData(
         elevation: 0,
         color: colorScheme.surfaceContainerHigh,
