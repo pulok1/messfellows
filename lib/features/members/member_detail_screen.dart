@@ -11,6 +11,7 @@ import '../../providers/month_calculation_provider.dart';
 import '../../providers/payment_providers.dart';
 import '../payments/add_edit_payment_screen.dart';
 import '../shared/widgets/balance_label.dart';
+import '../shared/widgets/expandable_text.dart';
 import '../shared/widgets/labeled_value_row.dart';
 import '../shared/widgets/page_header_card.dart';
 import '../shared/widgets/section_header.dart';
@@ -128,7 +129,7 @@ class MemberDetailScreen extends ConsumerWidget {
                                     bottom: AppSpacing.sm,
                                   ),
                                   child: ListTile(
-                                    title: Text(
+                                    title: ExpandableText(
                                       expense.bazarList,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w600,

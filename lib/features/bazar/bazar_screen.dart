@@ -12,6 +12,7 @@ import '../../providers/expense_providers.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/selection_providers.dart';
 import '../shared/widgets/empty_state.dart';
+import '../shared/widgets/expandable_text.dart';
 import '../shared/widgets/page_header_card.dart';
 import 'add_edit_expense_dialog.dart';
 import 'widgets/month_selector_bar.dart';
@@ -345,7 +346,7 @@ class _ExpenseTile extends ConsumerWidget {
           messId: messId,
           existing: expense,
         ),
-        title: Text(
+        title: ExpandableText(
           expense.bazarList,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
