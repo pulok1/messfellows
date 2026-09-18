@@ -1607,12 +1607,12 @@ class $ExpensesTable extends Expenses
       'REFERENCES members (id)',
     ),
   );
-  static const VerificationMeta _categoryMeta = const VerificationMeta(
-    'category',
+  static const VerificationMeta _bazarListMeta = const VerificationMeta(
+    'bazarList',
   );
   @override
-  late final GeneratedColumn<String> category = GeneratedColumn<String>(
-    'category',
+  late final GeneratedColumn<String> bazarList = GeneratedColumn<String>(
+    'bazar_list',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -1656,7 +1656,7 @@ class $ExpensesTable extends Expenses
     date,
     amountMinorUnits,
     paidByMemberId,
-    category,
+    bazarList,
     note,
     createdAt,
     updatedAt,
@@ -1716,13 +1716,13 @@ class $ExpensesTable extends Expenses
     } else if (isInserting) {
       context.missing(_paidByMemberIdMeta);
     }
-    if (data.containsKey('category')) {
+    if (data.containsKey('bazar_list')) {
       context.handle(
-        _categoryMeta,
-        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+        _bazarListMeta,
+        bazarList.isAcceptableOrUnknown(data['bazar_list']!, _bazarListMeta),
       );
     } else if (isInserting) {
-      context.missing(_categoryMeta);
+      context.missing(_bazarListMeta);
     }
     if (data.containsKey('note')) {
       context.handle(
@@ -1775,9 +1775,9 @@ class $ExpensesTable extends Expenses
         DriftSqlType.string,
         data['${effectivePrefix}paid_by_member_id'],
       )!,
-      category: attachedDatabase.typeMapping.read(
+      bazarList: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}category'],
+        data['${effectivePrefix}bazar_list'],
       )!,
       note: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -1806,7 +1806,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   final DateTime date;
   final int amountMinorUnits;
   final String paidByMemberId;
-  final String category;
+  final String bazarList;
   final String? note;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -1816,7 +1816,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     required this.date,
     required this.amountMinorUnits,
     required this.paidByMemberId,
-    required this.category,
+    required this.bazarList,
     this.note,
     required this.createdAt,
     required this.updatedAt,
@@ -1829,7 +1829,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     map['date'] = Variable<DateTime>(date);
     map['amount_minor_units'] = Variable<int>(amountMinorUnits);
     map['paid_by_member_id'] = Variable<String>(paidByMemberId);
-    map['category'] = Variable<String>(category);
+    map['bazar_list'] = Variable<String>(bazarList);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
@@ -1845,7 +1845,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       date: Value(date),
       amountMinorUnits: Value(amountMinorUnits),
       paidByMemberId: Value(paidByMemberId),
-      category: Value(category),
+      bazarList: Value(bazarList),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -1863,7 +1863,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       date: serializer.fromJson<DateTime>(json['date']),
       amountMinorUnits: serializer.fromJson<int>(json['amountMinorUnits']),
       paidByMemberId: serializer.fromJson<String>(json['paidByMemberId']),
-      category: serializer.fromJson<String>(json['category']),
+      bazarList: serializer.fromJson<String>(json['bazarList']),
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -1878,7 +1878,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       'date': serializer.toJson<DateTime>(date),
       'amountMinorUnits': serializer.toJson<int>(amountMinorUnits),
       'paidByMemberId': serializer.toJson<String>(paidByMemberId),
-      'category': serializer.toJson<String>(category),
+      'bazarList': serializer.toJson<String>(bazarList),
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -1891,7 +1891,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     DateTime? date,
     int? amountMinorUnits,
     String? paidByMemberId,
-    String? category,
+    String? bazarList,
     Value<String?> note = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -1901,7 +1901,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     date: date ?? this.date,
     amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
     paidByMemberId: paidByMemberId ?? this.paidByMemberId,
-    category: category ?? this.category,
+    bazarList: bazarList ?? this.bazarList,
     note: note.present ? note.value : this.note,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -1917,7 +1917,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       paidByMemberId: data.paidByMemberId.present
           ? data.paidByMemberId.value
           : this.paidByMemberId,
-      category: data.category.present ? data.category.value : this.category,
+      bazarList: data.bazarList.present ? data.bazarList.value : this.bazarList,
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1932,7 +1932,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           ..write('date: $date, ')
           ..write('amountMinorUnits: $amountMinorUnits, ')
           ..write('paidByMemberId: $paidByMemberId, ')
-          ..write('category: $category, ')
+          ..write('bazarList: $bazarList, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -1947,7 +1947,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     date,
     amountMinorUnits,
     paidByMemberId,
-    category,
+    bazarList,
     note,
     createdAt,
     updatedAt,
@@ -1961,7 +1961,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           other.date == this.date &&
           other.amountMinorUnits == this.amountMinorUnits &&
           other.paidByMemberId == this.paidByMemberId &&
-          other.category == this.category &&
+          other.bazarList == this.bazarList &&
           other.note == this.note &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -1973,7 +1973,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   final Value<DateTime> date;
   final Value<int> amountMinorUnits;
   final Value<String> paidByMemberId;
-  final Value<String> category;
+  final Value<String> bazarList;
   final Value<String?> note;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -1984,7 +1984,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     this.date = const Value.absent(),
     this.amountMinorUnits = const Value.absent(),
     this.paidByMemberId = const Value.absent(),
-    this.category = const Value.absent(),
+    this.bazarList = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1996,7 +1996,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     required DateTime date,
     required int amountMinorUnits,
     required String paidByMemberId,
-    required String category,
+    required String bazarList,
     this.note = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
@@ -2006,7 +2006,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
        date = Value(date),
        amountMinorUnits = Value(amountMinorUnits),
        paidByMemberId = Value(paidByMemberId),
-       category = Value(category),
+       bazarList = Value(bazarList),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<ExpenseRow> custom({
@@ -2015,7 +2015,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Expression<DateTime>? date,
     Expression<int>? amountMinorUnits,
     Expression<String>? paidByMemberId,
-    Expression<String>? category,
+    Expression<String>? bazarList,
     Expression<String>? note,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -2027,7 +2027,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       if (date != null) 'date': date,
       if (amountMinorUnits != null) 'amount_minor_units': amountMinorUnits,
       if (paidByMemberId != null) 'paid_by_member_id': paidByMemberId,
-      if (category != null) 'category': category,
+      if (bazarList != null) 'bazar_list': bazarList,
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -2041,7 +2041,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Value<DateTime>? date,
     Value<int>? amountMinorUnits,
     Value<String>? paidByMemberId,
-    Value<String>? category,
+    Value<String>? bazarList,
     Value<String?>? note,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -2053,7 +2053,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       date: date ?? this.date,
       amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
       paidByMemberId: paidByMemberId ?? this.paidByMemberId,
-      category: category ?? this.category,
+      bazarList: bazarList ?? this.bazarList,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -2079,8 +2079,8 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     if (paidByMemberId.present) {
       map['paid_by_member_id'] = Variable<String>(paidByMemberId.value);
     }
-    if (category.present) {
-      map['category'] = Variable<String>(category.value);
+    if (bazarList.present) {
+      map['bazar_list'] = Variable<String>(bazarList.value);
     }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
@@ -2105,7 +2105,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
           ..write('date: $date, ')
           ..write('amountMinorUnits: $amountMinorUnits, ')
           ..write('paidByMemberId: $paidByMemberId, ')
-          ..write('category: $category, ')
+          ..write('bazarList: $bazarList, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -5823,7 +5823,7 @@ typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   required DateTime date,
   required int amountMinorUnits,
   required String paidByMemberId,
-  required String category,
+  required String bazarList,
   Value<String?> note,
   required DateTime createdAt,
   required DateTime updatedAt,
@@ -5835,7 +5835,7 @@ typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
   Value<DateTime> date,
   Value<int> amountMinorUnits,
   Value<String> paidByMemberId,
-  Value<String> category,
+  Value<String> bazarList,
   Value<String?> note,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -5905,8 +5905,8 @@ class $$ExpensesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get category => $composableBuilder(
-    column: $table.category,
+  ColumnFilters<String> get bazarList => $composableBuilder(
+    column: $table.bazarList,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5996,8 +5996,8 @@ class $$ExpensesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get category => $composableBuilder(
-    column: $table.category,
+  ColumnOrderings<String> get bazarList => $composableBuilder(
+    column: $table.bazarList,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6083,8 +6083,8 @@ class $$ExpensesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get category =>
-      $composableBuilder(column: $table.category, builder: (column) => column);
+  GeneratedColumn<String> get bazarList =>
+      $composableBuilder(column: $table.bazarList, builder: (column) => column);
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
@@ -6175,7 +6175,7 @@ class $$ExpensesTableTableManager
                 Value<DateTime> date = const Value.absent(),
                 Value<int> amountMinorUnits = const Value.absent(),
                 Value<String> paidByMemberId = const Value.absent(),
-                Value<String> category = const Value.absent(),
+                Value<String> bazarList = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -6186,7 +6186,7 @@ class $$ExpensesTableTableManager
                 date: date,
                 amountMinorUnits: amountMinorUnits,
                 paidByMemberId: paidByMemberId,
-                category: category,
+                bazarList: bazarList,
                 note: note,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -6199,7 +6199,7 @@ class $$ExpensesTableTableManager
                 required DateTime date,
                 required int amountMinorUnits,
                 required String paidByMemberId,
-                required String category,
+                required String bazarList,
                 Value<String?> note = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
@@ -6210,7 +6210,7 @@ class $$ExpensesTableTableManager
                 date: date,
                 amountMinorUnits: amountMinorUnits,
                 paidByMemberId: paidByMemberId,
-                category: category,
+                bazarList: bazarList,
                 note: note,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

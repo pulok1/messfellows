@@ -38,7 +38,7 @@ class AppDatabase extends _$AppDatabase {
   // changes. Future sync-metadata columns (syncStatus, remoteId, ...) will
   // land as additive migrations here rather than a rewrite.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -46,7 +46,17 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      // No migrations yet — schemaVersion 1 is the first release.
+      if (from < 2) {
+        // expenses.category (required quick-pick text) replaced by
+        // expenses.bazarList (a free-text list of what was bought).
+        await m.alterTable(
+          TableMigration(
+            expenses,
+            columnTransformer: {expenses.bazarList: const Constant('')},
+            newColumns: [expenses.bazarList],
+          ),
+        );
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');

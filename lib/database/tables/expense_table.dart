@@ -13,7 +13,7 @@ class Expenses extends Table {
   DateTimeColumn get date => dateTime()();
   IntColumn get amountMinorUnits => integer()();
   TextColumn get paidByMemberId => text().references(Members, #id)();
-  TextColumn get category => text()();
+  TextColumn get bazarList => text()();
   TextColumn get note => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
