@@ -14,6 +14,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../../models/mess.dart';
 import '../../providers/backup_provider.dart';
 import '../../providers/locale_provider.dart';
+import '../../providers/mess_provider.dart';
 import '../../providers/repository_providers.dart';
 import '../../providers/theme_mode_provider.dart';
 import '../members/members_screen.dart';
@@ -36,9 +37,16 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isBusy = false;
 
+  // widget.mess is a one-time snapshot from whoever pushed this route —
+  // it never updates after that. Reading the live value from
+  // currentMessProvider instead means a toggle can't be built on top of an
+  // already-stale copy and silently undo an earlier change.
+  Mess get _mess => ref.read(currentMessProvider).value ?? widget.mess;
+
   Future<void> _renameMess() async {
     final l10n = AppLocalizations.of(context);
-    final controller = TextEditingController(text: widget.mess.name);
+    final mess = _mess;
+    final controller = TextEditingController(text: mess.name);
     final newName = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -56,12 +64,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
-    if (newName == null || newName.isEmpty || newName == widget.mess.name) {
+    if (newName == null || newName.isEmpty || newName == mess.name) {
       return;
     }
-    await ref
-        .read(messRepositoryProvider)
-        .updateMess(widget.mess.copyWith(name: newName));
+    await ref.read(messRepositoryProvider).updateMess(mess.copyWith(name: newName));
   }
 
   Future<void> _setMealTracking({
@@ -69,7 +75,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     bool? trackLunch,
     bool? trackDinner,
   }) async {
-    final updated = widget.mess.copyWith(
+    final updated = _mess.copyWith(
       trackBreakfast: trackBreakfast,
       trackLunch: trackLunch,
       trackDinner: trackDinner,
@@ -271,6 +277,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final mess = ref.watch(currentMessProvider).value ?? widget.mess;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -302,7 +309,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ListTile(
                             leading: const Icon(Icons.edit_outlined),
                             title: Text(l10n.messNameLabel),
-                            subtitle: Text(widget.mess.name),
+                            subtitle: Text(mess.name),
                             onTap: _renameMess,
                           ),
                           const Divider(height: 1, indent: 56),
@@ -310,7 +317,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             leading: const Icon(Icons.currency_exchange),
                             title: Text(l10n.currencyListTile),
                             subtitle: Text(
-                              '${widget.mess.currencySymbol} ${widget.mess.currencyCode}',
+                              '${mess.currencySymbol} ${mess.currencyCode}',
                             ),
                           ),
                           const Divider(height: 1, indent: 56),
@@ -320,7 +327,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) =>
-                                    MembersScreen(messId: widget.mess.id),
+                                    MembersScreen(messId: mess.id),
                               ),
                             ),
                           ),
@@ -375,7 +382,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           SwitchListTile(
                             secondary: const Icon(Icons.wb_twilight),
                             title: Text(l10n.breakfastLabel),
-                            value: widget.mess.trackBreakfast,
+                            value: mess.trackBreakfast,
                             onChanged: (value) =>
                                 _setMealTracking(trackBreakfast: value),
                           ),
@@ -383,7 +390,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           SwitchListTile(
                             secondary: const Icon(Icons.wb_sunny_outlined),
                             title: Text(l10n.lunchLabel),
-                            value: widget.mess.trackLunch,
+                            value: mess.trackLunch,
                             onChanged: (value) =>
                                 _setMealTracking(trackLunch: value),
                           ),
@@ -391,7 +398,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           SwitchListTile(
                             secondary: const Icon(Icons.nightlight_outlined),
                             title: Text(l10n.dinnerLabel),
-                            value: widget.mess.trackDinner,
+                            value: mess.trackDinner,
                             onChanged: (value) =>
                                 _setMealTracking(trackDinner: value),
                           ),
