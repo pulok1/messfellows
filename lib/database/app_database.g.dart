@@ -54,6 +54,51 @@ class $MessesTable extends Messes with TableInfo<$MessesTable, MessRow> {
     requiredDuringInsert: false,
     defaultValue: const Constant('৳'),
   );
+  static const VerificationMeta _trackBreakfastMeta = const VerificationMeta(
+    'trackBreakfast',
+  );
+  @override
+  late final GeneratedColumn<bool> trackBreakfast = GeneratedColumn<bool>(
+    'track_breakfast',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("track_breakfast" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _trackLunchMeta = const VerificationMeta(
+    'trackLunch',
+  );
+  @override
+  late final GeneratedColumn<bool> trackLunch = GeneratedColumn<bool>(
+    'track_lunch',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("track_lunch" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _trackDinnerMeta = const VerificationMeta(
+    'trackDinner',
+  );
+  @override
+  late final GeneratedColumn<bool> trackDinner = GeneratedColumn<bool>(
+    'track_dinner',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("track_dinner" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -82,6 +127,9 @@ class $MessesTable extends Messes with TableInfo<$MessesTable, MessRow> {
     name,
     currencyCode,
     currencySymbol,
+    trackBreakfast,
+    trackLunch,
+    trackDinner,
     createdAt,
     updatedAt,
   ];
@@ -128,6 +176,30 @@ class $MessesTable extends Messes with TableInfo<$MessesTable, MessRow> {
         ),
       );
     }
+    if (data.containsKey('track_breakfast')) {
+      context.handle(
+        _trackBreakfastMeta,
+        trackBreakfast.isAcceptableOrUnknown(
+          data['track_breakfast']!,
+          _trackBreakfastMeta,
+        ),
+      );
+    }
+    if (data.containsKey('track_lunch')) {
+      context.handle(
+        _trackLunchMeta,
+        trackLunch.isAcceptableOrUnknown(data['track_lunch']!, _trackLunchMeta),
+      );
+    }
+    if (data.containsKey('track_dinner')) {
+      context.handle(
+        _trackDinnerMeta,
+        trackDinner.isAcceptableOrUnknown(
+          data['track_dinner']!,
+          _trackDinnerMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -169,6 +241,18 @@ class $MessesTable extends Messes with TableInfo<$MessesTable, MessRow> {
         DriftSqlType.string,
         data['${effectivePrefix}currency_symbol'],
       )!,
+      trackBreakfast: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}track_breakfast'],
+      )!,
+      trackLunch: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}track_lunch'],
+      )!,
+      trackDinner: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}track_dinner'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -191,6 +275,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
   final String name;
   final String currencyCode;
   final String currencySymbol;
+  final bool trackBreakfast;
+  final bool trackLunch;
+  final bool trackDinner;
   final DateTime createdAt;
   final DateTime updatedAt;
   const MessRow({
@@ -198,6 +285,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
     required this.name,
     required this.currencyCode,
     required this.currencySymbol,
+    required this.trackBreakfast,
+    required this.trackLunch,
+    required this.trackDinner,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -208,6 +298,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
     map['name'] = Variable<String>(name);
     map['currency_code'] = Variable<String>(currencyCode);
     map['currency_symbol'] = Variable<String>(currencySymbol);
+    map['track_breakfast'] = Variable<bool>(trackBreakfast);
+    map['track_lunch'] = Variable<bool>(trackLunch);
+    map['track_dinner'] = Variable<bool>(trackDinner);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -219,6 +312,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
       name: Value(name),
       currencyCode: Value(currencyCode),
       currencySymbol: Value(currencySymbol),
+      trackBreakfast: Value(trackBreakfast),
+      trackLunch: Value(trackLunch),
+      trackDinner: Value(trackDinner),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -234,6 +330,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
       name: serializer.fromJson<String>(json['name']),
       currencyCode: serializer.fromJson<String>(json['currencyCode']),
       currencySymbol: serializer.fromJson<String>(json['currencySymbol']),
+      trackBreakfast: serializer.fromJson<bool>(json['trackBreakfast']),
+      trackLunch: serializer.fromJson<bool>(json['trackLunch']),
+      trackDinner: serializer.fromJson<bool>(json['trackDinner']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -246,6 +345,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
       'name': serializer.toJson<String>(name),
       'currencyCode': serializer.toJson<String>(currencyCode),
       'currencySymbol': serializer.toJson<String>(currencySymbol),
+      'trackBreakfast': serializer.toJson<bool>(trackBreakfast),
+      'trackLunch': serializer.toJson<bool>(trackLunch),
+      'trackDinner': serializer.toJson<bool>(trackDinner),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -256,6 +358,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
     String? name,
     String? currencyCode,
     String? currencySymbol,
+    bool? trackBreakfast,
+    bool? trackLunch,
+    bool? trackDinner,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => MessRow(
@@ -263,6 +368,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
     name: name ?? this.name,
     currencyCode: currencyCode ?? this.currencyCode,
     currencySymbol: currencySymbol ?? this.currencySymbol,
+    trackBreakfast: trackBreakfast ?? this.trackBreakfast,
+    trackLunch: trackLunch ?? this.trackLunch,
+    trackDinner: trackDinner ?? this.trackDinner,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -276,6 +384,15 @@ class MessRow extends DataClass implements Insertable<MessRow> {
       currencySymbol: data.currencySymbol.present
           ? data.currencySymbol.value
           : this.currencySymbol,
+      trackBreakfast: data.trackBreakfast.present
+          ? data.trackBreakfast.value
+          : this.trackBreakfast,
+      trackLunch: data.trackLunch.present
+          ? data.trackLunch.value
+          : this.trackLunch,
+      trackDinner: data.trackDinner.present
+          ? data.trackDinner.value
+          : this.trackDinner,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -288,6 +405,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
           ..write('name: $name, ')
           ..write('currencyCode: $currencyCode, ')
           ..write('currencySymbol: $currencySymbol, ')
+          ..write('trackBreakfast: $trackBreakfast, ')
+          ..write('trackLunch: $trackLunch, ')
+          ..write('trackDinner: $trackDinner, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -295,8 +415,17 @@ class MessRow extends DataClass implements Insertable<MessRow> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, currencyCode, currencySymbol, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    currencyCode,
+    currencySymbol,
+    trackBreakfast,
+    trackLunch,
+    trackDinner,
+    createdAt,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -305,6 +434,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
           other.name == this.name &&
           other.currencyCode == this.currencyCode &&
           other.currencySymbol == this.currencySymbol &&
+          other.trackBreakfast == this.trackBreakfast &&
+          other.trackLunch == this.trackLunch &&
+          other.trackDinner == this.trackDinner &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -314,6 +446,9 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
   final Value<String> name;
   final Value<String> currencyCode;
   final Value<String> currencySymbol;
+  final Value<bool> trackBreakfast;
+  final Value<bool> trackLunch;
+  final Value<bool> trackDinner;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -322,6 +457,9 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
     this.name = const Value.absent(),
     this.currencyCode = const Value.absent(),
     this.currencySymbol = const Value.absent(),
+    this.trackBreakfast = const Value.absent(),
+    this.trackLunch = const Value.absent(),
+    this.trackDinner = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -331,6 +469,9 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
     required String name,
     this.currencyCode = const Value.absent(),
     this.currencySymbol = const Value.absent(),
+    this.trackBreakfast = const Value.absent(),
+    this.trackLunch = const Value.absent(),
+    this.trackDinner = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
@@ -343,6 +484,9 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
     Expression<String>? name,
     Expression<String>? currencyCode,
     Expression<String>? currencySymbol,
+    Expression<bool>? trackBreakfast,
+    Expression<bool>? trackLunch,
+    Expression<bool>? trackDinner,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -352,6 +496,9 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
       if (name != null) 'name': name,
       if (currencyCode != null) 'currency_code': currencyCode,
       if (currencySymbol != null) 'currency_symbol': currencySymbol,
+      if (trackBreakfast != null) 'track_breakfast': trackBreakfast,
+      if (trackLunch != null) 'track_lunch': trackLunch,
+      if (trackDinner != null) 'track_dinner': trackDinner,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -363,6 +510,9 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
     Value<String>? name,
     Value<String>? currencyCode,
     Value<String>? currencySymbol,
+    Value<bool>? trackBreakfast,
+    Value<bool>? trackLunch,
+    Value<bool>? trackDinner,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -372,6 +522,9 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
       name: name ?? this.name,
       currencyCode: currencyCode ?? this.currencyCode,
       currencySymbol: currencySymbol ?? this.currencySymbol,
+      trackBreakfast: trackBreakfast ?? this.trackBreakfast,
+      trackLunch: trackLunch ?? this.trackLunch,
+      trackDinner: trackDinner ?? this.trackDinner,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -393,6 +546,15 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
     if (currencySymbol.present) {
       map['currency_symbol'] = Variable<String>(currencySymbol.value);
     }
+    if (trackBreakfast.present) {
+      map['track_breakfast'] = Variable<bool>(trackBreakfast.value);
+    }
+    if (trackLunch.present) {
+      map['track_lunch'] = Variable<bool>(trackLunch.value);
+    }
+    if (trackDinner.present) {
+      map['track_dinner'] = Variable<bool>(trackDinner.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -412,6 +574,9 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
           ..write('name: $name, ')
           ..write('currencyCode: $currencyCode, ')
           ..write('currencySymbol: $currencySymbol, ')
+          ..write('trackBreakfast: $trackBreakfast, ')
+          ..write('trackLunch: $trackLunch, ')
+          ..write('trackDinner: $trackDinner, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -3843,6 +4008,9 @@ typedef $$MessesTableCreateCompanionBuilder = MessesCompanion Function({
   required String name,
   Value<String> currencyCode,
   Value<String> currencySymbol,
+  Value<bool> trackBreakfast,
+  Value<bool> trackLunch,
+  Value<bool> trackDinner,
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<int> rowid,
@@ -3852,6 +4020,9 @@ typedef $$MessesTableUpdateCompanionBuilder = MessesCompanion Function({
   Value<String> name,
   Value<String> currencyCode,
   Value<String> currencySymbol,
+  Value<bool> trackBreakfast,
+  Value<bool> trackLunch,
+  Value<bool> trackDinner,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -3985,6 +4156,21 @@ class $$MessesTableFilterComposer
 
   ColumnFilters<String> get currencySymbol => $composableBuilder(
     column: $table.currencySymbol,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get trackBreakfast => $composableBuilder(
+    column: $table.trackBreakfast,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get trackLunch => $composableBuilder(
+    column: $table.trackLunch,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get trackDinner => $composableBuilder(
+    column: $table.trackDinner,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4153,6 +4339,21 @@ class $$MessesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get trackBreakfast => $composableBuilder(
+    column: $table.trackBreakfast,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get trackLunch => $composableBuilder(
+    column: $table.trackLunch,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get trackDinner => $composableBuilder(
+    column: $table.trackDinner,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -4186,6 +4387,21 @@ class $$MessesTableAnnotationComposer
 
   GeneratedColumn<String> get currencySymbol => $composableBuilder(
     column: $table.currencySymbol,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get trackBreakfast => $composableBuilder(
+    column: $table.trackBreakfast,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get trackLunch => $composableBuilder(
+    column: $table.trackLunch,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get trackDinner => $composableBuilder(
+    column: $table.trackDinner,
     builder: (column) => column,
   );
 
@@ -4360,6 +4576,9 @@ class $$MessesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> currencyCode = const Value.absent(),
                 Value<String> currencySymbol = const Value.absent(),
+                Value<bool> trackBreakfast = const Value.absent(),
+                Value<bool> trackLunch = const Value.absent(),
+                Value<bool> trackDinner = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -4368,6 +4587,9 @@ class $$MessesTableTableManager
                 name: name,
                 currencyCode: currencyCode,
                 currencySymbol: currencySymbol,
+                trackBreakfast: trackBreakfast,
+                trackLunch: trackLunch,
+                trackDinner: trackDinner,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -4378,6 +4600,9 @@ class $$MessesTableTableManager
                 required String name,
                 Value<String> currencyCode = const Value.absent(),
                 Value<String> currencySymbol = const Value.absent(),
+                Value<bool> trackBreakfast = const Value.absent(),
+                Value<bool> trackLunch = const Value.absent(),
+                Value<bool> trackDinner = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
@@ -4386,6 +4611,9 @@ class $$MessesTableTableManager
                 name: name,
                 currencyCode: currencyCode,
                 currencySymbol: currencySymbol,
+                trackBreakfast: trackBreakfast,
+                trackLunch: trackLunch,
+                trackDinner: trackDinner,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

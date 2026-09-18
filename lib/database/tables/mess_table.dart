@@ -13,6 +13,14 @@ class Messes extends Table {
   TextColumn get name => text().withLength(min: 1, max: 100)();
   TextColumn get currencyCode => text().withDefault(const Constant('BDT'))();
   TextColumn get currencySymbol => text().withDefault(const Constant('৳'))();
+
+  // Not every mess serves all three meals (many only do lunch & dinner) —
+  // these decide which slots the meal tracker shows. Default true so
+  // existing messes keep seeing all three exactly as before.
+  BoolColumn get trackBreakfast => boolean().withDefault(const Constant(true))();
+  BoolColumn get trackLunch => boolean().withDefault(const Constant(true))();
+  BoolColumn get trackDinner => boolean().withDefault(const Constant(true))();
+
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 

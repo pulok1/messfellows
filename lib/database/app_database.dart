@@ -38,7 +38,7 @@ class AppDatabase extends _$AppDatabase {
   // changes. Future sync-metadata columns (syncStatus, remoteId, ...) will
   // land as additive migrations here rather than a rewrite.
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -63,6 +63,26 @@ class AppDatabase extends _$AppDatabase {
         // boolean type — Drift's boolean() columns are already stored as
         // plain 0/1 INTEGER — so existing data needs no conversion, only
         // the Dart-side column type changes. No SQL step needed here.
+      }
+      if (from < 4) {
+        // messes gains per-mess toggles for which meal slots it tracks (not
+        // every mess serves breakfast). Default true so existing messes
+        // keep showing all three slots exactly as before.
+        await m.alterTable(
+          TableMigration(
+            messes,
+            columnTransformer: {
+              messes.trackBreakfast: const Constant(true),
+              messes.trackLunch: const Constant(true),
+              messes.trackDinner: const Constant(true),
+            },
+            newColumns: [
+              messes.trackBreakfast,
+              messes.trackLunch,
+              messes.trackDinner,
+            ],
+          ),
+        );
       }
     },
     beforeOpen: (details) async {
