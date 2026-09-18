@@ -46,6 +46,11 @@ dev_dependencies:
   drift_dev: ^2.35.0
   build_runner: ^2.16.1
 
+  # Generate the app icon and splash screen from assets/branding/ — see
+  # flutter_launcher_icons.yaml and flutter_native_splash.yaml.
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
+
 flutter:
   uses-material-design: true
   generate: true
