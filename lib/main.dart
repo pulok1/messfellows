@@ -7,6 +7,7 @@ import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'providers/locale_provider.dart';
+import 'providers/theme_mode_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,12 +15,17 @@ void main() async {
   // loaded before any DateFormat call — see core/utils/localized_date.dart.
   await Future.wait([initializeDateFormatting('en'), initializeDateFormatting('bn')]);
   final savedLocale = await loadSavedLocale();
+  final savedThemeMode = await loadSavedThemeMode();
 
   runApp(
     ProviderScope(
       overrides: [
         if (savedLocale != null)
           localeProvider.overrideWith(() => LocaleNotifier(savedLocale)),
+        if (savedThemeMode != null)
+          themeModeProvider.overrideWith(
+            () => AppThemeModeNotifier(savedThemeMode),
+          ),
       ],
       child: const MessFellowsApp(),
     ),
@@ -32,12 +38,14 @@ class MessFellowsApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
+      themeMode: themeMode,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
