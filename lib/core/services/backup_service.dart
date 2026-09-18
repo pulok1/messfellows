@@ -213,12 +213,20 @@ class BackupService {
         messId: json['messId'] as String,
         memberId: json['memberId'] as String,
         date: DateTime.parse(json['date'] as String),
-        breakfast: Value(json['breakfast'] as bool),
-        lunch: Value(json['lunch'] as bool),
-        dinner: Value(json['dinner'] as bool),
+        // Older backups stored these as bool; coerce so they still import.
+        breakfast: Value(_mealCount(json['breakfast'])),
+        lunch: Value(_mealCount(json['lunch'])),
+        dinner: Value(_mealCount(json['dinner'])),
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
       );
+
+  /// Meal counts were exported as bool before `backupFormatVersion` 3.
+  int _mealCount(Object? value) {
+    if (value is bool) return value ? 1 : 0;
+    if (value is int) return value;
+    return 0;
+  }
 
   // --- expenses ---
 
