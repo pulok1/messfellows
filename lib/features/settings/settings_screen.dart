@@ -14,6 +14,7 @@ import '../../models/mess.dart';
 import '../../providers/backup_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/repository_providers.dart';
+import '../../providers/theme_mode_provider.dart';
 import '../members/members_screen.dart';
 import '../shared/widgets/confirm_dialog.dart';
 import '../shared/widgets/page_header_card.dart';
@@ -93,6 +94,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       await ref.read(localeProvider.notifier).setLocale(picked);
     }
   }
+
+  Future<void> _pickThemeMode() async {
+    final l10n = AppLocalizations.of(context);
+    final current = ref.read(themeModeProvider);
+    final picked = await showDialog<ThemeMode>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(l10n.themeLabel),
+        children: [
+          RadioGroup<ThemeMode>(
+            groupValue: current,
+            onChanged: (value) => Navigator.of(context).pop(value),
+            child: Column(
+              children: [
+                RadioListTile<ThemeMode>(
+                  title: Text(l10n.themeLight),
+                  value: ThemeMode.light,
+                ),
+                RadioListTile<ThemeMode>(
+                  title: Text(l10n.themeDark),
+                  value: ThemeMode.dark,
+                ),
+                RadioListTile<ThemeMode>(
+                  title: Text(l10n.themeSystem),
+                  value: ThemeMode.system,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    if (picked != null && picked != current) {
+      await ref.read(themeModeProvider.notifier).setThemeMode(picked);
+    }
+  }
+
+  String _themeModeLabel(AppLocalizations l10n, ThemeMode mode) => switch (mode) {
+    ThemeMode.light => l10n.themeLight,
+    ThemeMode.dark => l10n.themeDark,
+    ThemeMode.system => l10n.themeSystem,
+  };
+
+  IconData _themeModeIcon(ThemeMode mode) => switch (mode) {
+    ThemeMode.light => Icons.light_mode_outlined,
+    ThemeMode.dark => Icons.dark_mode_outlined,
+    ThemeMode.system => Icons.brightness_auto_outlined,
+  };
 
   Future<void> _exportData() async {
     setState(() => _isBusy = true);
@@ -265,6 +314,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   : l10n.languageEnglish,
                             ),
                             onTap: _pickLanguage,
+                          ),
+                          const Divider(height: 1, indent: 56),
+                          ListTile(
+                            leading: Icon(
+                              _themeModeIcon(ref.watch(themeModeProvider)),
+                            ),
+                            title: Text(l10n.themeLabel),
+                            subtitle: Text(
+                              _themeModeLabel(l10n, ref.watch(themeModeProvider)),
+                            ),
+                            onTap: _pickThemeMode,
                           ),
                         ],
                       ),
