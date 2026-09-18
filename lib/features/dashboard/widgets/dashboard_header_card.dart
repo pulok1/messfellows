@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_logo.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/localized_date.dart';
 import '../../../l10n/gen/app_localizations.dart';
@@ -67,10 +68,8 @@ class DashboardHeaderCard extends StatelessWidget {
                 colors: [colorScheme.primary, colorScheme.tertiary],
               ),
             ),
-            child: Icon(
-              Icons.ramen_dining,
-              color: colorScheme.onPrimary,
-              size: 26,
+            child: Center(
+              child: AppLogoMark(size: 26, color: colorScheme.onPrimary),
             ),
           ),
           const SizedBox(width: AppSpacing.md),

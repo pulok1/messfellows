@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/errors/app_exception.dart';
+import '../../core/theme/app_logo.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/mess.dart';
@@ -390,7 +391,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Card(
                       clipBehavior: Clip.antiAlias,
                       child: ListTile(
-                        leading: const Icon(Icons.info_outline),
+                        leading: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.chipRadius,
+                            ),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Theme.of(context).colorScheme.primary,
+                                Theme.of(context).colorScheme.tertiary,
+                              ],
+                            ),
+                          ),
+                          child: Center(
+                            child: AppLogoMark(
+                              size: 20,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
                         title: const Text(AppConstants.appName),
                         subtitle: Text(l10n.aboutVersionSubtitle),
                       ),

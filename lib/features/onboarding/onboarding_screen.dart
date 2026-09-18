@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/theme/app_logo.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../providers/repository_providers.dart';
@@ -100,10 +101,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.ramen_dining,
-                        size: 36,
-                        color: colorScheme.onPrimary,
+                      child: Center(
+                        child: AppLogoMark(size: 36, color: colorScheme.onPrimary),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
