@@ -64,6 +64,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         .updateMess(widget.mess.copyWith(name: newName));
   }
 
+  Future<void> _setMealTracking({
+    bool? trackBreakfast,
+    bool? trackLunch,
+    bool? trackDinner,
+  }) async {
+    final updated = widget.mess.copyWith(
+      trackBreakfast: trackBreakfast,
+      trackLunch: trackLunch,
+      trackDinner: trackDinner,
+    );
+    if (!updated.trackBreakfast && !updated.trackLunch && !updated.trackDinner) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).atLeastOneMealRequired)),
+      );
+      return;
+    }
+    await ref.read(messRepositoryProvider).updateMess(updated);
+  }
+
   Future<void> _pickLanguage() async {
     final l10n = AppLocalizations.of(context);
     final current = ref.read(localeProvider);
@@ -326,6 +345,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               _themeModeLabel(l10n, ref.watch(themeModeProvider)),
                             ),
                             onTap: _pickThemeMode,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    SectionHeader(
+                      l10n.mealsSectionHeader,
+                      padding: _sectionHeaderPadding,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.xs,
+                        0,
+                        AppSpacing.xs,
+                        AppSpacing.sm,
+                      ),
+                      child: Text(
+                        l10n.mealsSectionExplain,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          SwitchListTile(
+                            secondary: const Icon(Icons.wb_twilight),
+                            title: Text(l10n.breakfastLabel),
+                            value: widget.mess.trackBreakfast,
+                            onChanged: (value) =>
+                                _setMealTracking(trackBreakfast: value),
+                          ),
+                          const Divider(height: 1, indent: 56),
+                          SwitchListTile(
+                            secondary: const Icon(Icons.wb_sunny_outlined),
+                            title: Text(l10n.lunchLabel),
+                            value: widget.mess.trackLunch,
+                            onChanged: (value) =>
+                                _setMealTracking(trackLunch: value),
+                          ),
+                          const Divider(height: 1, indent: 56),
+                          SwitchListTile(
+                            secondary: const Icon(Icons.nightlight_outlined),
+                            title: Text(l10n.dinnerLabel),
+                            value: widget.mess.trackDinner,
+                            onChanged: (value) =>
+                                _setMealTracking(trackDinner: value),
                           ),
                         ],
                       ),
