@@ -43,7 +43,7 @@ class DashboardHeaderCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             colorScheme.primaryContainer,
-            colorScheme.surfaceContainerHigh,
+            colorScheme.surfaceContainerHighest,
           ],
         ),
         boxShadow: [

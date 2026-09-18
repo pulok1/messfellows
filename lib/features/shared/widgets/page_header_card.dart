@@ -49,7 +49,7 @@ class PageHeaderCard extends StatelessWidget {
         AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHigh,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppSpacing.sheetRadius),
         boxShadow: [
           BoxShadow(
