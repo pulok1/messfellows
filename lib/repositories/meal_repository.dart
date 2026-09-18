@@ -21,13 +21,14 @@ abstract interface class MealRepository {
 
   /// Creates or updates the single meal record for [memberId] on [date].
   /// Only the meals explicitly passed are changed; omitted ones keep their
-  /// current value (or default to false on first creation).
+  /// current value (or default to 0 on first creation). A count above 1
+  /// records an extra/guest meal in that slot.
   Future<void> setMeal({
     required String messId,
     required String memberId,
     required DateTime date,
-    bool? breakfast,
-    bool? lunch,
-    bool? dinner,
+    int? breakfast,
+    int? lunch,
+    int? dinner,
   });
 }

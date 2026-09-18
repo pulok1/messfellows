@@ -4,9 +4,9 @@ class MealEntry {
   final String messId;
   final String memberId;
   final DateTime date;
-  final bool breakfast;
-  final bool lunch;
-  final bool dinner;
+  final int breakfast;
+  final int lunch;
+  final int dinner;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -22,14 +22,14 @@ class MealEntry {
     required this.updatedAt,
   });
 
-  /// Total meals eaten this day (0-3).
-  int get totalMeals =>
-      (breakfast ? 1 : 0) + (lunch ? 1 : 0) + (dinner ? 1 : 0);
+  /// Total meals eaten this day. Usually 0-3, but a slot can be 2 or more
+  /// when an extra/guest meal is recorded under this member.
+  int get totalMeals => breakfast + lunch + dinner;
 
   MealEntry copyWith({
-    bool? breakfast,
-    bool? lunch,
-    bool? dinner,
+    int? breakfast,
+    int? lunch,
+    int? dinner,
     DateTime? updatedAt,
   }) {
     return MealEntry(

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/errors/app_exception.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/utils/id_generator.dart';
 import '../../database/app_database.dart';
@@ -72,10 +73,16 @@ class LocalMealRepository implements MealRepository {
     required String messId,
     required String memberId,
     required DateTime date,
-    bool? breakfast,
-    bool? lunch,
-    bool? dinner,
+    int? breakfast,
+    int? lunch,
+    int? dinner,
   }) async {
+    for (final count in [breakfast, lunch, dinner]) {
+      if (count != null && count < 0) {
+        throw const ValidationException('Meal count cannot be negative.');
+      }
+    }
+
     final day = dateOnly(date);
     final now = DateTime.now();
 
@@ -98,9 +105,9 @@ class LocalMealRepository implements MealRepository {
                 messId: messId,
                 memberId: memberId,
                 date: day,
-                breakfast: Value(breakfast ?? false),
-                lunch: Value(lunch ?? false),
-                dinner: Value(dinner ?? false),
+                breakfast: Value(breakfast ?? 0),
+                lunch: Value(lunch ?? 0),
+                dinner: Value(dinner ?? 0),
                 createdAt: now,
                 updatedAt: now,
               ),
