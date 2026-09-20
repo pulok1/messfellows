@@ -7,6 +7,7 @@ import 'package:messfellows/core/theme/app_theme.dart';
 import 'package:messfellows/database/app_database.dart';
 import 'package:messfellows/features/rules/rule_templates_sheet.dart';
 import 'package:messfellows/features/rules/rules_screen.dart';
+import 'package:messfellows/features/rules/rules_summary_card.dart';
 import 'package:messfellows/l10n/gen/app_localizations.dart';
 import 'package:messfellows/models/mess.dart';
 import 'package:messfellows/models/rule_category.dart';
@@ -28,6 +29,7 @@ void main() {
     Locale locale = const Locale('en'),
     double textScale = 1.0,
     Size size = const Size(360, 720),
+    Widget? home,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
@@ -47,7 +49,7 @@ void main() {
             ),
             child: child!,
           ),
-          home: RulesScreen(messId: mess.id),
+          home: home ?? RulesScreen(messId: mess.id),
         ),
       ),
     );
@@ -150,6 +152,51 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Enter the rule'), findsOneWidget);
+  });
+
+  screenTest('the dashboard card prompts to set rules up when there are none', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      home: Scaffold(body: RulesSummaryCard(messId: mess.id)),
+    );
+
+    expect(find.text('Set your mess rules'), findsOneWidget);
+    expect(find.textContaining('rules'), findsWidgets);
+
+    await tester.tap(find.byType(RulesSummaryCard));
+    await tester.pumpAndSettle();
+    expect(find.byType(RulesScreen), findsOneWidget);
+    expect(find.text('No rules yet'), findsOneWidget);
+  });
+
+  screenTest('the dashboard card summarises the rules and when they changed', (
+    tester,
+  ) async {
+    final repo = LocalRuleRepository(db);
+    await tester.runAsync(() async {
+      await repo.addRule(
+        messId: mess.id,
+        title: 'Pay by the 5th',
+        category: RuleCategory.payments,
+        isImportant: true,
+      );
+      await repo.addRule(
+        messId: mess.id,
+        title: 'Quiet at night',
+        category: RuleCategory.quietHours,
+      );
+    });
+    await pumpScreen(
+      tester,
+      home: Scaffold(body: RulesSummaryCard(messId: mess.id)),
+    );
+    await tester.pump();
+
+    expect(find.text('Rules & Regulations'), findsOneWidget);
+    expect(find.text('2 rules · 1 important'), findsOneWidget);
+    expect(find.textContaining('Last updated'), findsOneWidget);
   });
 
   screenTest('adds suggested rules from the templates sheet', (tester) async {
