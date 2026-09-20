@@ -9,6 +9,9 @@ class Mess {
   final bool trackBreakfast;
   final bool trackLunch;
   final bool trackDinner;
+
+  /// When the mess rules last changed; null if none were ever saved.
+  final DateTime? rulesUpdatedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -20,6 +23,7 @@ class Mess {
     this.trackBreakfast = true,
     this.trackLunch = true,
     this.trackDinner = true,
+    this.rulesUpdatedAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -41,6 +45,7 @@ class Mess {
       trackBreakfast: trackBreakfast ?? this.trackBreakfast,
       trackLunch: trackLunch ?? this.trackLunch,
       trackDinner: trackDinner ?? this.trackDinner,
+      rulesUpdatedAt: rulesUpdatedAt,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

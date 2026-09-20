@@ -20,6 +20,7 @@ class LocalMessRepository implements MessRepository {
     trackBreakfast: row.trackBreakfast,
     trackLunch: row.trackLunch,
     trackDinner: row.trackDinner,
+    rulesUpdatedAt: row.rulesUpdatedAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   );
