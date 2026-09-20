@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../../database/app_database.dart';
+import '../../models/rule_category.dart';
 import '../../models/settlement_status.dart';
 import '../constants/app_constants.dart';
 import '../errors/app_exception.dart';
@@ -29,6 +30,7 @@ class BackupService {
       throw const StorageException('No mess to export yet.');
     }
 
+    final rules = await _db.select(_db.messRules).get();
     final members = await _db.select(_db.members).get();
     final mealEntries = await _db.select(_db.mealEntries).get();
     final expenses = await _db.select(_db.expenses).get();
@@ -42,6 +44,7 @@ class BackupService {
       'schemaVersion': AppConstants.backupFormatVersion,
       'exportedAt': DateTime.now().toIso8601String(),
       'mess': _messToJson(mess),
+      'rules': rules.map(_ruleToJson).toList(),
       'members': members.map(_memberToJson).toList(),
       'mealEntries': mealEntries.map(_mealEntryToJson).toList(),
       'expenses': expenses.map(_expenseToJson).toList(),
@@ -94,11 +97,17 @@ class BackupService {
         await _db.delete(_db.expenses).go();
         await _db.delete(_db.payments).go();
         await _db.delete(_db.members).go();
+        await _db.delete(_db.messRules).go();
         await _db.delete(_db.messes).go();
 
         await _db.into(_db.messes).insert(_messFromJson(messJson));
 
         await _db.batch((batch) {
+          // Older backups have no 'rules' key; _listOf treats that as none.
+          batch.insertAll(
+            _db.messRules,
+            _listOf(document['rules']).map(_ruleFromJson),
+          );
           batch.insertAll(
             _db.members,
             _listOf(document['members']).map(_memberFromJson),
@@ -151,6 +160,7 @@ class BackupService {
     'trackBreakfast': row.trackBreakfast,
     'trackLunch': row.trackLunch,
     'trackDinner': row.trackDinner,
+    'rulesUpdatedAt': row.rulesUpdatedAt?.toIso8601String(),
     'createdAt': row.createdAt.toIso8601String(),
     'updatedAt': row.updatedAt.toIso8601String(),
   };
@@ -166,6 +176,41 @@ class BackupService {
         trackBreakfast: Value(json['trackBreakfast'] as bool? ?? true),
         trackLunch: Value(json['trackLunch'] as bool? ?? true),
         trackDinner: Value(json['trackDinner'] as bool? ?? true),
+        rulesUpdatedAt: Value(
+          json['rulesUpdatedAt'] == null
+              ? null
+              : DateTime.parse(json['rulesUpdatedAt'] as String),
+        ),
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        updatedAt: DateTime.parse(json['updatedAt'] as String),
+      );
+
+  // --- rules ---
+
+  Map<String, dynamic> _ruleToJson(MessRuleRow row) => {
+    'id': row.id,
+    'messId': row.messId,
+    'title': row.title,
+    'details': row.details,
+    'category': row.category.name,
+    'isImportant': row.isImportant,
+    'createdAt': row.createdAt.toIso8601String(),
+    'updatedAt': row.updatedAt.toIso8601String(),
+  };
+
+  MessRulesCompanion _ruleFromJson(Map<String, dynamic> json) =>
+      MessRulesCompanion.insert(
+        id: json['id'] as String,
+        messId: json['messId'] as String,
+        title: json['title'] as String,
+        details: Value(json['details'] as String?),
+        // An unknown category (e.g. from a future version) degrades to
+        // 'other' instead of failing the whole import.
+        category: Value(
+          RuleCategory.values.asNameMap()[json['category']] ??
+              RuleCategory.other,
+        ),
+        isImportant: Value(json['isImportant'] as bool? ?? false),
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
       );
