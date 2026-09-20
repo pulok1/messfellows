@@ -91,6 +91,7 @@ class LocalMessRepository implements MessRepository {
       await _db.delete(_db.expenses).go();
       await _db.delete(_db.payments).go();
       await _db.delete(_db.members).go();
+      await _db.delete(_db.messRules).go();
       await _db.delete(_db.messes).go();
     });
   }
