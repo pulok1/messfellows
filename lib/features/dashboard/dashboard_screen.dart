@@ -9,6 +9,7 @@ import '../../providers/month_calculation_provider.dart';
 import '../members/add_edit_member_dialog.dart';
 import '../members/member_detail_screen.dart';
 import '../members/members_screen.dart';
+import '../rules/rules_summary_card.dart';
 import '../settings/settings_screen.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/section_header.dart';
@@ -117,6 +118,8 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
+                      const SizedBox(height: AppSpacing.md),
+                      RulesSummaryCard(messId: mess.id),
                       const SizedBox(height: AppSpacing.lg),
                       SectionHeader(l10n.settlementLabel),
                       const SizedBox(height: AppSpacing.sm),
