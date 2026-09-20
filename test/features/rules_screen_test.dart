@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:messfellows/core/theme/app_theme.dart';
 import 'package:messfellows/database/app_database.dart';
+import 'package:messfellows/features/rules/rule_templates_sheet.dart';
 import 'package:messfellows/features/rules/rules_screen.dart';
 import 'package:messfellows/l10n/gen/app_localizations.dart';
 import 'package:messfellows/models/mess.dart';
@@ -149,6 +150,76 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Enter the rule'), findsOneWidget);
+  });
+
+  screenTest('adds suggested rules from the templates sheet', (tester) async {
+    await pumpScreen(tester);
+
+    await tester.tap(find.text('Start from suggested rules'));
+    await tester.pumpAndSettle();
+    expect(find.text('Suggested rules'), findsOneWidget);
+    expect(find.text('Tell the manager before skipping a meal'), findsOneWidget);
+
+    // Nothing is preselected, so the add button starts disabled.
+    expect(
+      tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Add 0 rules')).onPressed,
+      isNull,
+    );
+
+    await tester.tap(find.text('Tell the manager before skipping a meal'));
+    // The list is lazy, so scroll the later template into view first.
+    await tester.scrollUntilVisible(
+      find.text('Pay your monthly share by the 5th'),
+      100,
+      scrollable: find.descendant(
+        of: find.byType(RuleTemplatesSheet),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.ensureVisible(find.text('Pay your monthly share by the 5th'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Pay your monthly share by the 5th'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, 'Add 2 rules'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 rules added'), findsOneWidget); // snackbar
+    // The important templates arrive flagged, grouped under their category.
+    expect(find.text('Important'), findsNWidgets(2));
+    expect(find.text('Meals'), findsOneWidget);
+    expect(find.text('Payments'), findsOneWidget);
+  });
+
+  screenTest('hides suggestions that were already added and offers select-all', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      await LocalRuleRepository(db).addRule(
+        messId: mess.id,
+        title: '  Keep quiet from 11 PM to 6 AM ',
+        category: RuleCategory.quietHours,
+      );
+    });
+    await pumpScreen(tester);
+
+    await tester.tap(find.byIcon(Icons.auto_awesome_outlined));
+    await tester.pumpAndSettle();
+
+    // Scoped to the sheet: the rule itself is (correctly) still on the
+    // screen behind it.
+    expect(
+      find.descendant(
+        of: find.byType(RuleTemplatesSheet),
+        matching: find.text('Keep quiet from 11 PM to 6 AM'),
+      ),
+      findsNothing,
+    );
+    await tester.tap(find.text('Select all'));
+    await tester.pump();
+    expect(find.text('Clear'), findsOneWidget);
+    // 11 templates minus the one that's already a rule.
+    expect(find.widgetWithText(FilledButton, 'Add 10 rules'), findsOneWidget);
   });
 
   screenTest('does not overflow on a small phone with large text, in Bangla', (
