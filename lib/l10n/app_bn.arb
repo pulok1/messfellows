@@ -245,6 +245,8 @@
   "suggestedRulesTitle": "প্রস্তাবিত নিয়ম",
   "suggestedRulesSubtitle": "আপনার মেসের জন্য যেগুলো মানানসই সেগুলো বেছে নিন। পরে সম্পাদনা করতে পারবেন।",
   "ruleAlreadyAdded": "যোগ করা হয়েছে",
+  "selectAllLabel": "সব বেছে নিন",
+  "clearSelectionLabel": "নির্বাচন বাতিল",
   "addSelectedRules": "{count}টি নিয়ম যোগ করুন",
   "rulesAddedSnackbar": "{count}টি নিয়ম যোগ হয়েছে",
   "allSuggestionsAdded": "সব প্রস্তাবিত নিয়ম যোগ করা হয়েছে।",
