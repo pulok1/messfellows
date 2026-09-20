@@ -99,6 +99,18 @@ class $MessesTable extends Messes with TableInfo<$MessesTable, MessRow> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _rulesUpdatedAtMeta = const VerificationMeta(
+    'rulesUpdatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> rulesUpdatedAt =
+      GeneratedColumn<DateTime>(
+        'rules_updated_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -130,6 +142,7 @@ class $MessesTable extends Messes with TableInfo<$MessesTable, MessRow> {
     trackBreakfast,
     trackLunch,
     trackDinner,
+    rulesUpdatedAt,
     createdAt,
     updatedAt,
   ];
@@ -200,6 +213,15 @@ class $MessesTable extends Messes with TableInfo<$MessesTable, MessRow> {
         ),
       );
     }
+    if (data.containsKey('rules_updated_at')) {
+      context.handle(
+        _rulesUpdatedAtMeta,
+        rulesUpdatedAt.isAcceptableOrUnknown(
+          data['rules_updated_at']!,
+          _rulesUpdatedAtMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -253,6 +275,10 @@ class $MessesTable extends Messes with TableInfo<$MessesTable, MessRow> {
         DriftSqlType.bool,
         data['${effectivePrefix}track_dinner'],
       )!,
+      rulesUpdatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}rules_updated_at'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -278,6 +304,7 @@ class MessRow extends DataClass implements Insertable<MessRow> {
   final bool trackBreakfast;
   final bool trackLunch;
   final bool trackDinner;
+  final DateTime? rulesUpdatedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
   const MessRow({
@@ -288,6 +315,7 @@ class MessRow extends DataClass implements Insertable<MessRow> {
     required this.trackBreakfast,
     required this.trackLunch,
     required this.trackDinner,
+    this.rulesUpdatedAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -301,6 +329,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
     map['track_breakfast'] = Variable<bool>(trackBreakfast);
     map['track_lunch'] = Variable<bool>(trackLunch);
     map['track_dinner'] = Variable<bool>(trackDinner);
+    if (!nullToAbsent || rulesUpdatedAt != null) {
+      map['rules_updated_at'] = Variable<DateTime>(rulesUpdatedAt);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -315,6 +346,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
       trackBreakfast: Value(trackBreakfast),
       trackLunch: Value(trackLunch),
       trackDinner: Value(trackDinner),
+      rulesUpdatedAt: rulesUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rulesUpdatedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -333,6 +367,7 @@ class MessRow extends DataClass implements Insertable<MessRow> {
       trackBreakfast: serializer.fromJson<bool>(json['trackBreakfast']),
       trackLunch: serializer.fromJson<bool>(json['trackLunch']),
       trackDinner: serializer.fromJson<bool>(json['trackDinner']),
+      rulesUpdatedAt: serializer.fromJson<DateTime?>(json['rulesUpdatedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -348,6 +383,7 @@ class MessRow extends DataClass implements Insertable<MessRow> {
       'trackBreakfast': serializer.toJson<bool>(trackBreakfast),
       'trackLunch': serializer.toJson<bool>(trackLunch),
       'trackDinner': serializer.toJson<bool>(trackDinner),
+      'rulesUpdatedAt': serializer.toJson<DateTime?>(rulesUpdatedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -361,6 +397,7 @@ class MessRow extends DataClass implements Insertable<MessRow> {
     bool? trackBreakfast,
     bool? trackLunch,
     bool? trackDinner,
+    Value<DateTime?> rulesUpdatedAt = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => MessRow(
@@ -371,6 +408,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
     trackBreakfast: trackBreakfast ?? this.trackBreakfast,
     trackLunch: trackLunch ?? this.trackLunch,
     trackDinner: trackDinner ?? this.trackDinner,
+    rulesUpdatedAt: rulesUpdatedAt.present
+        ? rulesUpdatedAt.value
+        : this.rulesUpdatedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -393,6 +433,9 @@ class MessRow extends DataClass implements Insertable<MessRow> {
       trackDinner: data.trackDinner.present
           ? data.trackDinner.value
           : this.trackDinner,
+      rulesUpdatedAt: data.rulesUpdatedAt.present
+          ? data.rulesUpdatedAt.value
+          : this.rulesUpdatedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -408,6 +451,7 @@ class MessRow extends DataClass implements Insertable<MessRow> {
           ..write('trackBreakfast: $trackBreakfast, ')
           ..write('trackLunch: $trackLunch, ')
           ..write('trackDinner: $trackDinner, ')
+          ..write('rulesUpdatedAt: $rulesUpdatedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -423,6 +467,7 @@ class MessRow extends DataClass implements Insertable<MessRow> {
     trackBreakfast,
     trackLunch,
     trackDinner,
+    rulesUpdatedAt,
     createdAt,
     updatedAt,
   );
@@ -437,6 +482,7 @@ class MessRow extends DataClass implements Insertable<MessRow> {
           other.trackBreakfast == this.trackBreakfast &&
           other.trackLunch == this.trackLunch &&
           other.trackDinner == this.trackDinner &&
+          other.rulesUpdatedAt == this.rulesUpdatedAt &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -449,6 +495,7 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
   final Value<bool> trackBreakfast;
   final Value<bool> trackLunch;
   final Value<bool> trackDinner;
+  final Value<DateTime?> rulesUpdatedAt;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -460,6 +507,7 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
     this.trackBreakfast = const Value.absent(),
     this.trackLunch = const Value.absent(),
     this.trackDinner = const Value.absent(),
+    this.rulesUpdatedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -472,6 +520,7 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
     this.trackBreakfast = const Value.absent(),
     this.trackLunch = const Value.absent(),
     this.trackDinner = const Value.absent(),
+    this.rulesUpdatedAt = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
@@ -487,6 +536,7 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
     Expression<bool>? trackBreakfast,
     Expression<bool>? trackLunch,
     Expression<bool>? trackDinner,
+    Expression<DateTime>? rulesUpdatedAt,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -499,6 +549,7 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
       if (trackBreakfast != null) 'track_breakfast': trackBreakfast,
       if (trackLunch != null) 'track_lunch': trackLunch,
       if (trackDinner != null) 'track_dinner': trackDinner,
+      if (rulesUpdatedAt != null) 'rules_updated_at': rulesUpdatedAt,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -513,6 +564,7 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
     Value<bool>? trackBreakfast,
     Value<bool>? trackLunch,
     Value<bool>? trackDinner,
+    Value<DateTime?>? rulesUpdatedAt,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -525,6 +577,7 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
       trackBreakfast: trackBreakfast ?? this.trackBreakfast,
       trackLunch: trackLunch ?? this.trackLunch,
       trackDinner: trackDinner ?? this.trackDinner,
+      rulesUpdatedAt: rulesUpdatedAt ?? this.rulesUpdatedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -555,6 +608,9 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
     if (trackDinner.present) {
       map['track_dinner'] = Variable<bool>(trackDinner.value);
     }
+    if (rulesUpdatedAt.present) {
+      map['rules_updated_at'] = Variable<DateTime>(rulesUpdatedAt.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -577,6 +633,534 @@ class MessesCompanion extends UpdateCompanion<MessRow> {
           ..write('trackBreakfast: $trackBreakfast, ')
           ..write('trackLunch: $trackLunch, ')
           ..write('trackDinner: $trackDinner, ')
+          ..write('rulesUpdatedAt: $rulesUpdatedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MessRulesTable extends MessRules
+    with TableInfo<$MessRulesTable, MessRuleRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MessRulesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _messIdMeta = const VerificationMeta('messId');
+  @override
+  late final GeneratedColumn<String> messId = GeneratedColumn<String>(
+    'mess_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES messes (id)',
+    ),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 120,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _detailsMeta = const VerificationMeta(
+    'details',
+  );
+  @override
+  late final GeneratedColumn<String> details = GeneratedColumn<String>(
+    'details',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<RuleCategory, String> category =
+      GeneratedColumn<String>(
+        'category',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: Constant(RuleCategory.other.name),
+      ).withConverter<RuleCategory>($MessRulesTable.$convertercategory);
+  static const VerificationMeta _isImportantMeta = const VerificationMeta(
+    'isImportant',
+  );
+  @override
+  late final GeneratedColumn<bool> isImportant = GeneratedColumn<bool>(
+    'is_important',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_important" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    messId,
+    title,
+    details,
+    category,
+    isImportant,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'mess_rules';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MessRuleRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('mess_id')) {
+      context.handle(
+        _messIdMeta,
+        messId.isAcceptableOrUnknown(data['mess_id']!, _messIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_messIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('details')) {
+      context.handle(
+        _detailsMeta,
+        details.isAcceptableOrUnknown(data['details']!, _detailsMeta),
+      );
+    }
+    if (data.containsKey('is_important')) {
+      context.handle(
+        _isImportantMeta,
+        isImportant.isAcceptableOrUnknown(
+          data['is_important']!,
+          _isImportantMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MessRuleRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MessRuleRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      messId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mess_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      details: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}details'],
+      ),
+      category: $MessRulesTable.$convertercategory.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}category'],
+        )!,
+      ),
+      isImportant: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_important'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MessRulesTable createAlias(String alias) {
+    return $MessRulesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<RuleCategory, String, String> $convertercategory =
+      const EnumNameConverter<RuleCategory>(RuleCategory.values);
+}
+
+class MessRuleRow extends DataClass implements Insertable<MessRuleRow> {
+  final String id;
+  final String messId;
+  final String title;
+  final String? details;
+  final RuleCategory category;
+  final bool isImportant;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const MessRuleRow({
+    required this.id,
+    required this.messId,
+    required this.title,
+    this.details,
+    required this.category,
+    required this.isImportant,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['mess_id'] = Variable<String>(messId);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || details != null) {
+      map['details'] = Variable<String>(details);
+    }
+    {
+      map['category'] = Variable<String>(
+        $MessRulesTable.$convertercategory.toSql(category),
+      );
+    }
+    map['is_important'] = Variable<bool>(isImportant);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  MessRulesCompanion toCompanion(bool nullToAbsent) {
+    return MessRulesCompanion(
+      id: Value(id),
+      messId: Value(messId),
+      title: Value(title),
+      details: details == null && nullToAbsent
+          ? const Value.absent()
+          : Value(details),
+      category: Value(category),
+      isImportant: Value(isImportant),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory MessRuleRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MessRuleRow(
+      id: serializer.fromJson<String>(json['id']),
+      messId: serializer.fromJson<String>(json['messId']),
+      title: serializer.fromJson<String>(json['title']),
+      details: serializer.fromJson<String?>(json['details']),
+      category: $MessRulesTable.$convertercategory.fromJson(
+        serializer.fromJson<String>(json['category']),
+      ),
+      isImportant: serializer.fromJson<bool>(json['isImportant']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'messId': serializer.toJson<String>(messId),
+      'title': serializer.toJson<String>(title),
+      'details': serializer.toJson<String?>(details),
+      'category': serializer.toJson<String>(
+        $MessRulesTable.$convertercategory.toJson(category),
+      ),
+      'isImportant': serializer.toJson<bool>(isImportant),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  MessRuleRow copyWith({
+    String? id,
+    String? messId,
+    String? title,
+    Value<String?> details = const Value.absent(),
+    RuleCategory? category,
+    bool? isImportant,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => MessRuleRow(
+    id: id ?? this.id,
+    messId: messId ?? this.messId,
+    title: title ?? this.title,
+    details: details.present ? details.value : this.details,
+    category: category ?? this.category,
+    isImportant: isImportant ?? this.isImportant,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  MessRuleRow copyWithCompanion(MessRulesCompanion data) {
+    return MessRuleRow(
+      id: data.id.present ? data.id.value : this.id,
+      messId: data.messId.present ? data.messId.value : this.messId,
+      title: data.title.present ? data.title.value : this.title,
+      details: data.details.present ? data.details.value : this.details,
+      category: data.category.present ? data.category.value : this.category,
+      isImportant: data.isImportant.present
+          ? data.isImportant.value
+          : this.isImportant,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessRuleRow(')
+          ..write('id: $id, ')
+          ..write('messId: $messId, ')
+          ..write('title: $title, ')
+          ..write('details: $details, ')
+          ..write('category: $category, ')
+          ..write('isImportant: $isImportant, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    messId,
+    title,
+    details,
+    category,
+    isImportant,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MessRuleRow &&
+          other.id == this.id &&
+          other.messId == this.messId &&
+          other.title == this.title &&
+          other.details == this.details &&
+          other.category == this.category &&
+          other.isImportant == this.isImportant &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class MessRulesCompanion extends UpdateCompanion<MessRuleRow> {
+  final Value<String> id;
+  final Value<String> messId;
+  final Value<String> title;
+  final Value<String?> details;
+  final Value<RuleCategory> category;
+  final Value<bool> isImportant;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const MessRulesCompanion({
+    this.id = const Value.absent(),
+    this.messId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.details = const Value.absent(),
+    this.category = const Value.absent(),
+    this.isImportant = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MessRulesCompanion.insert({
+    required String id,
+    required String messId,
+    required String title,
+    this.details = const Value.absent(),
+    this.category = const Value.absent(),
+    this.isImportant = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       messId = Value(messId),
+       title = Value(title),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<MessRuleRow> custom({
+    Expression<String>? id,
+    Expression<String>? messId,
+    Expression<String>? title,
+    Expression<String>? details,
+    Expression<String>? category,
+    Expression<bool>? isImportant,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (messId != null) 'mess_id': messId,
+      if (title != null) 'title': title,
+      if (details != null) 'details': details,
+      if (category != null) 'category': category,
+      if (isImportant != null) 'is_important': isImportant,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MessRulesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? messId,
+    Value<String>? title,
+    Value<String?>? details,
+    Value<RuleCategory>? category,
+    Value<bool>? isImportant,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return MessRulesCompanion(
+      id: id ?? this.id,
+      messId: messId ?? this.messId,
+      title: title ?? this.title,
+      details: details ?? this.details,
+      category: category ?? this.category,
+      isImportant: isImportant ?? this.isImportant,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (messId.present) {
+      map['mess_id'] = Variable<String>(messId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (details.present) {
+      map['details'] = Variable<String>(details.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(
+        $MessRulesTable.$convertercategory.toSql(category.value),
+      );
+    }
+    if (isImportant.present) {
+      map['is_important'] = Variable<bool>(isImportant.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessRulesCompanion(')
+          ..write('id: $id, ')
+          ..write('messId: $messId, ')
+          ..write('title: $title, ')
+          ..write('details: $details, ')
+          ..write('category: $category, ')
+          ..write('isImportant: $isImportant, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -3980,6 +4564,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $MessesTable messes = $MessesTable(this);
+  late final $MessRulesTable messRules = $MessRulesTable(this);
   late final $MembersTable members = $MembersTable(this);
   late final $MealEntriesTable mealEntries = $MealEntriesTable(this);
   late final $ExpensesTable expenses = $ExpensesTable(this);
@@ -3994,6 +4579,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     messes,
+    messRules,
     members,
     mealEntries,
     expenses,
@@ -4011,6 +4597,7 @@ typedef $$MessesTableCreateCompanionBuilder = MessesCompanion Function({
   Value<bool> trackBreakfast,
   Value<bool> trackLunch,
   Value<bool> trackDinner,
+  Value<DateTime?> rulesUpdatedAt,
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<int> rowid,
@@ -4023,6 +4610,7 @@ typedef $$MessesTableUpdateCompanionBuilder = MessesCompanion Function({
   Value<bool> trackBreakfast,
   Value<bool> trackLunch,
   Value<bool> trackDinner,
+  Value<DateTime?> rulesUpdatedAt,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -4031,6 +4619,24 @@ typedef $$MessesTableUpdateCompanionBuilder = MessesCompanion Function({
 final class $$MessesTableReferences
     extends BaseReferences<_$AppDatabase, $MessesTable, MessRow> {
   $$MessesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$MessRulesTable, List<MessRuleRow>>
+  _messRulesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.messRules,
+    aliasName: 'messes__id__mess_rules__mess_id',
+  );
+
+  $$MessRulesTableProcessedTableManager get messRulesRefs {
+    final manager = $$MessRulesTableTableManager(
+      $_db,
+      $_db.messRules,
+    ).filter((f) => f.messId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_messRulesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 
   static MultiTypedResultKey<$MembersTable, List<MemberRow>> _membersRefsTable(
     _$AppDatabase db,
@@ -4174,6 +4780,11 @@ class $$MessesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get rulesUpdatedAt => $composableBuilder(
+    column: $table.rulesUpdatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -4183,6 +4794,31 @@ class $$MessesTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> messRulesRefs(
+    Expression<bool> Function($$MessRulesTableFilterComposer f) f,
+  ) {
+    final $$MessRulesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.messRules,
+      getReferencedColumn: (t) => t.messId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MessRulesTableFilterComposer(
+            $db: $db,
+            $table: $db.messRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<bool> membersRefs(
     Expression<bool> Function($$MembersTableFilterComposer f) f,
@@ -4354,6 +4990,11 @@ class $$MessesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get rulesUpdatedAt => $composableBuilder(
+    column: $table.rulesUpdatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -4405,11 +5046,41 @@ class $$MessesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get rulesUpdatedAt => $composableBuilder(
+    column: $table.rulesUpdatedAt,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> messRulesRefs<T extends Object>(
+    Expression<T> Function($$MessRulesTableAnnotationComposer a) f,
+  ) {
+    final $$MessRulesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.messRules,
+      getReferencedColumn: (t) => t.messId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MessRulesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.messRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<T> membersRefs<T extends Object>(
     Expression<T> Function($$MembersTableAnnotationComposer a) f,
@@ -4552,6 +5223,7 @@ class $$MessesTableTableManager
           (MessRow, $$MessesTableReferences),
           MessRow,
           PrefetchHooks Function({
+            bool messRulesRefs,
             bool membersRefs,
             bool mealEntriesRefs,
             bool expensesRefs,
@@ -4579,6 +5251,7 @@ class $$MessesTableTableManager
                 Value<bool> trackBreakfast = const Value.absent(),
                 Value<bool> trackLunch = const Value.absent(),
                 Value<bool> trackDinner = const Value.absent(),
+                Value<DateTime?> rulesUpdatedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -4590,6 +5263,7 @@ class $$MessesTableTableManager
                 trackBreakfast: trackBreakfast,
                 trackLunch: trackLunch,
                 trackDinner: trackDinner,
+                rulesUpdatedAt: rulesUpdatedAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -4603,6 +5277,7 @@ class $$MessesTableTableManager
                 Value<bool> trackBreakfast = const Value.absent(),
                 Value<bool> trackLunch = const Value.absent(),
                 Value<bool> trackDinner = const Value.absent(),
+                Value<DateTime?> rulesUpdatedAt = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
@@ -4614,6 +5289,7 @@ class $$MessesTableTableManager
                 trackBreakfast: trackBreakfast,
                 trackLunch: trackLunch,
                 trackDinner: trackDinner,
+                rulesUpdatedAt: rulesUpdatedAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -4628,6 +5304,7 @@ class $$MessesTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
+                messRulesRefs = false,
                 membersRefs = false,
                 mealEntriesRefs = false,
                 expensesRefs = false,
@@ -4637,6 +5314,7 @@ class $$MessesTableTableManager
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (messRulesRefs) db.messRules,
                     if (membersRefs) db.members,
                     if (mealEntriesRefs) db.mealEntries,
                     if (expensesRefs) db.expenses,
@@ -4646,6 +5324,27 @@ class $$MessesTableTableManager
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (messRulesRefs)
+                        await $_getPrefetchedData<
+                          MessRow,
+                          $MessesTable,
+                          MessRuleRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MessesTableReferences
+                              ._messRulesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MessesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).messRulesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.messId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (membersRefs)
                         await $_getPrefetchedData<
                           MessRow,
@@ -4772,12 +5471,386 @@ typedef $$MessesTableProcessedTableManager =
       (MessRow, $$MessesTableReferences),
       MessRow,
       PrefetchHooks Function({
+        bool messRulesRefs,
         bool membersRefs,
         bool mealEntriesRefs,
         bool expensesRefs,
         bool paymentsRefs,
         bool monthlySettlementsRefs,
       })
+    >;
+typedef $$MessRulesTableCreateCompanionBuilder = MessRulesCompanion Function({
+  required String id,
+  required String messId,
+  required String title,
+  Value<String?> details,
+  Value<RuleCategory> category,
+  Value<bool> isImportant,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$MessRulesTableUpdateCompanionBuilder = MessRulesCompanion Function({
+  Value<String> id,
+  Value<String> messId,
+  Value<String> title,
+  Value<String?> details,
+  Value<RuleCategory> category,
+  Value<bool> isImportant,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+final class $$MessRulesTableReferences
+    extends BaseReferences<_$AppDatabase, $MessRulesTable, MessRuleRow> {
+  $$MessRulesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $MessesTable _messIdTable(_$AppDatabase db) =>
+      db.messes.createAlias('mess_rules__mess_id__messes__id');
+
+  $$MessesTableProcessedTableManager get messId {
+    final $_column = $_itemColumn<String>('mess_id')!;
+
+    final manager = $$MessesTableTableManager(
+      $_db,
+      $_db.messes,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_messIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$MessRulesTableFilterComposer
+    extends Composer<_$AppDatabase, $MessRulesTable> {
+  $$MessRulesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get details => $composableBuilder(
+    column: $table.details,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<RuleCategory, RuleCategory, String>
+  get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get isImportant => $composableBuilder(
+    column: $table.isImportant,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$MessesTableFilterComposer get messId {
+    final $$MessesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.messId,
+      referencedTable: $db.messes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MessesTableFilterComposer(
+            $db: $db,
+            $table: $db.messes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MessRulesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MessRulesTable> {
+  $$MessRulesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get details => $composableBuilder(
+    column: $table.details,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isImportant => $composableBuilder(
+    column: $table.isImportant,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$MessesTableOrderingComposer get messId {
+    final $$MessesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.messId,
+      referencedTable: $db.messes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MessesTableOrderingComposer(
+            $db: $db,
+            $table: $db.messes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MessRulesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MessRulesTable> {
+  $$MessRulesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get details =>
+      $composableBuilder(column: $table.details, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<RuleCategory, String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<bool> get isImportant => $composableBuilder(
+    column: $table.isImportant,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$MessesTableAnnotationComposer get messId {
+    final $$MessesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.messId,
+      referencedTable: $db.messes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MessesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.messes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MessRulesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MessRulesTable,
+          MessRuleRow,
+          $$MessRulesTableFilterComposer,
+          $$MessRulesTableOrderingComposer,
+          $$MessRulesTableAnnotationComposer,
+          $$MessRulesTableCreateCompanionBuilder,
+          $$MessRulesTableUpdateCompanionBuilder,
+          (MessRuleRow, $$MessRulesTableReferences),
+          MessRuleRow,
+          PrefetchHooks Function({bool messId})
+        > {
+  $$MessRulesTableTableManager(_$AppDatabase db, $MessRulesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MessRulesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MessRulesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MessRulesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> messId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String?> details = const Value.absent(),
+                Value<RuleCategory> category = const Value.absent(),
+                Value<bool> isImportant = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MessRulesCompanion(
+                id: id,
+                messId: messId,
+                title: title,
+                details: details,
+                category: category,
+                isImportant: isImportant,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String messId,
+                required String title,
+                Value<String?> details = const Value.absent(),
+                Value<RuleCategory> category = const Value.absent(),
+                Value<bool> isImportant = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MessRulesCompanion.insert(
+                id: id,
+                messId: messId,
+                title: title,
+                details: details,
+                category: category,
+                isImportant: isImportant,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MessRulesTable, MessRuleRow>(table),
+                  $$MessRulesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({messId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (messId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.messId,
+                        referencedTable: $$MessRulesTableReferences
+                            ._messIdTable(db),
+                        referencedColumn: $$MessRulesTableReferences
+                            ._messIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$MessRulesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MessRulesTable,
+      MessRuleRow,
+      $$MessRulesTableFilterComposer,
+      $$MessRulesTableOrderingComposer,
+      $$MessRulesTableAnnotationComposer,
+      $$MessRulesTableCreateCompanionBuilder,
+      $$MessRulesTableUpdateCompanionBuilder,
+      (MessRuleRow, $$MessRulesTableReferences),
+      MessRuleRow,
+      PrefetchHooks Function({bool messId})
     >;
 typedef $$MembersTableCreateCompanionBuilder = MembersCompanion Function({
   required String id,
@@ -8014,6 +9087,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$MessesTableTableManager get messes =>
       $$MessesTableTableManager(_db, _db.messes);
+  $$MessRulesTableTableManager get messRules =>
+      $$MessRulesTableTableManager(_db, _db.messRules);
   $$MembersTableTableManager get members =>
       $$MembersTableTableManager(_db, _db.members);
   $$MealEntriesTableTableManager get mealEntries =>

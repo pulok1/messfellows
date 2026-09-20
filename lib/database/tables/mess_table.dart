@@ -21,6 +21,10 @@ class Messes extends Table {
   BoolColumn get trackLunch => boolean().withDefault(const Constant(true))();
   BoolColumn get trackDinner => boolean().withDefault(const Constant(true))();
 
+  // When the mess rules last changed (added/edited/deleted) — shown as
+  // "Last updated" on the Rules screen. Null until a rule is first saved.
+  DateTimeColumn get rulesUpdatedAt => dateTime().nullable()();
+
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 

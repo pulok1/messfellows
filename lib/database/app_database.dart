@@ -2,10 +2,12 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../models/rule_category.dart';
 import '../models/settlement_status.dart';
 import 'tables/expense_table.dart';
 import 'tables/meal_entry_table.dart';
 import 'tables/member_table.dart';
+import 'tables/mess_rule_table.dart';
 import 'tables/mess_table.dart';
 import 'tables/monthly_settlement_member_table.dart';
 import 'tables/monthly_settlement_table.dart';
@@ -20,6 +22,7 @@ part 'app_database.g.dart';
 @DriftDatabase(
   tables: [
     Messes,
+    MessRules,
     Members,
     MealEntries,
     Expenses,
@@ -38,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   // changes. Future sync-metadata columns (syncStatus, remoteId, ...) will
   // land as additive migrations here rather than a rewrite.
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -83,6 +86,12 @@ class AppDatabase extends _$AppDatabase {
             ],
           ),
         );
+      }
+      if (from < 5) {
+        // Mess rules & regulations: a new table, plus a stamp on messes for
+        // when the rules last changed (nullable, so no backfill needed).
+        await m.createTable(messRules);
+        await m.addColumn(messes, messes.rulesUpdatedAt);
       }
     },
     beforeOpen: (details) async {
