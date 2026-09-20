@@ -7,11 +7,13 @@ import '../repositories/local/local_meal_repository.dart';
 import '../repositories/local/local_member_repository.dart';
 import '../repositories/local/local_mess_repository.dart';
 import '../repositories/local/local_payment_repository.dart';
+import '../repositories/local/local_rule_repository.dart';
 import '../repositories/local/local_settlement_repository.dart';
 import '../repositories/meal_repository.dart';
 import '../repositories/member_repository.dart';
 import '../repositories/mess_repository.dart';
 import '../repositories/payment_repository.dart';
+import '../repositories/rule_repository.dart';
 import '../repositories/settlement_repository.dart';
 import 'database_provider.dart';
 
@@ -39,7 +41,11 @@ final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
   return LocalPaymentRepository(ref.watch(appDatabaseProvider));
 });
 
-final settlementRepositoryProvider = Provider<SettlementRepository>((ref) {
+final ruleRepositoryProvider = Provider<RuleRepository>((ref) {
+  return LocalRuleRepository(ref.watch(appDatabaseProvider));
+});
+
+final settlementRepositoryProvider =Provider<SettlementRepository>((ref) {
   return LocalSettlementRepository(ref.watch(appDatabaseProvider));
 });
 
