@@ -14,6 +14,7 @@ import '../shared/widgets/page_header_card.dart';
 import '../shared/widgets/section_header.dart';
 import 'add_edit_rule_dialog.dart';
 import 'rule_category_ui.dart';
+import 'rule_templates_sheet.dart';
 
 /// The mess's house rules, grouped by category with important ones first.
 /// The manager (whoever holds this device — there are no accounts) adds and
@@ -43,6 +44,14 @@ class RulesScreen extends ConsumerWidget {
               subtitle: updatedAt == null
                   ? null
                   : l10n.rulesLastUpdated(formatShortDate(context, updatedAt)),
+              actions: [
+                HeaderIconButton(
+                  icon: Icons.auto_awesome_outlined,
+                  tooltip: l10n.rulesSuggestionsTooltip,
+                  onPressed: () =>
+                      showRuleTemplatesSheet(context, messId: messId),
+                ),
+              ],
             ),
             Expanded(
               child: rulesAsync.when(
@@ -52,6 +61,9 @@ class RulesScreen extends ConsumerWidget {
                       icon: Icons.gavel_outlined,
                       title: l10n.rulesEmptyTitle,
                       message: l10n.rulesEmptyMessage,
+                      actionLabel: l10n.startFromSuggestions,
+                      onAction: () =>
+                          showRuleTemplatesSheet(context, messId: messId),
                     );
                   }
                   return _RulesList(messId: messId, rules: rules);
