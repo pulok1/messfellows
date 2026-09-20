@@ -1,4 +1,4 @@
-package com.example.messfellows
+package com.pulok.messfellows
 
 import io.flutter.embedding.android.FlutterActivity
 
