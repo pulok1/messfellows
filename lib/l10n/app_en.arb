@@ -267,7 +267,6 @@
 
   "suggestedRulesTitle": "Suggested rules",
   "suggestedRulesSubtitle": "Pick the ones that suit your mess. You can edit them afterwards.",
-  "ruleAlreadyAdded": "Added",
   "selectAllLabel": "Select all",
   "clearSelectionLabel": "Clear",
   "addSelectedRules": "{count, plural, one{Add {count} rule} other{Add {count} rules}}",
