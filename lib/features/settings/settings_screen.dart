@@ -18,6 +18,7 @@ import '../../providers/mess_provider.dart';
 import '../../providers/repository_providers.dart';
 import '../../providers/theme_mode_provider.dart';
 import '../members/members_screen.dart';
+import '../rules/rules_screen.dart';
 import '../shared/widgets/confirm_dialog.dart';
 import '../shared/widgets/page_header_card.dart';
 import '../shared/widgets/section_header.dart';
@@ -328,6 +329,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               MaterialPageRoute(
                                 builder: (_) =>
                                     MembersScreen(messId: mess.id),
+                              ),
+                            ),
+                          ),
+                          const Divider(height: 1, indent: 56),
+                          ListTile(
+                            leading: const Icon(Icons.gavel_outlined),
+                            title: Text(l10n.rulesTitle),
+                            subtitle: Text(l10n.rulesSettingsSubtitle),
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => RulesScreen(messId: mess.id),
                               ),
                             ),
                           ),
