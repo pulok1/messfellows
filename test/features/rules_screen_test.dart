@@ -1,0 +1,191 @@
+import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:messfellows/core/theme/app_theme.dart';
+import 'package:messfellows/database/app_database.dart';
+import 'package:messfellows/features/rules/rules_screen.dart';
+import 'package:messfellows/l10n/gen/app_localizations.dart';
+import 'package:messfellows/models/mess.dart';
+import 'package:messfellows/models/rule_category.dart';
+import 'package:messfellows/providers/database_provider.dart';
+import 'package:messfellows/repositories/local/local_mess_repository.dart';
+import 'package:messfellows/repositories/local/local_rule_repository.dart';
+
+void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('en');
+    await initializeDateFormatting('bn');
+  });
+
+  late AppDatabase db;
+  late Mess mess;
+
+  Future<void> pumpScreen(
+    WidgetTester tester, {
+    Locale locale = const Locale('en'),
+    double textScale = 1.0,
+    Size size = const Size(360, 720),
+  }) async {
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(db)],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          locale: locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(textScale),
+            ),
+            child: child!,
+          ),
+          home: RulesScreen(messId: mess.id),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+  }
+
+  // Unmounts the screen after the body so Drift's zero-duration stream
+  // cleanup timers fire before the framework's "no pending timers" check.
+  void screenTest(
+    String description,
+    Future<void> Function(WidgetTester tester) body,
+  ) {
+    testWidgets(description, (tester) async {
+      await body(tester);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump(Duration.zero);
+    });
+  }
+
+  setUp(() async {
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+    mess = await LocalMessRepository(db).createMess(
+      name: 'Test Mess',
+      currencyCode: 'BDT',
+      currencySymbol: '৳',
+    );
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  screenTest('shows the empty state when there are no rules', (tester) async {
+    await pumpScreen(tester);
+
+    expect(find.text('Rules & Regulations'), findsOneWidget);
+    expect(find.text('No rules yet'), findsOneWidget);
+    expect(find.text('Add rule'), findsOneWidget); // the FAB
+    expect(find.textContaining('Last updated'), findsNothing);
+  });
+
+  screenTest('groups rules by category, numbers them and flags important ones', (
+    tester,
+  ) async {
+    final repo = LocalRuleRepository(db);
+    await tester.runAsync(() async {
+      await repo.addRule(
+        messId: mess.id,
+        title: 'Keep quiet at night',
+        category: RuleCategory.quietHours,
+      );
+      await repo.addRule(
+        messId: mess.id,
+        title: 'Pay by the 5th',
+        details: 'Late payments hold up the settlement.',
+        category: RuleCategory.payments,
+        isImportant: true,
+      );
+    });
+    await pumpScreen(tester);
+    await tester.pump();
+
+    expect(find.text('Payments'), findsOneWidget);
+    expect(find.text('Quiet hours'), findsOneWidget);
+    expect(find.text('Pay by the 5th'), findsOneWidget);
+    expect(find.text('Late payments hold up the settlement.'), findsOneWidget);
+    expect(find.text('Important'), findsOneWidget);
+    // Payments is declared before quiet hours, so it is rule 1.
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.textContaining('Last updated'), findsOneWidget);
+  });
+
+  screenTest('adds a rule through the dialog', (tester) async {
+    await pumpScreen(tester);
+
+    await tester.tap(find.text('Add rule'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mark as important'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField).first, 'No shoes indoors');
+    await tester.tap(find.text('Cleanliness'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No shoes indoors'), findsOneWidget);
+    expect(find.text('Cleanliness'), findsOneWidget);
+  });
+
+  screenTest('rejects an empty title in the dialog', (tester) async {
+    await pumpScreen(tester);
+
+    await tester.tap(find.text('Add rule'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enter the rule'), findsOneWidget);
+  });
+
+  screenTest('does not overflow on a small phone with large text, in Bangla', (
+    tester,
+  ) async {
+    final repo = LocalRuleRepository(db);
+    await tester.runAsync(() async {
+      await repo.addRule(
+        messId: mess.id,
+        title:
+            'রান্না ও খাওয়ার পর নিজের থালা ধুয়ে রাখুন এবং কাউন্টার ও চুলা মুছে দিন সবসময়',
+        details:
+            'বিল সবাই মিলে ভাগ হয়, তাই অপচয় এড়িয়ে চলুন। ' * 6,
+        category: RuleCategory.cleanliness,
+        isImportant: true,
+      );
+    });
+    // Collect the full error details (not just the message) so a failure
+    // names the widget that overflowed.
+    final errors = <FlutterErrorDetails>[];
+    final originalOnError = FlutterError.onError;
+    FlutterError.onError = errors.add;
+
+    await pumpScreen(
+      tester,
+      locale: const Locale('bn'),
+      textScale: 1.6,
+      size: const Size(320, 568),
+    );
+    await tester.pump();
+    FlutterError.onError = originalOnError;
+
+    expect(
+      errors,
+      isEmpty,
+      reason: errors.map((e) => e.toString()).join('\n---\n'),
+    );
+    expect(find.text('গুরুত্বপূর্ণ'), findsOneWidget);
+  });
+}
