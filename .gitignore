@@ -55,3 +55,6 @@ app.*.map.json
 # Drift's build_runner output, this needs no manual build step, so there's
 # no reason to commit it).
 /lib/l10n/gen/
+
+# Flutter web build served by the landing page (see scripts/build_landing.ps1)
+/landing/app/
