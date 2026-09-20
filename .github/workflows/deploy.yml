@@ -1,0 +1,93 @@
+name: Release & deploy
+
+# Every push to main: build + sign the APK, publish it as the latest GitHub release,
+# build the web app, and deploy the landing page (with the web app at /app/) to Cloudflare.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check required secrets
+        run: |
+          missing=0
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+            if [ -z "${!name}" ]; then echo "::error::Repository secret $name is not set (see docs/deployment.md)"; missing=1; fi
+          done
+          exit $missing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history: the commit count is the Android versionCode
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.1
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Restore signing key
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
+          cat > android/key.properties <<PROPS
+          storeFile=keystore.jks
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyPassword=$ANDROID_KEYSTORE_PASSWORD
+          keyAlias=messfellows
+          PROPS
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+
+      # versionCode must only ever go up, or Android refuses to update the installed app in place.
+      - name: Build APK
+        run: |
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
+          flutter build apk --release --build-number="$BUILD_NUMBER"
+          cp build/app/outputs/flutter-apk/app-release.apk messfellows.apk
+
+      - name: Publish GitHub release
+        run: |
+          VERSION=$(grep -m1 '^version:' pubspec.yaml | sed -E 's/version: *([^+ ]+).*/\1/')
+          TAG="v$VERSION-build.$BUILD_NUMBER"
+          gh release create "$TAG" messfellows.apk \
+            --title "Mess Fellows $VERSION (build $BUILD_NUMBER)" \
+            --notes "Android APK, installs over the previous version." \
+            --latest \
+            --target "$GITHUB_SHA"
+
+      - name: Build web app
+        run: flutter build web --release --base-href /app/ --output landing/app
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy

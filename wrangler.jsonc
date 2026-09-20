@@ -1,0 +1,9 @@
+{
+  // Static site: the landing page in ./landing, with the Flutter web build at /app/.
+  // Deployed by .github/workflows/deploy.yml -> https://messfellows.<subdomain>.workers.dev
+  "name": "messfellows",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./landing"
+  }
+}
