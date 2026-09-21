@@ -7,7 +7,7 @@ Static site, no build step. Files: `index.html`, `styles.css`, `script.js`, `fav
 The "Open web app" buttons link to `app/`, which is the Flutter web build served from the same site. It is not committed (`landing/app/` is gitignored); build it from the repo root before previewing:
 
 ```
-pwsh scripts/build_landing.ps1
+powershell -ExecutionPolicy Bypass -File scriptsuild_landing.ps1
 ```
 
 (or `flutter build web --release --base-href /app/ --output landing/app`). Data stays in the visitor's browser (SQLite via drift/wasm), so it is per-browser and not synced.

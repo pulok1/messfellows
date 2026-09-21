@@ -19,7 +19,7 @@ Never change the key or the application id (`com.pulok.messfellows`) after users
 
 Nothing secret is stored in the repo or on a work machine; the secrets live in GitHub.
 
-1. **Signing key:** run `pwsh scripts/create_keystore.ps1`, add the two values as GitHub secrets
+1. **Signing key:** run `powershell -ExecutionPolicy Bypass -File scripts\create_keystore.ps1 -OutDir <folder>` (a USB drive on a work computer), add the two values as GitHub secrets
    `ANDROID_KEYSTORE_BASE64` and `ANDROID_KEYSTORE_PASSWORD`, back up `messfellows.jks`, delete the temp folder.
 2. **Cloudflare token:** dash.cloudflare.com → My Profile → API Tokens → Create Token → template
    *Edit Cloudflare Workers* → account resources: your account → create. Add it as secret `CLOUDFLARE_API_TOKEN`.
@@ -31,4 +31,4 @@ The site is then live at `https://messfellows.<your-subdomain>.workers.dev`.
 
 ## Local preview
 
-`pwsh scripts/build_landing.ps1`, then `npx serve landing`.
+`powershell -ExecutionPolicy Bypass -File scriptsuild_landing.ps1`, then `npx serve landing`.
