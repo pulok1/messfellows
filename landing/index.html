@@ -6,6 +6,7 @@
 <title>Mess Fellows — meal &amp; bazar tracking for shared households</title>
 <meta name="description" content="Mess Fellows tracks who ate what, who bought the bazar, and who owes whom — offline, private, and bilingual (English + বাংলা).">
 <meta name="theme-color" content="#2E7D67">
+<meta name="color-scheme" content="light dark">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="Mess Fellows — meal & bazar tracking for shared households">
@@ -41,7 +42,7 @@
       <a href="#download">Download</a>
     </nav>
     <div class="nav-actions">
-      <a href="app/" class="btn btn-primary btn-sm">Open web app</a>
+      <a href="app/" class="btn btn-primary btn-sm"><span class="hide-xs">Open web app</span><span class="show-xs">Web app</span></a>
       <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
         <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.9 4.9l1.4 1.4"/><path d="M17.7 17.7l1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.9 19.1l1.4-1.4"/><path d="M17.7 6.3l1.4-1.4"/></svg>
         <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
@@ -63,8 +64,10 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
           </a>
           <a href="app/" class="btn btn-ghost">Open web app</a>
-          <a href="#how-it-works" class="btn btn-ghost">See how it works</a>
+          <a href="#how-it-works" class="btn btn-ghost hide-sm">See how it works</a>
         </div>
+        <p class="apk-meta" data-apk-meta>Free Android app &middot; no account needed</p>
+        <p class="ios-hint" hidden>On iPhone? Android apps don&rsquo;t install on iOS &mdash; open the web app and use <strong>Share &rarr; Add to Home Screen</strong>.</p>
         <div class="stats-row">
           <div class="stat">
             <div class="stat-title">Fully offline</div>
@@ -126,6 +129,20 @@
               <div class="entry-meta">19 Sep · Prottoy</div>
             </div>
             <div class="entry-amount">৳1,200</div>
+          </div>
+          <div class="phone-entry">
+            <div class="entry-text">
+              <div class="entry-title">Chal, dal, dim</div>
+              <div class="entry-meta">18 Sep · Rahul</div>
+            </div>
+            <div class="entry-amount">৳640</div>
+          </div>
+          <div class="phone-summary">
+            <div>
+              <div class="chip-label">Meal rate</div>
+              <div class="entry-title">৳68.50 per meal</div>
+            </div>
+            <div class="summary-pill">On track</div>
           </div>
 
           <div class="phone-navbar">
@@ -230,6 +247,7 @@
         </a>
         <a href="app/" class="btn btn-outline-light">Open web app</a>
       </div>
+      <p class="apk-meta apk-meta-light" data-apk-meta>Free Android app &middot; no account needed</p>
       <div class="cta-older">Older phone (32-bit), or the app won&rsquo;t install? <a href="https://github.com/pulok1/messfellows/releases/latest/download/messfellows-32bit.apk" download>Download the 32-bit version</a>.</div>
       <div class="cta-note">First install: your browser may ask you to allow installing from this source. Newer versions install over the old one and keep your data. The web app keeps its data in this browser only. Currently in development, Android first.</div>
     </div>
@@ -252,6 +270,11 @@
     <div class="footer-note">Made for households who split more than rent.</div>
   </div>
 </footer>
+
+<div class="sticky-cta" id="sticky-cta">
+  <a href="https://github.com/pulok1/messfellows/releases/latest/download/messfellows.apk" class="btn btn-primary" download>Download for Android</a>
+  <a href="app/" class="btn btn-ghost">Web app</a>
+</div>
 
 <script src="script.js" defer></script>
 </body>
