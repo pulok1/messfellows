@@ -69,17 +69,20 @@ jobs:
         run: |
           BUILD_NUMBER=$(git rev-list --count HEAD)
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
-          # arm64 only: covers virtually all current phones and is ~1/3 the size of a fat APK
+          # One APK per CPU type instead of a 61 MB fat APK. Same versionCode and signing key, so a
+          # phone updates in place from whichever one it installed first.
           flutter build apk --release --target-platform android-arm64 --build-number="$BUILD_NUMBER"
           cp build/app/outputs/flutter-apk/app-release.apk messfellows.apk
+          flutter build apk --release --target-platform android-arm --build-number="$BUILD_NUMBER"
+          cp build/app/outputs/flutter-apk/app-release.apk messfellows-32bit.apk
 
       - name: Publish GitHub release
         run: |
           VERSION=$(grep -m1 '^version:' pubspec.yaml | sed -E 's/version: *([^+ ]+).*/\1/')
           TAG="v$VERSION-build.$BUILD_NUMBER"
-          gh release create "$TAG" messfellows.apk \
+          gh release create "$TAG" messfellows.apk messfellows-32bit.apk \
             --title "Mess Fellows $VERSION (build $BUILD_NUMBER)" \
-            --notes "Android APK, installs over the previous version." \
+            --notes "messfellows.apk for current 64-bit phones; messfellows-32bit.apk for older 32-bit phones. Installs over the previous version." \
             --latest \
             --target "$GITHUB_SHA"
 
