@@ -303,5 +303,23 @@
   "tplQuietHoursTitle": "Keep quiet from 11 PM to 6 AM",
   "tplQuietHoursDetails": "Use headphones and keep phone calls short and low.",
   "tplSaveUtilitiesTitle": "Switch off lights, fans and gas when not in use",
-  "tplSaveUtilitiesDetails": "The bills are shared by everyone, so avoid waste."
+  "tplSaveUtilitiesDetails": "The bills are shared by everyone, so avoid waste.",
+
+  "insightsTitle": "Insights",
+  "insightMealsNotMarkedToday": "Today's meals aren't marked yet",
+  "insightMarkMealsAction": "Mark",
+  "insightNoRecentBazar": "{days, plural, other{No bazar logged in the last {days} days}}",
+  "@insightNoRecentBazar": {"placeholders": {"days": {"type": "num"}}},
+  "insightMealRateUp": "Meal rate is {percent}% higher than last month ({previous})",
+  "@insightMealRateUp": {"placeholders": {"percent": {"type": "int"}, "previous": {"type": "String"}}},
+  "insightMealRateDown": "Meal rate is {percent}% lower than last month ({previous})",
+  "@insightMealRateDown": {"placeholders": {"percent": {"type": "int"}, "previous": {"type": "String"}}},
+  "insightOneMemberNoBazar": "{name} hasn't done a bazar run this month",
+  "@insightOneMemberNoBazar": {"placeholders": {"name": {"type": "String"}}},
+  "insightMembersNoBazar": "{names} haven't done a bazar run this month",
+  "@insightMembersNoBazar": {"placeholders": {"names": {"type": "String"}}},
+  "insightMoreMembers": "{count, plural, one{{count} other} other{{count} others}}",
+  "@insightMoreMembers": {"placeholders": {"count": {"type": "num"}}},
+  "insightBazarProjection": "At this pace, bazar will reach about {amount} this month",
+  "@insightBazarProjection": {"placeholders": {"amount": {"type": "String"}}}
 }

@@ -62,7 +62,7 @@ class _HomeShellState extends State<HomeShell>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final tabs = [
-      DashboardScreen(mess: widget.mess),
+      DashboardScreen(mess: widget.mess, onOpenMeals: _goToMealsTab),
       MealsScreen(mess: widget.mess),
       BazarScreen(messId: widget.mess.id),
       ReportScreen(mess: widget.mess),

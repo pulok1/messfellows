@@ -18,6 +18,7 @@ import '../shared/widgets/section_header.dart';
 import '../shared/widgets/staggered_entrance.dart';
 import '../shared/widgets/stat_tile.dart';
 import 'widgets/dashboard_header_card.dart';
+import 'widgets/insights_card.dart';
 import 'widgets/settlement_tile.dart';
 
 /// The Home tab (section 11): always shows the current, still-open month —
@@ -26,7 +27,10 @@ import 'widgets/settlement_tile.dart';
 class DashboardScreen extends ConsumerWidget {
   final Mess mess;
 
-  const DashboardScreen({super.key, required this.mess});
+  /// Switches to the Meals tab (from the "meals not marked" insight).
+  final VoidCallback? onOpenMeals;
+
+  const DashboardScreen({super.key, required this.mess, this.onOpenMeals});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -131,6 +135,11 @@ class DashboardScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.md),
+                      InsightsCard(
+                        messId: mess.id,
+                        currencySymbol: mess.currencySymbol,
+                        onOpenMeals: onOpenMeals,
+                      ),
                       RulesSummaryCard(messId: mess.id),
                       const SizedBox(height: AppSpacing.lg),
                       SectionHeader(l10n.settlementLabel),

@@ -276,5 +276,16 @@
   "tplQuietHoursTitle": "রাত ১১টা থেকে ভোর ৬টা পর্যন্ত নীরবতা মানুন",
   "tplQuietHoursDetails": "হেডফোন ব্যবহার করুন এবং ফোনে নিচু স্বরে অল্প কথা বলুন।",
   "tplSaveUtilitiesTitle": "ব্যবহার না হলে লাইট, ফ্যান ও গ্যাস বন্ধ রাখুন",
-  "tplSaveUtilitiesDetails": "বিল সবাই মিলে ভাগ হয়, তাই অপচয় এড়িয়ে চলুন।"
+  "tplSaveUtilitiesDetails": "বিল সবাই মিলে ভাগ হয়, তাই অপচয় এড়িয়ে চলুন।",
+
+  "insightsTitle": "এক নজরে",
+  "insightMealsNotMarkedToday": "আজকের মিল এখনো দেওয়া হয়নি",
+  "insightMarkMealsAction": "দিন",
+  "insightNoRecentBazar": "গত {days} দিন কোনো বাজার লেখা হয়নি",
+  "insightMealRateUp": "মিল রেট গত মাসের চেয়ে {percent}% বেশি ({previous})",
+  "insightMealRateDown": "মিল রেট গত মাসের চেয়ে {percent}% কম ({previous})",
+  "insightOneMemberNoBazar": "{name} এ মাসে এখনো বাজার করেনি",
+  "insightMembersNoBazar": "{names} এ মাসে এখনো বাজার করেনি",
+  "insightMoreMembers": "আরও {count} জন",
+  "insightBazarProjection": "এভাবে চললে এ মাসে বাজার প্রায় {amount} হবে"
 }
