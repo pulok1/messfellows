@@ -15,6 +15,7 @@ import '../settings/settings_screen.dart';
 import '../shared/widgets/count_up_text.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/section_header.dart';
+import '../shared/widgets/staggered_entrance.dart';
 import '../shared/widgets/stat_tile.dart';
 import 'widgets/dashboard_header_card.dart';
 import 'widgets/settlement_tile.dart';
@@ -134,14 +135,19 @@ class DashboardScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.lg),
                       SectionHeader(l10n.settlementLabel),
                       const SizedBox(height: AppSpacing.sm),
-                      for (final balance in calculation.memberBalances)
-                        SettlementTile(
-                          balance: balance,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => MemberDetailScreen(
-                                messId: mess.id,
-                                memberId: balance.memberId,
+                      for (final (i, balance)
+                          in calculation.memberBalances.indexed)
+                        StaggeredEntrance(
+                          key: ValueKey(balance.memberId),
+                          index: i,
+                          child: SettlementTile(
+                            balance: balance,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => MemberDetailScreen(
+                                  messId: mess.id,
+                                  memberId: balance.memberId,
+                                ),
                               ),
                             ),
                           ),
