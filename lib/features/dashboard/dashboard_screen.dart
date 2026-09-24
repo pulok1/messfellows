@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/money.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/mess.dart';
 import '../../providers/member_providers.dart';
@@ -11,6 +12,7 @@ import '../members/member_detail_screen.dart';
 import '../members/members_screen.dart';
 import '../rules/rules_summary_card.dart';
 import '../settings/settings_screen.dart';
+import '../shared/widgets/count_up_text.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/section_header.dart';
 import '../shared/widgets/stat_tile.dart';
@@ -37,6 +39,9 @@ class DashboardScreen extends ConsumerWidget {
         month: now.month,
       )),
     );
+
+    final rateStyle = Theme.of(context).textTheme.headlineMedium
+        ?.copyWith(fontWeight: FontWeight.bold);
 
     return Scaffold(
       body: SafeArea(
@@ -87,15 +92,15 @@ class DashboardScreen extends ConsumerWidget {
                                 style: Theme.of(context).textTheme.labelMedium,
                               ),
                               const SizedBox(height: AppSpacing.xs),
-                              Text(
-                                calculation.hasNoMeals
-                                    ? l10n.noMealsRecordedYet
-                                    : '${mess.currencySymbol}${calculation.mealRate.major.toStringAsFixed(2)}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
+                              if (calculation.hasNoMeals)
+                                Text(l10n.noMealsRecordedYet, style: rateStyle)
+                              else
+                                CountUpText(
+                                  value: calculation.mealRate.major,
+                                  format: (v) =>
+                                      '${mess.currencySymbol}${v.toStringAsFixed(2)}',
+                                  style: rateStyle,
+                                ),
                             ],
                           ),
                         ),
@@ -104,16 +109,22 @@ class DashboardScreen extends ConsumerWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: StatTile(
+                            child: StatTile.animated(
                               label: l10n.totalBazar,
-                              value: calculation.totalExpense.format(),
+                              count: calculation.totalExpense.minorUnits,
+                              // Counts in whole taka, landing on the exact total.
+                              format: (v) =>
+                                  v == calculation.totalExpense.minorUnits
+                                  ? calculation.totalExpense.format()
+                                  : Money((v / 100).round() * 100).format(),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.md),
                           Expanded(
-                            child: StatTile(
+                            child: StatTile.animated(
                               label: l10n.totalMeals,
-                              value: '${calculation.totalMeals}',
+                              count: calculation.totalMeals,
+                              format: (v) => '${v.round()}',
                             ),
                           ),
                         ],
