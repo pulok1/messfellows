@@ -23,5 +23,18 @@ abstract interface class ExpenseRepository {
 
   Future<void> updateExpense(Expense expense);
 
+  /// Soft-deletes: the entry moves to the Recycle Bin rather than
+  /// disappearing outright. See [restoreExpense]/[permanentlyDeleteExpense].
   Future<void> deleteExpense(String id);
+
+  /// All soft-deleted entries for [messId], most recently deleted first —
+  /// the Recycle Bin's source.
+  Stream<List<Expense>> watchDeletedExpenses(String messId);
+
+  Future<void> restoreExpense(String id);
+
+  Future<void> permanentlyDeleteExpense(String id);
+
+  /// Hard-deletes entries soft-deleted more than [retention] ago.
+  Future<void> purgeExpiredExpenses(String messId, Duration retention);
 }

@@ -20,5 +20,18 @@ abstract interface class PaymentRepository {
 
   Future<void> updatePayment(Payment payment);
 
+  /// Soft-deletes: the payment moves to the Recycle Bin rather than
+  /// disappearing outright. See [restorePayment]/[permanentlyDeletePayment].
   Future<void> deletePayment(String id);
+
+  /// All soft-deleted payments for [messId], most recently deleted first —
+  /// the Recycle Bin's source.
+  Stream<List<Payment>> watchDeletedPayments(String messId);
+
+  Future<void> restorePayment(String id);
+
+  Future<void> permanentlyDeletePayment(String id);
+
+  /// Hard-deletes payments soft-deleted more than [retention] ago.
+  Future<void> purgeExpiredPayments(String messId, Duration retention);
 }

@@ -10,6 +10,7 @@ class Payment {
   final String? note;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? deletedAt;
 
   const Payment({
     required this.id,
@@ -20,6 +21,7 @@ class Payment {
     this.note,
     required this.createdAt,
     required this.updatedAt,
+    this.deletedAt,
   });
 
   Payment copyWith({
@@ -39,6 +41,7 @@ class Payment {
       note: clearNote ? null : (note ?? this.note),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt,
     );
   }
 }

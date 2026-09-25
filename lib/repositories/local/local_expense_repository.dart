@@ -23,6 +23,7 @@ class LocalExpenseRepository implements ExpenseRepository {
     note: row.note,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
   );
 
   @override
@@ -38,7 +39,8 @@ class LocalExpenseRepository implements ExpenseRepository {
         (t) =>
             t.messId.equals(messId) &
             t.date.isBiggerOrEqualValue(start) &
-            t.date.isSmallerThanValue(end),
+            t.date.isSmallerThanValue(end) &
+            t.deletedAt.isNull(),
       )
       ..orderBy([(t) => OrderingTerm.desc(t.date)]);
     return query.watch().map((rows) => rows.map(_toModel).toList());
@@ -48,9 +50,20 @@ class LocalExpenseRepository implements ExpenseRepository {
   Stream<List<Expense>> watchExpensesForMember(String messId, String memberId) {
     final query = _db.select(_db.expenses)
       ..where(
-        (t) => t.messId.equals(messId) & t.paidByMemberId.equals(memberId),
+        (t) =>
+            t.messId.equals(messId) &
+            t.paidByMemberId.equals(memberId) &
+            t.deletedAt.isNull(),
       )
       ..orderBy([(t) => OrderingTerm.desc(t.date)]);
+    return query.watch().map((rows) => rows.map(_toModel).toList());
+  }
+
+  @override
+  Stream<List<Expense>> watchDeletedExpenses(String messId) {
+    final query = _db.select(_db.expenses)
+      ..where((t) => t.messId.equals(messId) & t.deletedAt.isNotNull())
+      ..orderBy([(t) => OrderingTerm.desc(t.deletedAt)]);
     return query.watch().map((rows) => rows.map(_toModel).toList());
   }
 
@@ -119,6 +132,36 @@ class LocalExpenseRepository implements ExpenseRepository {
 
   @override
   Future<void> deleteExpense(String id) async {
+    await (_db.update(
+      _db.expenses,
+    )..where((t) => t.id.equals(id))).write(
+      ExpensesCompanion(deletedAt: Value(DateTime.now())),
+    );
+  }
+
+  @override
+  Future<void> restoreExpense(String id) async {
+    await (_db.update(
+      _db.expenses,
+    )..where((t) => t.id.equals(id))).write(
+      const ExpensesCompanion(deletedAt: Value(null)),
+    );
+  }
+
+  @override
+  Future<void> permanentlyDeleteExpense(String id) async {
     await (_db.delete(_db.expenses)..where((t) => t.id.equals(id))).go();
+  }
+
+  @override
+  Future<void> purgeExpiredExpenses(String messId, Duration retention) async {
+    final cutoff = DateTime.now().subtract(retention);
+    await (_db.delete(_db.expenses)..where(
+          (t) =>
+              t.messId.equals(messId) &
+              t.deletedAt.isNotNull() &
+              t.deletedAt.isSmallerThanValue(cutoff),
+        ))
+        .go();
   }
 }

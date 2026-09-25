@@ -17,3 +17,9 @@ final expensesForMemberProvider =
           .watch(expenseRepositoryProvider)
           .watchExpensesForMember(params.messId, params.memberId);
     });
+
+/// Soft-deleted bazar entries for the Recycle Bin.
+final deletedExpensesProvider =
+    StreamProvider.family<List<Expense>, String>((ref, messId) {
+      return ref.watch(expenseRepositoryProvider).watchDeletedExpenses(messId);
+    });

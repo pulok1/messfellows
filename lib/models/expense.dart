@@ -12,6 +12,7 @@ class Expense {
   final String? note;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? deletedAt;
 
   const Expense({
     required this.id,
@@ -23,6 +24,7 @@ class Expense {
     this.note,
     required this.createdAt,
     required this.updatedAt,
+    this.deletedAt,
   });
 
   Expense copyWith({
@@ -44,6 +46,7 @@ class Expense {
       note: clearNote ? null : (note ?? this.note),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt,
     );
   }
 }

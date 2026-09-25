@@ -17,3 +17,9 @@ final paymentsForMemberProvider =
           .watch(paymentRepositoryProvider)
           .watchPaymentsForMember(params.messId, params.memberId);
     });
+
+/// Soft-deleted payments for the Recycle Bin.
+final deletedPaymentsProvider =
+    StreamProvider.family<List<Payment>, String>((ref, messId) {
+      return ref.watch(paymentRepositoryProvider).watchDeletedPayments(messId);
+    });

@@ -22,6 +22,7 @@ class LocalPaymentRepository implements PaymentRepository {
     note: row.note,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
   );
 
   @override
@@ -37,7 +38,8 @@ class LocalPaymentRepository implements PaymentRepository {
         (t) =>
             t.messId.equals(messId) &
             t.date.isBiggerOrEqualValue(start) &
-            t.date.isSmallerThanValue(end),
+            t.date.isSmallerThanValue(end) &
+            t.deletedAt.isNull(),
       )
       ..orderBy([(t) => OrderingTerm.desc(t.date)]);
     return query.watch().map((rows) => rows.map(_toModel).toList());
@@ -46,8 +48,21 @@ class LocalPaymentRepository implements PaymentRepository {
   @override
   Stream<List<Payment>> watchPaymentsForMember(String messId, String memberId) {
     final query = _db.select(_db.payments)
-      ..where((t) => t.messId.equals(messId) & t.memberId.equals(memberId))
+      ..where(
+        (t) =>
+            t.messId.equals(messId) &
+            t.memberId.equals(memberId) &
+            t.deletedAt.isNull(),
+      )
       ..orderBy([(t) => OrderingTerm.desc(t.date)]);
+    return query.watch().map((rows) => rows.map(_toModel).toList());
+  }
+
+  @override
+  Stream<List<Payment>> watchDeletedPayments(String messId) {
+    final query = _db.select(_db.payments)
+      ..where((t) => t.messId.equals(messId) & t.deletedAt.isNotNull())
+      ..orderBy([(t) => OrderingTerm.desc(t.deletedAt)]);
     return query.watch().map((rows) => rows.map(_toModel).toList());
   }
 
@@ -112,6 +127,36 @@ class LocalPaymentRepository implements PaymentRepository {
 
   @override
   Future<void> deletePayment(String id) async {
+    await (_db.update(
+      _db.payments,
+    )..where((t) => t.id.equals(id))).write(
+      PaymentsCompanion(deletedAt: Value(DateTime.now())),
+    );
+  }
+
+  @override
+  Future<void> restorePayment(String id) async {
+    await (_db.update(
+      _db.payments,
+    )..where((t) => t.id.equals(id))).write(
+      const PaymentsCompanion(deletedAt: Value(null)),
+    );
+  }
+
+  @override
+  Future<void> permanentlyDeletePayment(String id) async {
     await (_db.delete(_db.payments)..where((t) => t.id.equals(id))).go();
+  }
+
+  @override
+  Future<void> purgeExpiredPayments(String messId, Duration retention) async {
+    final cutoff = DateTime.now().subtract(retention);
+    await (_db.delete(_db.payments)..where(
+          (t) =>
+              t.messId.equals(messId) &
+              t.deletedAt.isNotNull() &
+              t.deletedAt.isSmallerThanValue(cutoff),
+        ))
+        .go();
   }
 }
