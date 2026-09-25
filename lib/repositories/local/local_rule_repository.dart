@@ -3,9 +3,11 @@ import 'package:drift/drift.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/utils/id_generator.dart';
 import '../../database/app_database.dart';
+import '../../models/activity_type.dart';
 import '../../models/rule.dart';
 import '../../models/rule_category.dart';
 import '../rule_repository.dart';
+import 'activity_logger.dart';
 
 class LocalRuleRepository implements RuleRepository {
   final AppDatabase _db;
@@ -98,6 +100,12 @@ class LocalRuleRepository implements RuleRepository {
             ),
           );
       await _touchRules(messId, now);
+      await logActivity(
+        _db,
+        messId: messId,
+        type: ActivityType.ruleAdded,
+        detail: cleanTitle,
+      );
     });
 
     return Rule(
@@ -136,6 +144,12 @@ class LocalRuleRepository implements RuleRepository {
             );
       }
       await _touchRules(messId, now);
+      await logActivity(
+        _db,
+        messId: messId,
+        type: ActivityType.rulesBulkAdded,
+        count: cleaned.length,
+      );
     });
   }
 
@@ -155,6 +169,12 @@ class LocalRuleRepository implements RuleRepository {
             ),
           );
       await _touchRules(rule.messId, now);
+      await logActivity(
+        _db,
+        messId: rule.messId,
+        type: ActivityType.ruleUpdated,
+        detail: title,
+      );
     });
   }
 
@@ -167,6 +187,12 @@ class LocalRuleRepository implements RuleRepository {
       if (row == null) return;
       await (_db.delete(_db.messRules)..where((t) => t.id.equals(id))).go();
       await _touchRules(row.messId, DateTime.now());
+      await logActivity(
+        _db,
+        messId: row.messId,
+        type: ActivityType.ruleDeleted,
+        detail: row.title,
+      );
     });
   }
 }

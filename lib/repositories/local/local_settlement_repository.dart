@@ -3,10 +3,12 @@ import 'package:drift/drift.dart';
 import '../../core/utils/id_generator.dart';
 import '../../core/utils/money.dart';
 import '../../database/app_database.dart';
+import '../../models/activity_type.dart';
 import '../../models/member_balance.dart';
 import '../../models/settlement.dart';
 import '../../models/settlement_status.dart';
 import '../settlement_repository.dart';
+import 'activity_logger.dart';
 
 class LocalSettlementRepository implements SettlementRepository {
   final AppDatabase _db;
@@ -153,6 +155,15 @@ class LocalSettlementRepository implements SettlementRepository {
         );
       });
 
+      await logActivity(
+        _db,
+        messId: messId,
+        type: ActivityType.monthClosed,
+        amountMinorUnits: totalExpense.minorUnits,
+        year: year,
+        month: month,
+      );
+
       return MonthlySettlement(
         id: settlementId,
         messId: messId,
@@ -170,6 +181,9 @@ class LocalSettlementRepository implements SettlementRepository {
 
   @override
   Future<void> reopenMonth(String settlementId) async {
+    final row = await (_db.select(
+      _db.monthlySettlements,
+    )..where((t) => t.id.equals(settlementId))).getSingleOrNull();
     await (_db.update(
       _db.monthlySettlements,
     )..where((t) => t.id.equals(settlementId))).write(
@@ -178,5 +192,14 @@ class LocalSettlementRepository implements SettlementRepository {
         updatedAt: Value(DateTime.now()),
       ),
     );
+    if (row != null) {
+      await logActivity(
+        _db,
+        messId: row.messId,
+        type: ActivityType.monthReopened,
+        year: row.year,
+        month: row.month,
+      );
+    }
   }
 }

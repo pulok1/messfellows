@@ -3,8 +3,10 @@ import 'package:drift/drift.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/utils/id_generator.dart';
 import '../../database/app_database.dart';
+import '../../models/activity_type.dart';
 import '../../models/member.dart';
 import '../member_repository.dart';
+import 'activity_logger.dart';
 
 class LocalMemberRepository implements MemberRepository {
   final AppDatabase _db;
@@ -72,6 +74,12 @@ class LocalMemberRepository implements MemberRepository {
             updatedAt: now,
           ),
         );
+    await logActivity(
+      _db,
+      messId: messId,
+      type: ActivityType.memberAdded,
+      memberId: id,
+    );
     return Member(
       id: id,
       messId: messId,
@@ -102,6 +110,9 @@ class LocalMemberRepository implements MemberRepository {
 
   @override
   Future<void> archiveMember(String id) async {
+    final row = await (_db.select(
+      _db.members,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     await (_db.update(_db.members)..where((t) => t.id.equals(id))).write(
       MembersCompanion(
         isActive: const Value(false),
@@ -109,10 +120,21 @@ class LocalMemberRepository implements MemberRepository {
         updatedAt: Value(DateTime.now()),
       ),
     );
+    if (row != null) {
+      await logActivity(
+        _db,
+        messId: row.messId,
+        type: ActivityType.memberArchived,
+        memberId: id,
+      );
+    }
   }
 
   @override
   Future<void> reactivateMember(String id) async {
+    final row = await (_db.select(
+      _db.members,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     await (_db.update(_db.members)..where((t) => t.id.equals(id))).write(
       MembersCompanion(
         isActive: const Value(true),
@@ -120,5 +142,13 @@ class LocalMemberRepository implements MemberRepository {
         updatedAt: Value(DateTime.now()),
       ),
     );
+    if (row != null) {
+      await logActivity(
+        _db,
+        messId: row.messId,
+        type: ActivityType.memberReactivated,
+        memberId: id,
+      );
+    }
   }
 }
