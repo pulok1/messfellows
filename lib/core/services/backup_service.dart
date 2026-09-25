@@ -293,6 +293,7 @@ class BackupService {
     'note': row.note,
     'createdAt': row.createdAt.toIso8601String(),
     'updatedAt': row.updatedAt.toIso8601String(),
+    'deletedAt': row.deletedAt?.toIso8601String(),
   };
 
   ExpensesCompanion _expenseFromJson(Map<String, dynamic> json) =>
@@ -308,6 +309,12 @@ class BackupService {
         note: Value(json['note'] as String?),
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
+        // Older backups predate the Recycle Bin; absent means not deleted.
+        deletedAt: Value(
+          json['deletedAt'] == null
+              ? null
+              : DateTime.parse(json['deletedAt'] as String),
+        ),
       );
 
   // --- payments ---
@@ -321,6 +328,7 @@ class BackupService {
     'note': row.note,
     'createdAt': row.createdAt.toIso8601String(),
     'updatedAt': row.updatedAt.toIso8601String(),
+    'deletedAt': row.deletedAt?.toIso8601String(),
   };
 
   PaymentsCompanion _paymentFromJson(Map<String, dynamic> json) =>
@@ -333,6 +341,12 @@ class BackupService {
         note: Value(json['note'] as String?),
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
+        // Older backups predate the Recycle Bin; absent means not deleted.
+        deletedAt: Value(
+          json['deletedAt'] == null
+              ? null
+              : DateTime.parse(json['deletedAt'] as String),
+        ),
       );
 
   // --- settlements ---
