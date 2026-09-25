@@ -12,6 +12,7 @@ import '../../providers/member_providers.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/page_header_card.dart';
 import '../shared/widgets/section_header.dart';
+import '../shared/widgets/staggered_entrance.dart';
 
 enum _Filter { all, bazar, payments, members, rules, settlement }
 
@@ -109,6 +110,7 @@ class _ActivityLogScreenState extends ConsumerState<ActivityLogScreen> {
 
     final children = <Widget>[];
     DateTime? lastDay;
+    var tileIndex = 0;
     for (final entry in filtered) {
       final day = DateTime(
         entry.createdAt.year,
@@ -122,7 +124,13 @@ class _ActivityLogScreenState extends ConsumerState<ActivityLogScreen> {
         );
         lastDay = day;
       }
-      children.add(_ActivityTile(messId: widget.messId, entry: entry));
+      children.add(
+        StaggeredEntrance(
+          key: ValueKey(entry.id),
+          index: tileIndex++,
+          child: _ActivityTile(messId: widget.messId, entry: entry),
+        ),
+      );
     }
 
     return ListView(
