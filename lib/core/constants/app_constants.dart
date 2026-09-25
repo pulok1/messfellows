@@ -11,4 +11,8 @@ class AppConstants {
 
   static const String defaultCurrencySymbol = '৳';
   static const String defaultCurrencyCode = 'BDT';
+
+  /// How long a soft-deleted bazar entry or payment stays in the Recycle
+  /// Bin before being purged for good.
+  static const int recycleBinRetentionDays = 30;
 }

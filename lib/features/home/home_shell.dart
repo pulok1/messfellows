@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_motion.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/mess.dart';
+import '../../providers/recycle_bin_purge_provider.dart';
 import '../bazar/bazar_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../meals/meals_screen.dart';
@@ -15,16 +17,16 @@ import '../shared/quick_add/quick_add_sheet.dart';
 /// bottom nav and FAB, wrapped by IndexedStack so switching tabs doesn't
 /// lose scroll position or in-progress state. Switching tabs fades the new
 /// one in with a slight upward drift.
-class HomeShell extends StatefulWidget {
+class HomeShell extends ConsumerStatefulWidget {
   final Mess mess;
 
   const HomeShell({super.key, required this.mess});
 
   @override
-  State<HomeShell> createState() => _HomeShellState();
+  ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends State<HomeShell>
+class _HomeShellState extends ConsumerState<HomeShell>
     with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
 
@@ -60,6 +62,8 @@ class _HomeShellState extends State<HomeShell>
 
   @override
   Widget build(BuildContext context) {
+    // Runs once per session — see recycle_bin_purge_provider.dart.
+    ref.watch(recycleBinPurgeProvider(widget.mess.id));
     final l10n = AppLocalizations.of(context);
     final tabs = [
       DashboardScreen(mess: widget.mess, onOpenMeals: _goToMealsTab),
