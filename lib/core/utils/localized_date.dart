@@ -27,3 +27,8 @@ String formatMonthYear(BuildContext context, int year, int month) {
 String formatWeekday(BuildContext context, DateTime date) {
   return DateFormat.EEEE(_tag(context)).format(date);
 }
+
+/// "3:40 PM"
+String formatTimeOfDay(BuildContext context, DateTime date) {
+  return DateFormat.jm(_tag(context)).format(date);
+}
