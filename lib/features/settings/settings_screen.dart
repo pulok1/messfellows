@@ -13,11 +13,14 @@ import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/mess.dart';
 import '../../providers/backup_provider.dart';
+import '../../providers/expense_providers.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/mess_provider.dart';
+import '../../providers/payment_providers.dart';
 import '../../providers/repository_providers.dart';
 import '../../providers/theme_mode_provider.dart';
 import '../members/members_screen.dart';
+import '../recycle_bin/recycle_bin_screen.dart';
 import '../rules/rules_screen.dart';
 import '../shared/widgets/confirm_dialog.dart';
 import '../shared/widgets/page_header_card.dart';
@@ -69,6 +72,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return;
     }
     await ref.read(messRepositoryProvider).updateMess(mess.copyWith(name: newName));
+  }
+
+  int _recycleBinCount(WidgetRef ref, String messId) {
+    final deletedExpenses = ref.watch(deletedExpensesProvider(messId)).value ?? const [];
+    final deletedPayments = ref.watch(deletedPaymentsProvider(messId)).value ?? const [];
+    return deletedExpenses.length + deletedPayments.length;
   }
 
   Future<void> _setMealTracking({
@@ -452,6 +461,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             title: Text(l10n.importDataTitle),
                             subtitle: Text(l10n.importDataSubtitle),
                             onTap: _importData,
+                          ),
+                          const Divider(height: 1, indent: 56),
+                          Builder(
+                            builder: (context) {
+                              final count = _recycleBinCount(ref, mess.id);
+                              return ListTile(
+                                leading: const Icon(
+                                  Icons.restore_from_trash_outlined,
+                                ),
+                                title: Text(l10n.recycleBinTitle),
+                                subtitle: Text(l10n.recycleBinSubtitle),
+                                trailing: count == 0
+                                    ? null
+                                    : CircleAvatar(
+                                        radius: 11,
+                                        backgroundColor:
+                                            Theme.of(context).colorScheme.error,
+                                        child: Text(
+                                          '$count',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onError,
+                                          ),
+                                        ),
+                                      ),
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        RecycleBinScreen(messId: mess.id),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                           const Divider(height: 1, indent: 56),
                           ListTile(
