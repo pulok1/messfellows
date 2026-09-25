@@ -2,8 +2,10 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../models/activity_type.dart';
 import '../models/rule_category.dart';
 import '../models/settlement_status.dart';
+import 'tables/activity_log_table.dart';
 import 'tables/expense_table.dart';
 import 'tables/meal_entry_table.dart';
 import 'tables/member_table.dart';
@@ -29,6 +31,7 @@ part 'app_database.g.dart';
     Payments,
     MonthlySettlements,
     MonthlySettlementMembers,
+    ActivityLogs,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -41,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   // changes. Future sync-metadata columns (syncStatus, remoteId, ...) will
   // land as additive migrations here rather than a rewrite.
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -109,6 +112,11 @@ class AppDatabase extends _$AppDatabase {
             newColumns: [payments.deletedAt],
           ),
         );
+      }
+      if (from < 6) {
+        // Activity Log: a permanent history of meaningful changes, distinct
+        // from the Recycle Bin (which is an undo buffer that auto-purges).
+        await m.createTable(activityLogs);
       }
     },
     beforeOpen: (details) async {

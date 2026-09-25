@@ -4658,6 +4658,626 @@ class MonthlySettlementMembersCompanion
   }
 }
 
+class $ActivityLogsTable extends ActivityLogs
+    with TableInfo<$ActivityLogsTable, ActivityLogRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ActivityLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _messIdMeta = const VerificationMeta('messId');
+  @override
+  late final GeneratedColumn<String> messId = GeneratedColumn<String>(
+    'mess_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES messes (id)',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ActivityType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<ActivityType>($ActivityLogsTable.$convertertype);
+  static const VerificationMeta _memberIdMeta = const VerificationMeta(
+    'memberId',
+  );
+  @override
+  late final GeneratedColumn<String> memberId = GeneratedColumn<String>(
+    'member_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES members (id)',
+    ),
+  );
+  static const VerificationMeta _amountMinorUnitsMeta = const VerificationMeta(
+    'amountMinorUnits',
+  );
+  @override
+  late final GeneratedColumn<int> amountMinorUnits = GeneratedColumn<int>(
+    'amount_minor_units',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _detailMeta = const VerificationMeta('detail');
+  @override
+  late final GeneratedColumn<String> detail = GeneratedColumn<String>(
+    'detail',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _yearMeta = const VerificationMeta('year');
+  @override
+  late final GeneratedColumn<int> year = GeneratedColumn<int>(
+    'year',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _monthMeta = const VerificationMeta('month');
+  @override
+  late final GeneratedColumn<int> month = GeneratedColumn<int>(
+    'month',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _countMeta = const VerificationMeta('count');
+  @override
+  late final GeneratedColumn<int> count = GeneratedColumn<int>(
+    'count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    messId,
+    type,
+    memberId,
+    amountMinorUnits,
+    detail,
+    year,
+    month,
+    count,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'activity_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ActivityLogRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('mess_id')) {
+      context.handle(
+        _messIdMeta,
+        messId.isAcceptableOrUnknown(data['mess_id']!, _messIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_messIdMeta);
+    }
+    if (data.containsKey('member_id')) {
+      context.handle(
+        _memberIdMeta,
+        memberId.isAcceptableOrUnknown(data['member_id']!, _memberIdMeta),
+      );
+    }
+    if (data.containsKey('amount_minor_units')) {
+      context.handle(
+        _amountMinorUnitsMeta,
+        amountMinorUnits.isAcceptableOrUnknown(
+          data['amount_minor_units']!,
+          _amountMinorUnitsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('detail')) {
+      context.handle(
+        _detailMeta,
+        detail.isAcceptableOrUnknown(data['detail']!, _detailMeta),
+      );
+    }
+    if (data.containsKey('year')) {
+      context.handle(
+        _yearMeta,
+        year.isAcceptableOrUnknown(data['year']!, _yearMeta),
+      );
+    }
+    if (data.containsKey('month')) {
+      context.handle(
+        _monthMeta,
+        month.isAcceptableOrUnknown(data['month']!, _monthMeta),
+      );
+    }
+    if (data.containsKey('count')) {
+      context.handle(
+        _countMeta,
+        count.isAcceptableOrUnknown(data['count']!, _countMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ActivityLogRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ActivityLogRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      messId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mess_id'],
+      )!,
+      type: $ActivityLogsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
+      memberId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}member_id'],
+      ),
+      amountMinorUnits: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_minor_units'],
+      ),
+      detail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}detail'],
+      ),
+      year: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}year'],
+      ),
+      month: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}month'],
+      ),
+      count: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}count'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ActivityLogsTable createAlias(String alias) {
+    return $ActivityLogsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<ActivityType, String, String> $convertertype =
+      const EnumNameConverter<ActivityType>(ActivityType.values);
+}
+
+class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
+  final String id;
+  final String messId;
+  final ActivityType type;
+  final String? memberId;
+  final int? amountMinorUnits;
+  final String? detail;
+  final int? year;
+  final int? month;
+  final int? count;
+  final DateTime createdAt;
+  const ActivityLogRow({
+    required this.id,
+    required this.messId,
+    required this.type,
+    this.memberId,
+    this.amountMinorUnits,
+    this.detail,
+    this.year,
+    this.month,
+    this.count,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['mess_id'] = Variable<String>(messId);
+    {
+      map['type'] = Variable<String>(
+        $ActivityLogsTable.$convertertype.toSql(type),
+      );
+    }
+    if (!nullToAbsent || memberId != null) {
+      map['member_id'] = Variable<String>(memberId);
+    }
+    if (!nullToAbsent || amountMinorUnits != null) {
+      map['amount_minor_units'] = Variable<int>(amountMinorUnits);
+    }
+    if (!nullToAbsent || detail != null) {
+      map['detail'] = Variable<String>(detail);
+    }
+    if (!nullToAbsent || year != null) {
+      map['year'] = Variable<int>(year);
+    }
+    if (!nullToAbsent || month != null) {
+      map['month'] = Variable<int>(month);
+    }
+    if (!nullToAbsent || count != null) {
+      map['count'] = Variable<int>(count);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ActivityLogsCompanion toCompanion(bool nullToAbsent) {
+    return ActivityLogsCompanion(
+      id: Value(id),
+      messId: Value(messId),
+      type: Value(type),
+      memberId: memberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(memberId),
+      amountMinorUnits: amountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amountMinorUnits),
+      detail: detail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(detail),
+      year: year == null && nullToAbsent ? const Value.absent() : Value(year),
+      month: month == null && nullToAbsent
+          ? const Value.absent()
+          : Value(month),
+      count: count == null && nullToAbsent
+          ? const Value.absent()
+          : Value(count),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ActivityLogRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ActivityLogRow(
+      id: serializer.fromJson<String>(json['id']),
+      messId: serializer.fromJson<String>(json['messId']),
+      type: $ActivityLogsTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
+      memberId: serializer.fromJson<String?>(json['memberId']),
+      amountMinorUnits: serializer.fromJson<int?>(json['amountMinorUnits']),
+      detail: serializer.fromJson<String?>(json['detail']),
+      year: serializer.fromJson<int?>(json['year']),
+      month: serializer.fromJson<int?>(json['month']),
+      count: serializer.fromJson<int?>(json['count']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'messId': serializer.toJson<String>(messId),
+      'type': serializer.toJson<String>(
+        $ActivityLogsTable.$convertertype.toJson(type),
+      ),
+      'memberId': serializer.toJson<String?>(memberId),
+      'amountMinorUnits': serializer.toJson<int?>(amountMinorUnits),
+      'detail': serializer.toJson<String?>(detail),
+      'year': serializer.toJson<int?>(year),
+      'month': serializer.toJson<int?>(month),
+      'count': serializer.toJson<int?>(count),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ActivityLogRow copyWith({
+    String? id,
+    String? messId,
+    ActivityType? type,
+    Value<String?> memberId = const Value.absent(),
+    Value<int?> amountMinorUnits = const Value.absent(),
+    Value<String?> detail = const Value.absent(),
+    Value<int?> year = const Value.absent(),
+    Value<int?> month = const Value.absent(),
+    Value<int?> count = const Value.absent(),
+    DateTime? createdAt,
+  }) => ActivityLogRow(
+    id: id ?? this.id,
+    messId: messId ?? this.messId,
+    type: type ?? this.type,
+    memberId: memberId.present ? memberId.value : this.memberId,
+    amountMinorUnits: amountMinorUnits.present
+        ? amountMinorUnits.value
+        : this.amountMinorUnits,
+    detail: detail.present ? detail.value : this.detail,
+    year: year.present ? year.value : this.year,
+    month: month.present ? month.value : this.month,
+    count: count.present ? count.value : this.count,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ActivityLogRow copyWithCompanion(ActivityLogsCompanion data) {
+    return ActivityLogRow(
+      id: data.id.present ? data.id.value : this.id,
+      messId: data.messId.present ? data.messId.value : this.messId,
+      type: data.type.present ? data.type.value : this.type,
+      memberId: data.memberId.present ? data.memberId.value : this.memberId,
+      amountMinorUnits: data.amountMinorUnits.present
+          ? data.amountMinorUnits.value
+          : this.amountMinorUnits,
+      detail: data.detail.present ? data.detail.value : this.detail,
+      year: data.year.present ? data.year.value : this.year,
+      month: data.month.present ? data.month.value : this.month,
+      count: data.count.present ? data.count.value : this.count,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ActivityLogRow(')
+          ..write('id: $id, ')
+          ..write('messId: $messId, ')
+          ..write('type: $type, ')
+          ..write('memberId: $memberId, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('detail: $detail, ')
+          ..write('year: $year, ')
+          ..write('month: $month, ')
+          ..write('count: $count, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    messId,
+    type,
+    memberId,
+    amountMinorUnits,
+    detail,
+    year,
+    month,
+    count,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ActivityLogRow &&
+          other.id == this.id &&
+          other.messId == this.messId &&
+          other.type == this.type &&
+          other.memberId == this.memberId &&
+          other.amountMinorUnits == this.amountMinorUnits &&
+          other.detail == this.detail &&
+          other.year == this.year &&
+          other.month == this.month &&
+          other.count == this.count &&
+          other.createdAt == this.createdAt);
+}
+
+class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
+  final Value<String> id;
+  final Value<String> messId;
+  final Value<ActivityType> type;
+  final Value<String?> memberId;
+  final Value<int?> amountMinorUnits;
+  final Value<String?> detail;
+  final Value<int?> year;
+  final Value<int?> month;
+  final Value<int?> count;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ActivityLogsCompanion({
+    this.id = const Value.absent(),
+    this.messId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.memberId = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.detail = const Value.absent(),
+    this.year = const Value.absent(),
+    this.month = const Value.absent(),
+    this.count = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ActivityLogsCompanion.insert({
+    required String id,
+    required String messId,
+    required ActivityType type,
+    this.memberId = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.detail = const Value.absent(),
+    this.year = const Value.absent(),
+    this.month = const Value.absent(),
+    this.count = const Value.absent(),
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       messId = Value(messId),
+       type = Value(type),
+       createdAt = Value(createdAt);
+  static Insertable<ActivityLogRow> custom({
+    Expression<String>? id,
+    Expression<String>? messId,
+    Expression<String>? type,
+    Expression<String>? memberId,
+    Expression<int>? amountMinorUnits,
+    Expression<String>? detail,
+    Expression<int>? year,
+    Expression<int>? month,
+    Expression<int>? count,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (messId != null) 'mess_id': messId,
+      if (type != null) 'type': type,
+      if (memberId != null) 'member_id': memberId,
+      if (amountMinorUnits != null) 'amount_minor_units': amountMinorUnits,
+      if (detail != null) 'detail': detail,
+      if (year != null) 'year': year,
+      if (month != null) 'month': month,
+      if (count != null) 'count': count,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ActivityLogsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? messId,
+    Value<ActivityType>? type,
+    Value<String?>? memberId,
+    Value<int?>? amountMinorUnits,
+    Value<String?>? detail,
+    Value<int?>? year,
+    Value<int?>? month,
+    Value<int?>? count,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ActivityLogsCompanion(
+      id: id ?? this.id,
+      messId: messId ?? this.messId,
+      type: type ?? this.type,
+      memberId: memberId ?? this.memberId,
+      amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+      detail: detail ?? this.detail,
+      year: year ?? this.year,
+      month: month ?? this.month,
+      count: count ?? this.count,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (messId.present) {
+      map['mess_id'] = Variable<String>(messId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(
+        $ActivityLogsTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (memberId.present) {
+      map['member_id'] = Variable<String>(memberId.value);
+    }
+    if (amountMinorUnits.present) {
+      map['amount_minor_units'] = Variable<int>(amountMinorUnits.value);
+    }
+    if (detail.present) {
+      map['detail'] = Variable<String>(detail.value);
+    }
+    if (year.present) {
+      map['year'] = Variable<int>(year.value);
+    }
+    if (month.present) {
+      map['month'] = Variable<int>(month.value);
+    }
+    if (count.present) {
+      map['count'] = Variable<int>(count.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ActivityLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('messId: $messId, ')
+          ..write('type: $type, ')
+          ..write('memberId: $memberId, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('detail: $detail, ')
+          ..write('year: $year, ')
+          ..write('month: $month, ')
+          ..write('count: $count, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4671,6 +5291,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $MonthlySettlementsTable(this);
   late final $MonthlySettlementMembersTable monthlySettlementMembers =
       $MonthlySettlementMembersTable(this);
+  late final $ActivityLogsTable activityLogs = $ActivityLogsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4684,6 +5305,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     payments,
     monthlySettlements,
     monthlySettlementMembers,
+    activityLogs,
   ];
 }
 
@@ -4828,6 +5450,24 @@ final class $$MessesTableReferences
     final cache = $_typedResult.readTableOrNull(
       _monthlySettlementsRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ActivityLogsTable, List<ActivityLogRow>>
+  _activityLogsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.activityLogs,
+    aliasName: 'messes__id__activity_logs__mess_id',
+  );
+
+  $$ActivityLogsTableProcessedTableManager get activityLogsRefs {
+    final manager = $$ActivityLogsTableTableManager(
+      $_db,
+      $_db.activityLogs,
+    ).filter((f) => f.messId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_activityLogsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -5034,6 +5674,31 @@ class $$MessesTableFilterComposer
           }) => $$MonthlySettlementsTableFilterComposer(
             $db: $db,
             $table: $db.monthlySettlements,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> activityLogsRefs(
+    Expression<bool> Function($$ActivityLogsTableFilterComposer f) f,
+  ) {
+    final $$ActivityLogsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.activityLogs,
+      getReferencedColumn: (t) => t.messId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityLogsTableFilterComposer(
+            $db: $db,
+            $table: $db.activityLogs,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5305,6 +5970,31 @@ class $$MessesTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> activityLogsRefs<T extends Object>(
+    Expression<T> Function($$ActivityLogsTableAnnotationComposer a) f,
+  ) {
+    final $$ActivityLogsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.activityLogs,
+      getReferencedColumn: (t) => t.messId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityLogsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.activityLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$MessesTableTableManager
@@ -5327,6 +6017,7 @@ class $$MessesTableTableManager
             bool expensesRefs,
             bool paymentsRefs,
             bool monthlySettlementsRefs,
+            bool activityLogsRefs,
           })
         > {
   $$MessesTableTableManager(_$AppDatabase db, $MessesTable table)
@@ -5408,6 +6099,7 @@ class $$MessesTableTableManager
                 expensesRefs = false,
                 paymentsRefs = false,
                 monthlySettlementsRefs = false,
+                activityLogsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -5418,6 +6110,7 @@ class $$MessesTableTableManager
                     if (expensesRefs) db.expenses,
                     if (paymentsRefs) db.payments,
                     if (monthlySettlementsRefs) db.monthlySettlements,
+                    if (activityLogsRefs) db.activityLogs,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -5548,6 +6241,27 @@ class $$MessesTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (activityLogsRefs)
+                        await $_getPrefetchedData<
+                          MessRow,
+                          $MessesTable,
+                          ActivityLogRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MessesTableReferences
+                              ._activityLogsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MessesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).activityLogsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.messId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -5575,6 +6289,7 @@ typedef $$MessesTableProcessedTableManager =
         bool expensesRefs,
         bool paymentsRefs,
         bool monthlySettlementsRefs,
+        bool activityLogsRefs,
       })
     >;
 typedef $$MessRulesTableCreateCompanionBuilder = MessRulesCompanion Function({
@@ -6074,6 +6789,24 @@ final class $$MembersTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$ActivityLogsTable, List<ActivityLogRow>>
+  _activityLogsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.activityLogs,
+    aliasName: 'members__id__activity_logs__member_id',
+  );
+
+  $$ActivityLogsTableProcessedTableManager get activityLogsRefs {
+    final manager = $$ActivityLogsTableTableManager(
+      $_db,
+      $_db.activityLogs,
+    ).filter((f) => f.memberId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_activityLogsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$MembersTableFilterComposer
@@ -6247,6 +6980,31 @@ class $$MembersTableFilterComposer
                     $removeJoinBuilderFromRootComposer,
               ),
         );
+    return f(composer);
+  }
+
+  Expression<bool> activityLogsRefs(
+    Expression<bool> Function($$ActivityLogsTableFilterComposer f) f,
+  ) {
+    final $$ActivityLogsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.activityLogs,
+      getReferencedColumn: (t) => t.memberId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityLogsTableFilterComposer(
+            $db: $db,
+            $table: $db.activityLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
@@ -6481,6 +7239,31 @@ class $$MembersTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> activityLogsRefs<T extends Object>(
+    Expression<T> Function($$ActivityLogsTableAnnotationComposer a) f,
+  ) {
+    final $$ActivityLogsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.activityLogs,
+      getReferencedColumn: (t) => t.memberId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityLogsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.activityLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$MembersTableTableManager
@@ -6502,6 +7285,7 @@ class $$MembersTableTableManager
             bool expensesRefs,
             bool paymentsRefs,
             bool monthlySettlementMembersRefs,
+            bool activityLogsRefs,
           })
         > {
   $$MembersTableTableManager(_$AppDatabase db, $MembersTable table)
@@ -6578,6 +7362,7 @@ class $$MembersTableTableManager
                 expensesRefs = false,
                 paymentsRefs = false,
                 monthlySettlementMembersRefs = false,
+                activityLogsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -6587,6 +7372,7 @@ class $$MembersTableTableManager
                     if (paymentsRefs) db.payments,
                     if (monthlySettlementMembersRefs)
                       db.monthlySettlementMembers,
+                    if (activityLogsRefs) db.activityLogs,
                   ],
                   addJoins:
                       <
@@ -6704,6 +7490,27 @@ class $$MembersTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (activityLogsRefs)
+                        await $_getPrefetchedData<
+                          MemberRow,
+                          $MembersTable,
+                          ActivityLogRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MembersTableReferences
+                              ._activityLogsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MembersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).activityLogsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.memberId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -6730,6 +7537,7 @@ typedef $$MembersTableProcessedTableManager =
         bool expensesRefs,
         bool paymentsRefs,
         bool monthlySettlementMembersRefs,
+        bool activityLogsRefs,
       })
     >;
 typedef $$MealEntriesTableCreateCompanionBuilder =
@@ -9217,6 +10025,503 @@ typedef $$MonthlySettlementMembersTableProcessedTableManager =
       MonthlySettlementMemberRow,
       PrefetchHooks Function({bool settlementId, bool memberId})
     >;
+typedef $$ActivityLogsTableCreateCompanionBuilder =
+    ActivityLogsCompanion Function({
+      required String id,
+      required String messId,
+      required ActivityType type,
+      Value<String?> memberId,
+      Value<int?> amountMinorUnits,
+      Value<String?> detail,
+      Value<int?> year,
+      Value<int?> month,
+      Value<int?> count,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$ActivityLogsTableUpdateCompanionBuilder =
+    ActivityLogsCompanion Function({
+      Value<String> id,
+      Value<String> messId,
+      Value<ActivityType> type,
+      Value<String?> memberId,
+      Value<int?> amountMinorUnits,
+      Value<String?> detail,
+      Value<int?> year,
+      Value<int?> month,
+      Value<int?> count,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$ActivityLogsTableReferences
+    extends BaseReferences<_$AppDatabase, $ActivityLogsTable, ActivityLogRow> {
+  $$ActivityLogsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $MessesTable _messIdTable(_$AppDatabase db) =>
+      db.messes.createAlias('activity_logs__mess_id__messes__id');
+
+  $$MessesTableProcessedTableManager get messId {
+    final $_column = $_itemColumn<String>('mess_id')!;
+
+    final manager = $$MessesTableTableManager(
+      $_db,
+      $_db.messes,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_messIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MembersTable _memberIdTable(_$AppDatabase db) =>
+      db.members.createAlias('activity_logs__member_id__members__id');
+
+  $$MembersTableProcessedTableManager? get memberId {
+    final $_column = $_itemColumn<String>('member_id');
+    if ($_column == null) return null;
+    final manager = $$MembersTableTableManager(
+      $_db,
+      $_db.members,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_memberIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ActivityLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $ActivityLogsTable> {
+  $$ActivityLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ActivityType, ActivityType, String> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get amountMinorUnits => $composableBuilder(
+    column: $table.amountMinorUnits,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get detail => $composableBuilder(
+    column: $table.detail,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get year => $composableBuilder(
+    column: $table.year,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get month => $composableBuilder(
+    column: $table.month,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$MessesTableFilterComposer get messId {
+    final $$MessesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.messId,
+      referencedTable: $db.messes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MessesTableFilterComposer(
+            $db: $db,
+            $table: $db.messes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MembersTableFilterComposer get memberId {
+    final $$MembersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.memberId,
+      referencedTable: $db.members,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MembersTableFilterComposer(
+            $db: $db,
+            $table: $db.members,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ActivityLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ActivityLogsTable> {
+  $$ActivityLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amountMinorUnits => $composableBuilder(
+    column: $table.amountMinorUnits,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get detail => $composableBuilder(
+    column: $table.detail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get year => $composableBuilder(
+    column: $table.year,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get month => $composableBuilder(
+    column: $table.month,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$MessesTableOrderingComposer get messId {
+    final $$MessesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.messId,
+      referencedTable: $db.messes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MessesTableOrderingComposer(
+            $db: $db,
+            $table: $db.messes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MembersTableOrderingComposer get memberId {
+    final $$MembersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.memberId,
+      referencedTable: $db.members,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MembersTableOrderingComposer(
+            $db: $db,
+            $table: $db.members,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ActivityLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ActivityLogsTable> {
+  $$ActivityLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ActivityType, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMinorUnits => $composableBuilder(
+    column: $table.amountMinorUnits,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get detail =>
+      $composableBuilder(column: $table.detail, builder: (column) => column);
+
+  GeneratedColumn<int> get year =>
+      $composableBuilder(column: $table.year, builder: (column) => column);
+
+  GeneratedColumn<int> get month =>
+      $composableBuilder(column: $table.month, builder: (column) => column);
+
+  GeneratedColumn<int> get count =>
+      $composableBuilder(column: $table.count, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$MessesTableAnnotationComposer get messId {
+    final $$MessesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.messId,
+      referencedTable: $db.messes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MessesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.messes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MembersTableAnnotationComposer get memberId {
+    final $$MembersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.memberId,
+      referencedTable: $db.members,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MembersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.members,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ActivityLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ActivityLogsTable,
+          ActivityLogRow,
+          $$ActivityLogsTableFilterComposer,
+          $$ActivityLogsTableOrderingComposer,
+          $$ActivityLogsTableAnnotationComposer,
+          $$ActivityLogsTableCreateCompanionBuilder,
+          $$ActivityLogsTableUpdateCompanionBuilder,
+          (ActivityLogRow, $$ActivityLogsTableReferences),
+          ActivityLogRow,
+          PrefetchHooks Function({bool messId, bool memberId})
+        > {
+  $$ActivityLogsTableTableManager(_$AppDatabase db, $ActivityLogsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ActivityLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ActivityLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ActivityLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> messId = const Value.absent(),
+                Value<ActivityType> type = const Value.absent(),
+                Value<String?> memberId = const Value.absent(),
+                Value<int?> amountMinorUnits = const Value.absent(),
+                Value<String?> detail = const Value.absent(),
+                Value<int?> year = const Value.absent(),
+                Value<int?> month = const Value.absent(),
+                Value<int?> count = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ActivityLogsCompanion(
+                id: id,
+                messId: messId,
+                type: type,
+                memberId: memberId,
+                amountMinorUnits: amountMinorUnits,
+                detail: detail,
+                year: year,
+                month: month,
+                count: count,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String messId,
+                required ActivityType type,
+                Value<String?> memberId = const Value.absent(),
+                Value<int?> amountMinorUnits = const Value.absent(),
+                Value<String?> detail = const Value.absent(),
+                Value<int?> year = const Value.absent(),
+                Value<int?> month = const Value.absent(),
+                Value<int?> count = const Value.absent(),
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ActivityLogsCompanion.insert(
+                id: id,
+                messId: messId,
+                type: type,
+                memberId: memberId,
+                amountMinorUnits: amountMinorUnits,
+                detail: detail,
+                year: year,
+                month: month,
+                count: count,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ActivityLogsTable, ActivityLogRow>(table),
+                  $$ActivityLogsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({messId = false, memberId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (messId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.messId,
+                        referencedTable: $$ActivityLogsTableReferences
+                            ._messIdTable(db),
+                        referencedColumn: $$ActivityLogsTableReferences
+                            ._messIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+                    if (memberId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.memberId,
+                        referencedTable: $$ActivityLogsTableReferences
+                            ._memberIdTable(db),
+                        referencedColumn: $$ActivityLogsTableReferences
+                            ._memberIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ActivityLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ActivityLogsTable,
+      ActivityLogRow,
+      $$ActivityLogsTableFilterComposer,
+      $$ActivityLogsTableOrderingComposer,
+      $$ActivityLogsTableAnnotationComposer,
+      $$ActivityLogsTableCreateCompanionBuilder,
+      $$ActivityLogsTableUpdateCompanionBuilder,
+      (ActivityLogRow, $$ActivityLogsTableReferences),
+      ActivityLogRow,
+      PrefetchHooks Function({bool messId, bool memberId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9240,4 +10545,6 @@ class $AppDatabaseManager {
         _db,
         _db.monthlySettlementMembers,
       );
+  $$ActivityLogsTableTableManager get activityLogs =>
+      $$ActivityLogsTableTableManager(_db, _db.activityLogs);
 }

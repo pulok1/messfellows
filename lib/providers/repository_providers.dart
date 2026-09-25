@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/services/calculation_engine.dart';
+import '../repositories/activity_log_repository.dart';
 import '../repositories/expense_repository.dart';
+import '../repositories/local/local_activity_log_repository.dart';
 import '../repositories/local/local_expense_repository.dart';
 import '../repositories/local/local_meal_repository.dart';
 import '../repositories/local/local_member_repository.dart';
@@ -23,6 +25,10 @@ import 'database_provider.dart';
 /// one-line change here, not a rewrite of the app.
 final messRepositoryProvider = Provider<MessRepository>((ref) {
   return LocalMessRepository(ref.watch(appDatabaseProvider));
+});
+
+final activityLogRepositoryProvider = Provider<ActivityLogRepository>((ref) {
+  return LocalActivityLogRepository(ref.watch(appDatabaseProvider));
 });
 
 final memberRepositoryProvider = Provider<MemberRepository>((ref) {
