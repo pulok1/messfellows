@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/theme/app_logo.dart';
+import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/mess.dart';
@@ -485,23 +486,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                                 title: Text(l10n.recycleBinTitle),
                                 subtitle: Text(l10n.recycleBinSubtitle),
-                                trailing: count == 0
-                                    ? null
-                                    : CircleAvatar(
-                                        radius: 11,
-                                        backgroundColor:
-                                            Theme.of(context).colorScheme.error,
-                                        child: Text(
-                                          '$count',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onError,
+                                trailing: AnimatedSwitcher(
+                                  duration: AppMotion.of(
+                                    context,
+                                    AppMotion.short,
+                                  ),
+                                  transitionBuilder: (child, animation) =>
+                                      ScaleTransition(
+                                        scale: animation,
+                                        child: child,
+                                      ),
+                                  child: count == 0
+                                      ? const SizedBox.shrink(key: ValueKey('empty'))
+                                      : CircleAvatar(
+                                          key: ValueKey(count),
+                                          radius: 11,
+                                          backgroundColor:
+                                              Theme.of(context).colorScheme.error,
+                                          child: Text(
+                                            '$count',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onError,
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                ),
                                 onTap: () => Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) =>
