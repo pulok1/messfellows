@@ -5,6 +5,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/utils/localized_date.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/meal_entry.dart';
+import '../../models/member.dart';
 import '../../models/mess.dart';
 import '../../providers/meal_providers.dart';
 import '../../providers/member_providers.dart';
@@ -15,6 +16,7 @@ import '../members/add_edit_member_dialog.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/page_header_card.dart';
 import 'widgets/meal_day_row.dart';
+import 'widgets/meal_progress_row.dart';
 
 /// The daily meal tracker (sections 14/15) — the screen a manager is
 /// expected to open several times a day, so it defaults to today and
@@ -25,6 +27,29 @@ class MealsScreen extends ConsumerWidget {
   const MealsScreen({super.key, required this.mess});
 
   String get messId => mess.id;
+
+  /// Marks everyone who hasn't eaten yet in [countOf]'s slot (leaving
+  /// anyone already at 1+, including a guest-meal count, untouched) —
+  /// or, if everyone's already marked, clears the whole slot back to 0.
+  /// Runs every write in parallel; a household mess is small enough that
+  /// this is instant either way.
+  Future<void> _toggleAllForSlot(
+    WidgetRef ref, {
+    required List<Member> members,
+    required Map<String, MealEntry> mealsByMember,
+    required DateTime date,
+    required int Function(MealEntry?) countOf,
+    required Future<void> Function(String memberId, int value) setValue,
+  }) async {
+    final allMarked =
+        members.isNotEmpty &&
+        members.every((m) => countOf(mealsByMember[m.id]) > 0);
+    await Future.wait([
+      for (final member in members)
+        if (allMarked || countOf(mealsByMember[member.id]) == 0)
+          setValue(member.id, allMarked ? 0 : 1),
+    ]);
+  }
 
   Future<void> _pickDate(BuildContext context, WidgetRef ref, DateTime current) async {
     final picked = await showDatePicker(
@@ -85,47 +110,119 @@ class MealsScreen extends ConsumerWidget {
                   final meals = mealsAsync.value ?? const <MealEntry>[];
                   final mealsByMember = {for (final meal in meals) meal.memberId: meal};
 
-                  return ListView.separated(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    itemCount: members.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-                    itemBuilder: (context, index) {
-                      final member = members[index];
-                      final meal = mealsByMember[member.id];
-                      return MealDayRow(
-                        member: member,
-                        breakfast: meal?.breakfast ?? 0,
-                        lunch: meal?.lunch ?? 0,
-                        dinner: meal?.dinner ?? 0,
+                  return Column(
+                    children: [
+                      MealProgressRow(
+                        totalMembers: members.length,
+                        breakfastMarked: members
+                            .where((m) => (mealsByMember[m.id]?.breakfast ?? 0) > 0)
+                            .length,
+                        lunchMarked: members
+                            .where((m) => (mealsByMember[m.id]?.lunch ?? 0) > 0)
+                            .length,
+                        dinnerMarked: members
+                            .where((m) => (mealsByMember[m.id]?.dinner ?? 0) > 0)
+                            .length,
                         showBreakfast: mess.trackBreakfast,
                         showLunch: mess.trackLunch,
                         showDinner: mess.trackDinner,
-                        onBreakfastChanged: (value) => ref
-                            .read(mealRepositoryProvider)
-                            .setMeal(
-                              messId: messId,
-                              memberId: member.id,
-                              date: date,
-                              breakfast: value,
-                            ),
-                        onLunchChanged: (value) => ref
-                            .read(mealRepositoryProvider)
-                            .setMeal(
-                              messId: messId,
-                              memberId: member.id,
-                              date: date,
-                              lunch: value,
-                            ),
-                        onDinnerChanged: (value) => ref
-                            .read(mealRepositoryProvider)
-                            .setMeal(
-                              messId: messId,
-                              memberId: member.id,
-                              date: date,
-                              dinner: value,
-                            ),
-                      );
-                    },
+                        onToggleBreakfast: () => _toggleAllForSlot(
+                          ref,
+                          members: members,
+                          mealsByMember: mealsByMember,
+                          date: date,
+                          countOf: (m) => m?.breakfast ?? 0,
+                          setValue: (memberId, value) => ref
+                              .read(mealRepositoryProvider)
+                              .setMeal(
+                                messId: messId,
+                                memberId: memberId,
+                                date: date,
+                                breakfast: value,
+                              ),
+                        ),
+                        onToggleLunch: () => _toggleAllForSlot(
+                          ref,
+                          members: members,
+                          mealsByMember: mealsByMember,
+                          date: date,
+                          countOf: (m) => m?.lunch ?? 0,
+                          setValue: (memberId, value) => ref
+                              .read(mealRepositoryProvider)
+                              .setMeal(
+                                messId: messId,
+                                memberId: memberId,
+                                date: date,
+                                lunch: value,
+                              ),
+                        ),
+                        onToggleDinner: () => _toggleAllForSlot(
+                          ref,
+                          members: members,
+                          mealsByMember: mealsByMember,
+                          date: date,
+                          countOf: (m) => m?.dinner ?? 0,
+                          setValue: (memberId, value) => ref
+                              .read(mealRepositoryProvider)
+                              .setMeal(
+                                messId: messId,
+                                memberId: memberId,
+                                date: date,
+                                dinner: value,
+                              ),
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.md,
+                            0,
+                            AppSpacing.md,
+                            AppSpacing.md,
+                          ),
+                          itemCount: members.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: AppSpacing.sm),
+                          itemBuilder: (context, index) {
+                            final member = members[index];
+                            final meal = mealsByMember[member.id];
+                            return MealDayRow(
+                              member: member,
+                              breakfast: meal?.breakfast ?? 0,
+                              lunch: meal?.lunch ?? 0,
+                              dinner: meal?.dinner ?? 0,
+                              showBreakfast: mess.trackBreakfast,
+                              showLunch: mess.trackLunch,
+                              showDinner: mess.trackDinner,
+                              onBreakfastChanged: (value) => ref
+                                  .read(mealRepositoryProvider)
+                                  .setMeal(
+                                    messId: messId,
+                                    memberId: member.id,
+                                    date: date,
+                                    breakfast: value,
+                                  ),
+                              onLunchChanged: (value) => ref
+                                  .read(mealRepositoryProvider)
+                                  .setMeal(
+                                    messId: messId,
+                                    memberId: member.id,
+                                    date: date,
+                                    lunch: value,
+                                  ),
+                              onDinnerChanged: (value) => ref
+                                  .read(mealRepositoryProvider)
+                                  .setMeal(
+                                    messId: messId,
+                                    memberId: member.id,
+                                    date: date,
+                                    dinner: value,
+                                  ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),

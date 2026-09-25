@@ -77,6 +77,10 @@
   "mealCountDialogTitle": "{meal} count",
   "@mealCountDialogTitle": {"placeholders": {"meal": {"type": "String"}}},
   "mealCountDialogHint": "Add extra meals for a guest or a second helping.",
+  "markAllAction": "Mark all",
+  "clearAllAction": "Clear all",
+  "mealProgressLabel": "{label}, {marked} of {total} marked",
+  "@mealProgressLabel": {"placeholders": {"label": {"type": "String"}, "marked": {"type": "num"}, "total": {"type": "num"}}},
 
   "couldntSaveMember": "Couldn't save this member. Please try again.",
   "editMemberTitle": "Edit Member",

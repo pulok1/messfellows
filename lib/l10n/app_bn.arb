@@ -69,6 +69,9 @@
   "mealSemanticsLabel": "{label}, {state}",
   "mealCountDialogTitle": "{meal} সংখ্যা",
   "mealCountDialogHint": "অতিথি বা দ্বিতীয়বার খেলে অতিরিক্ত মিল যোগ করুন।",
+  "markAllAction": "সবাইকে চিহ্নিত করুন",
+  "clearAllAction": "সব মুছুন",
+  "mealProgressLabel": "{label}, {total}-এর মধ্যে {marked} জন চিহ্নিত",
 
   "couldntSaveMember": "সদস্যকে সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
   "editMemberTitle": "সদস্য সম্পাদনা করুন",
