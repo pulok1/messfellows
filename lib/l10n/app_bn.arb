@@ -72,6 +72,8 @@
   "markAllAction": "সবাইকে চিহ্নিত করুন",
   "clearAllAction": "সব মুছুন",
   "mealProgressLabel": "{label}, {total}-এর মধ্যে {marked} জন চিহ্নিত",
+  "copyPreviousDayTooltip": "গতকালের মিল কপি করুন",
+  "copiedPreviousDaySnackbar": "গতকালের মিল কপি করা হয়েছে।",
 
   "couldntSaveMember": "সদস্যকে সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
   "editMemberTitle": "সদস্য সম্পাদনা করুন",

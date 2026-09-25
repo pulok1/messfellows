@@ -63,13 +63,61 @@ class MealsScreen extends ConsumerWidget {
     }
   }
 
+  /// Copies each member's meal counts from [previousMeals] onto [date] —
+  /// only for members who actually ate something the day before, and only
+  /// into slots this mess currently tracks. Only offered when [date] has
+  /// no meals recorded yet (see the header action's guard), so this never
+  /// overwrites a day already in progress.
+  Future<void> _copyPreviousDay(
+    BuildContext context,
+    WidgetRef ref, {
+    required DateTime date,
+    required List<MealEntry> previousMeals,
+  }) async {
+    final members = ref.read(activeMembersProvider(messId)).value ?? const <Member>[];
+    final previousByMember = {for (final m in previousMeals) m.memberId: m};
+    final repo = ref.read(mealRepositoryProvider);
+
+    await Future.wait([
+      for (final member in members)
+        if (previousByMember[member.id] case final prev? when prev.totalMeals > 0)
+          repo.setMeal(
+            messId: messId,
+            memberId: member.id,
+            date: date,
+            breakfast: mess.trackBreakfast ? prev.breakfast : null,
+            lunch: mess.trackLunch ? prev.lunch : null,
+            dinner: mess.trackDinner ? prev.dinner : null,
+          ),
+    ]);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).copiedPreviousDaySnackbar)));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final date = ref.watch(selectedMealDateProvider);
     final membersAsync = ref.watch(activeMembersProvider(messId));
     final mealsAsync = ref.watch(mealsForDateProvider((messId: messId, date: date)));
+    final previousMeals = ref
+        .watch(
+          mealsForDateProvider((
+            messId: messId,
+            date: date.subtract(const Duration(days: 1)),
+          )),
+        )
+        .value;
     final isToday = _isSameDay(date, DateTime.now());
+    // Offered only when today has nothing recorded yet and yesterday has
+    // something to copy — never as a way to overwrite a day in progress.
+    final canCopyPreviousDay =
+        (mealsAsync.value?.every((m) => m.totalMeals == 0) ?? true) &&
+        (previousMeals?.any((m) => m.totalMeals > 0) ?? false);
 
     return Scaffold(
       body: SafeArea(
@@ -79,6 +127,17 @@ class MealsScreen extends ConsumerWidget {
               title: l10n.navMeals,
               showBackButton: false,
               actions: [
+                if (canCopyPreviousDay)
+                  HeaderIconButton(
+                    icon: Icons.repeat,
+                    tooltip: l10n.copyPreviousDayTooltip,
+                    onPressed: () => _copyPreviousDay(
+                      context,
+                      ref,
+                      date: date,
+                      previousMeals: previousMeals!,
+                    ),
+                  ),
                 HeaderIconButton(
                   icon: Icons.bar_chart_outlined,
                   tooltip: l10n.monthlyTotalsTooltip,
