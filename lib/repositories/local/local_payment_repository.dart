@@ -5,8 +5,10 @@ import '../../core/utils/date_utils.dart';
 import '../../core/utils/id_generator.dart';
 import '../../core/utils/money.dart';
 import '../../database/app_database.dart';
+import '../../models/activity_type.dart';
 import '../../models/payment.dart';
 import '../payment_repository.dart';
+import 'activity_logger.dart';
 
 class LocalPaymentRepository implements PaymentRepository {
   final AppDatabase _db;
@@ -95,6 +97,14 @@ class LocalPaymentRepository implements PaymentRepository {
             updatedAt: now,
           ),
         );
+    await logActivity(
+      _db,
+      messId: messId,
+      type: ActivityType.paymentAdded,
+      memberId: memberId,
+      amountMinorUnits: amount.minorUnits,
+      detail: note,
+    );
     return Payment(
       id: id,
       messId: messId,
@@ -123,29 +133,76 @@ class LocalPaymentRepository implements PaymentRepository {
         updatedAt: Value(DateTime.now()),
       ),
     );
+    await logActivity(
+      _db,
+      messId: payment.messId,
+      type: ActivityType.paymentEdited,
+      memberId: payment.memberId,
+      amountMinorUnits: payment.amount.minorUnits,
+      detail: payment.note,
+    );
   }
 
   @override
   Future<void> deletePayment(String id) async {
+    final row = await (_db.select(
+      _db.payments,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     await (_db.update(
       _db.payments,
     )..where((t) => t.id.equals(id))).write(
       PaymentsCompanion(deletedAt: Value(DateTime.now())),
     );
+    if (row != null) {
+      await logActivity(
+        _db,
+        messId: row.messId,
+        type: ActivityType.paymentDeleted,
+        memberId: row.memberId,
+        amountMinorUnits: row.amountMinorUnits,
+        detail: row.note,
+      );
+    }
   }
 
   @override
   Future<void> restorePayment(String id) async {
+    final row = await (_db.select(
+      _db.payments,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     await (_db.update(
       _db.payments,
     )..where((t) => t.id.equals(id))).write(
       const PaymentsCompanion(deletedAt: Value(null)),
     );
+    if (row != null) {
+      await logActivity(
+        _db,
+        messId: row.messId,
+        type: ActivityType.paymentRestored,
+        memberId: row.memberId,
+        amountMinorUnits: row.amountMinorUnits,
+        detail: row.note,
+      );
+    }
   }
 
   @override
   Future<void> permanentlyDeletePayment(String id) async {
+    final row = await (_db.select(
+      _db.payments,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     await (_db.delete(_db.payments)..where((t) => t.id.equals(id))).go();
+    if (row != null) {
+      await logActivity(
+        _db,
+        messId: row.messId,
+        type: ActivityType.paymentPurged,
+        memberId: row.memberId,
+        amountMinorUnits: row.amountMinorUnits,
+        detail: row.note,
+      );
+    }
   }
 
   @override

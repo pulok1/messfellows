@@ -5,8 +5,10 @@ import '../../core/utils/date_utils.dart';
 import '../../core/utils/id_generator.dart';
 import '../../core/utils/money.dart';
 import '../../database/app_database.dart';
+import '../../models/activity_type.dart';
 import '../../models/expense.dart';
 import '../expense_repository.dart';
+import 'activity_logger.dart';
 
 class LocalExpenseRepository implements ExpenseRepository {
   final AppDatabase _db;
@@ -98,6 +100,14 @@ class LocalExpenseRepository implements ExpenseRepository {
             updatedAt: now,
           ),
         );
+    await logActivity(
+      _db,
+      messId: messId,
+      type: ActivityType.bazarAdded,
+      memberId: paidByMemberId,
+      amountMinorUnits: amount.minorUnits,
+      detail: bazarList,
+    );
     return Expense(
       id: id,
       messId: messId,
@@ -128,29 +138,76 @@ class LocalExpenseRepository implements ExpenseRepository {
         updatedAt: Value(DateTime.now()),
       ),
     );
+    await logActivity(
+      _db,
+      messId: expense.messId,
+      type: ActivityType.bazarEdited,
+      memberId: expense.paidByMemberId,
+      amountMinorUnits: expense.amount.minorUnits,
+      detail: expense.bazarList,
+    );
   }
 
   @override
   Future<void> deleteExpense(String id) async {
+    final row = await (_db.select(
+      _db.expenses,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     await (_db.update(
       _db.expenses,
     )..where((t) => t.id.equals(id))).write(
       ExpensesCompanion(deletedAt: Value(DateTime.now())),
     );
+    if (row != null) {
+      await logActivity(
+        _db,
+        messId: row.messId,
+        type: ActivityType.bazarDeleted,
+        memberId: row.paidByMemberId,
+        amountMinorUnits: row.amountMinorUnits,
+        detail: row.bazarList,
+      );
+    }
   }
 
   @override
   Future<void> restoreExpense(String id) async {
+    final row = await (_db.select(
+      _db.expenses,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     await (_db.update(
       _db.expenses,
     )..where((t) => t.id.equals(id))).write(
       const ExpensesCompanion(deletedAt: Value(null)),
     );
+    if (row != null) {
+      await logActivity(
+        _db,
+        messId: row.messId,
+        type: ActivityType.bazarRestored,
+        memberId: row.paidByMemberId,
+        amountMinorUnits: row.amountMinorUnits,
+        detail: row.bazarList,
+      );
+    }
   }
 
   @override
   Future<void> permanentlyDeleteExpense(String id) async {
+    final row = await (_db.select(
+      _db.expenses,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     await (_db.delete(_db.expenses)..where((t) => t.id.equals(id))).go();
+    if (row != null) {
+      await logActivity(
+        _db,
+        messId: row.messId,
+        type: ActivityType.bazarPurged,
+        memberId: row.paidByMemberId,
+        amountMinorUnits: row.amountMinorUnits,
+        detail: row.bazarList,
+      );
+    }
   }
 
   @override
