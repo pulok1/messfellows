@@ -18,6 +18,10 @@ class Expenses extends Table {
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
+  // Soft-delete: set when the entry is removed so it can sit in the
+  // Recycle Bin instead of disappearing outright. Null means active.
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

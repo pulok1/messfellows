@@ -92,6 +92,23 @@ class AppDatabase extends _$AppDatabase {
         // when the rules last changed (nullable, so no backfill needed).
         await m.createTable(messRules);
         await m.addColumn(messes, messes.rulesUpdatedAt);
+
+        // Recycle Bin: expenses/payments gain a nullable deletedAt so a
+        // delete can be undone instead of being a hard SQL DELETE.
+        await m.alterTable(
+          TableMigration(
+            expenses,
+            columnTransformer: {expenses.deletedAt: const Constant(null)},
+            newColumns: [expenses.deletedAt],
+          ),
+        );
+        await m.alterTable(
+          TableMigration(
+            payments,
+            columnTransformer: {payments.deletedAt: const Constant(null)},
+            newColumns: [payments.deletedAt],
+          ),
+        );
       }
     },
     beforeOpen: (details) async {
