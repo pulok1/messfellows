@@ -1,10 +1,12 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
-import '../../core/utils/money.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../models/insight.dart';
 import '../../models/mess.dart';
+import '../../providers/insight_providers.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/month_calculation_provider.dart';
 import '../members/add_edit_member_dialog.dart';
@@ -12,13 +14,12 @@ import '../members/member_detail_screen.dart';
 import '../members/members_screen.dart';
 import '../rules/rules_summary_card.dart';
 import '../settings/settings_screen.dart';
-import '../shared/widgets/count_up_text.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/section_header.dart';
 import '../shared/widgets/staggered_entrance.dart';
-import '../shared/widgets/stat_tile.dart';
 import 'widgets/dashboard_header_card.dart';
 import 'widgets/insights_card.dart';
+import 'widgets/month_overview_card.dart';
 import 'widgets/settlement_tile.dart';
 
 /// The Home tab (section 11): always shows the current, still-open month —
@@ -44,9 +45,15 @@ class DashboardScreen extends ConsumerWidget {
         month: now.month,
       )),
     );
-
-    final rateStyle = Theme.of(context).textTheme.headlineMedium
-        ?.copyWith(fontWeight: FontWeight.bold);
+    // Shares the same cached computation InsightsCard reads below — Riverpod
+    // keys on the params, so watching it here doesn't recompute anything.
+    final insights = ref.watch(
+      dashboardInsightsProvider((
+        messId: mess.id,
+        hour: DateTime(now.year, now.month, now.day, now.hour),
+      )),
+    );
+    final rateChange = insights.whereType<MealRateChange>().firstOrNull;
 
     return Scaffold(
       body: SafeArea(
@@ -86,53 +93,10 @@ class DashboardScreen extends ConsumerWidget {
                       AppSpacing.xxl,
                     ),
                     children: [
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.currentMealRate,
-                                style: Theme.of(context).textTheme.labelMedium,
-                              ),
-                              const SizedBox(height: AppSpacing.xs),
-                              if (calculation.hasNoMeals)
-                                Text(l10n.noMealsRecordedYet, style: rateStyle)
-                              else
-                                CountUpText(
-                                  value: calculation.mealRate.major,
-                                  format: (v) =>
-                                      '${mess.currencySymbol}${v.toStringAsFixed(2)}',
-                                  style: rateStyle,
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatTile.animated(
-                              label: l10n.totalBazar,
-                              count: calculation.totalExpense.minorUnits,
-                              // Counts in whole taka, landing on the exact total.
-                              format: (v) =>
-                                  v == calculation.totalExpense.minorUnits
-                                  ? calculation.totalExpense.format()
-                                  : Money((v / 100).round() * 100).format(),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: StatTile.animated(
-                              label: l10n.totalMeals,
-                              count: calculation.totalMeals,
-                              format: (v) => '${v.round()}',
-                            ),
-                          ),
-                        ],
+                      MonthOverviewCard(
+                        calculation: calculation,
+                        currencySymbol: mess.currencySymbol,
+                        rateChangePercent: rateChange?.percent,
                       ),
                       const SizedBox(height: AppSpacing.md),
                       InsightsCard(
@@ -142,7 +106,33 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                       RulesSummaryCard(messId: mess.id),
                       const SizedBox(height: AppSpacing.lg),
-                      SectionHeader(l10n.settlementLabel),
+                      Row(
+                        children: [
+                          Expanded(child: SectionHeader(l10n.settlementLabel)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              '${calculation.memberBalances.length}',
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       for (final (i, balance)
                           in calculation.memberBalances.indexed)
