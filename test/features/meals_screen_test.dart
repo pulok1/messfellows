@@ -24,6 +24,7 @@ import 'package:messfellows/repositories/local/local_settlement_repository.dart'
 void main() {
   setUpAll(() async {
     await initializeDateFormatting('en');
+    await initializeDateFormatting('bn');
   });
 
   late AppDatabase db;
@@ -36,8 +37,11 @@ void main() {
     WidgetTester tester, {
     Widget? home,
     DateTime? date,
+    Locale locale = const Locale('en'),
+    double textScale = 1.0,
+    Size size = const Size(400, 900),
   }) async {
-    tester.view.physicalSize = const Size(400, 900);
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
@@ -50,9 +54,15 @@ void main() {
         ],
         child: MaterialApp(
           theme: AppTheme.light(),
-          locale: const Locale('en'),
+          locale: locale,
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(textScale)),
+            child: child!,
+          ),
           home: home ?? MealsScreen(mess: mess),
         ),
       ),
@@ -284,6 +294,40 @@ void main() {
     await fling(-300);
     await fling(-300);
     expect(find.text(dayLabel(addDays(today, 1))), findsOneWidget);
+  });
+
+  screenTest('does not overflow on a small phone with large text, in Bangla', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      final memberRepo = LocalMemberRepository(db);
+      final longName = await memberRepo.addMember(
+        messId: mess.id,
+        name: 'Mohammad Abdur Rahman Chowdhury',
+      );
+      final repo = LocalMealRepository(db);
+      await repo.setMeal(messId: mess.id, memberId: longName.id, date: today, lunch: 3, dinner: 1);
+      await repo.setMeal(messId: mess.id, memberId: karim.id, date: today, lunch: 1);
+      await memberRepo.archiveMember(karim.id);
+    });
+    await pumpScreen(
+      tester,
+      locale: const Locale('bn'),
+      textScale: 1.3,
+      size: const Size(320, 640),
+    );
+
+    expect(tester.takeException(), isNull);
+
+    // The archived row is last; scrolling to it lays out every row.
+    await tester.scrollUntilVisible(
+      find.text('আর্কাইভড'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump();
+    expect(find.text('আর্কাইভড'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   screenTest('a closed month is shown read-only with a way forward', (
