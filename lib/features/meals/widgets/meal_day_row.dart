@@ -16,6 +16,10 @@ class MealDayRow extends StatelessWidget {
   final bool showBreakfast;
   final bool showLunch;
   final bool showDinner;
+
+  /// False when [member]'s day can't be changed (its month is closed):
+  /// the counts still show, but taps and long-presses do nothing.
+  final bool enabled;
   final ValueChanged<int> onBreakfastChanged;
   final ValueChanged<int> onLunchChanged;
   final ValueChanged<int> onDinnerChanged;
@@ -29,6 +33,7 @@ class MealDayRow extends StatelessWidget {
     this.showBreakfast = true,
     this.showLunch = true,
     this.showDinner = true,
+    this.enabled = true,
     required this.onBreakfastChanged,
     required this.onLunchChanged,
     required this.onDinnerChanged,
@@ -73,13 +78,17 @@ class MealDayRow extends StatelessWidget {
           icon: Icons.wb_twilight,
           label: l10n.breakfastLabel,
           count: breakfast,
-          onTap: () => onBreakfastChanged(breakfast > 0 ? 0 : 1),
-          onLongPress: () => _showMealCountDialog(
-            context,
-            label: l10n.breakfastLabel,
-            current: breakfast,
-            onChanged: onBreakfastChanged,
-          ),
+          onTap: enabled
+              ? () => onBreakfastChanged(breakfast > 0 ? 0 : 1)
+              : null,
+          onLongPress: enabled
+              ? () => _showMealCountDialog(
+                  context,
+                  label: l10n.breakfastLabel,
+                  current: breakfast,
+                  onChanged: onBreakfastChanged,
+                )
+              : null,
         ),
       );
     }
@@ -89,13 +98,15 @@ class MealDayRow extends StatelessWidget {
           icon: Icons.wb_sunny_outlined,
           label: l10n.lunchLabel,
           count: lunch,
-          onTap: () => onLunchChanged(lunch > 0 ? 0 : 1),
-          onLongPress: () => _showMealCountDialog(
-            context,
-            label: l10n.lunchLabel,
-            current: lunch,
-            onChanged: onLunchChanged,
-          ),
+          onTap: enabled ? () => onLunchChanged(lunch > 0 ? 0 : 1) : null,
+          onLongPress: enabled
+              ? () => _showMealCountDialog(
+                  context,
+                  label: l10n.lunchLabel,
+                  current: lunch,
+                  onChanged: onLunchChanged,
+                )
+              : null,
         ),
       );
     }
@@ -105,13 +116,15 @@ class MealDayRow extends StatelessWidget {
           icon: Icons.nightlight_outlined,
           label: l10n.dinnerLabel,
           count: dinner,
-          onTap: () => onDinnerChanged(dinner > 0 ? 0 : 1),
-          onLongPress: () => _showMealCountDialog(
-            context,
-            label: l10n.dinnerLabel,
-            current: dinner,
-            onChanged: onDinnerChanged,
-          ),
+          onTap: enabled ? () => onDinnerChanged(dinner > 0 ? 0 : 1) : null,
+          onLongPress: enabled
+              ? () => _showMealCountDialog(
+                  context,
+                  label: l10n.dinnerLabel,
+                  current: dinner,
+                  onChanged: onDinnerChanged,
+                )
+              : null,
         ),
       );
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/errors/app_exception.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/utils/localized_date.dart';
@@ -13,6 +14,7 @@ import '../../providers/member_providers.dart';
 import '../../providers/month_calculation_provider.dart';
 import '../../providers/repository_providers.dart';
 import '../../providers/selection_providers.dart';
+import '../../providers/settlement_providers.dart';
 import '../members/add_edit_member_dialog.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/page_header_card.dart';
@@ -29,12 +31,43 @@ class MealsScreen extends ConsumerWidget {
 
   String get messId => mess.id;
 
+  /// Runs a meal write, turning a failure into a snackbar instead of
+  /// letting it vanish — a tap that didn't save must never look like it
+  /// did. The screen itself only ever shows what the database holds, so a
+  /// rejected write simply leaves the toggle where it was.
+  Future<bool> _save(
+    BuildContext context,
+    Future<void> Function() write,
+  ) async {
+    try {
+      await write();
+      return true;
+    } catch (error) {
+      if (context.mounted) {
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                error is MonthClosedException
+                    ? l10n.mealsLockedSnackbar
+                    : l10n.couldntSaveMeal,
+              ),
+            ),
+          );
+      }
+      return false;
+    }
+  }
+
   /// Marks everyone who hasn't eaten yet in [countOf]'s slot (leaving
   /// anyone already at 1+, including a guest-meal count, untouched) —
   /// or, if everyone's already marked, clears the whole slot back to 0.
   /// Runs every write in parallel; a household mess is small enough that
   /// this is instant either way.
   Future<void> _toggleAllForSlot(
+    BuildContext context,
     WidgetRef ref, {
     required List<Member> members,
     required Map<String, MealEntry> mealsByMember,
@@ -45,14 +78,21 @@ class MealsScreen extends ConsumerWidget {
     final allMarked =
         members.isNotEmpty &&
         members.every((m) => countOf(mealsByMember[m.id]) > 0);
-    await Future.wait([
-      for (final member in members)
-        if (allMarked || countOf(mealsByMember[member.id]) == 0)
-          setValue(member.id, allMarked ? 0 : 1),
-    ]);
+    await _save(
+      context,
+      () => Future.wait([
+        for (final member in members)
+          if (allMarked || countOf(mealsByMember[member.id]) == 0)
+            setValue(member.id, allMarked ? 0 : 1),
+      ]),
+    );
   }
 
-  Future<void> _pickDate(BuildContext context, WidgetRef ref, DateTime current) async {
+  Future<void> _pickDate(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime current,
+  ) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: current,
@@ -75,27 +115,34 @@ class MealsScreen extends ConsumerWidget {
     required DateTime date,
     required List<MealEntry> previousMeals,
   }) async {
-    final members = ref.read(activeMembersProvider(messId)).value ?? const <Member>[];
+    final members =
+        ref.read(activeMembersProvider(messId)).value ?? const <Member>[];
     final previousByMember = {for (final m in previousMeals) m.memberId: m};
     final repo = ref.read(mealRepositoryProvider);
 
-    await Future.wait([
-      for (final member in members)
-        if (previousByMember[member.id] case final prev? when prev.totalMeals > 0)
-          repo.setMeal(
-            messId: messId,
-            memberId: member.id,
-            date: date,
-            breakfast: mess.trackBreakfast ? prev.breakfast : null,
-            lunch: mess.trackLunch ? prev.lunch : null,
-            dinner: mess.trackDinner ? prev.dinner : null,
-          ),
-    ]);
+    final saved = await _save(
+      context,
+      () => Future.wait([
+        for (final member in members)
+          if (previousByMember[member.id] case final prev?
+              when prev.totalMeals > 0)
+            repo.setMeal(
+              messId: messId,
+              memberId: member.id,
+              date: date,
+              breakfast: mess.trackBreakfast ? prev.breakfast : null,
+              lunch: mess.trackLunch ? prev.lunch : null,
+              dinner: mess.trackDinner ? prev.dinner : null,
+            ),
+      ]),
+    );
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).copiedPreviousDaySnackbar)));
+    if (saved && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).copiedPreviousDaySnackbar),
+        ),
+      );
     }
   }
 
@@ -104,19 +151,30 @@ class MealsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final date = ref.watch(selectedMealDateProvider);
     final membersAsync = ref.watch(activeMembersProvider(messId));
-    final mealsAsync = ref.watch(mealsForDateProvider((messId: messId, date: date)));
+    final mealsAsync = ref.watch(
+      mealsForDateProvider((messId: messId, date: date)),
+    );
     final previousMeals = ref
-        .watch(
-          mealsForDateProvider((
-            messId: messId,
-            date: addDays(date, -1),
-          )),
-        )
+        .watch(mealsForDateProvider((messId: messId, date: addDays(date, -1))))
         .value;
     final isToday = _isSameDay(date, DateTime.now());
+    // A closed month's settlement is frozen, so its meals are shown
+    // read-only (the repository refuses the write anyway).
+    final locked =
+        ref
+            .watch(
+              settlementForMonthProvider((
+                messId: messId,
+                year: date.year,
+                month: date.month,
+              )),
+            )
+            ?.isClosed ??
+        false;
     // Offered only when today has nothing recorded yet and yesterday has
     // something to copy — never as a way to overwrite a day in progress.
     final canCopyPreviousDay =
+        !locked &&
         (mealsAsync.value?.every((m) => m.totalMeals == 0) ?? true) &&
         (previousMeals?.any((m) => m.totalMeals > 0) ?? false);
 
@@ -148,14 +206,23 @@ class MealsScreen extends ConsumerWidget {
               bottom: _DateBar(
                 date: date,
                 isToday: isToday,
-                onToday: () => ref.read(selectedMealDateProvider.notifier).goToToday(),
-                onPrevious: () => ref.read(selectedMealDateProvider.notifier).goToPreviousDay(),
+                onToday: () =>
+                    ref.read(selectedMealDateProvider.notifier).goToToday(),
+                onPrevious: () => ref
+                    .read(selectedMealDateProvider.notifier)
+                    .goToPreviousDay(),
                 onNext: date.isBefore(latestMealDate())
-                    ? () => ref.read(selectedMealDateProvider.notifier).goToNextDay()
+                    ? () => ref
+                          .read(selectedMealDateProvider.notifier)
+                          .goToNextDay()
                     : null,
                 onPickDate: () => _pickDate(context, ref, date),
               ),
             ),
+            if (locked)
+              _LockedBanner(
+                monthYear: formatMonthYear(context, date.year, date.month),
+              ),
             Expanded(
               child: membersAsync.when(
                 data: (members) {
@@ -165,30 +232,39 @@ class MealsScreen extends ConsumerWidget {
                       title: l10n.noMembersYetTitle,
                       message: l10n.addMembersToTrackMeals,
                       actionLabel: l10n.addMember,
-                      onAction: () => showAddEditMemberDialog(context, messId: messId),
+                      onAction: () =>
+                          showAddEditMemberDialog(context, messId: messId),
                     );
                   }
 
                   final meals = mealsAsync.value ?? const <MealEntry>[];
-                  final mealsByMember = {for (final meal in meals) meal.memberId: meal};
+                  final mealsByMember = {
+                    for (final meal in meals) meal.memberId: meal,
+                  };
 
                   return Column(
                     children: [
                       MealProgressRow(
                         totalMembers: members.length,
                         breakfastMarked: members
-                            .where((m) => (mealsByMember[m.id]?.breakfast ?? 0) > 0)
+                            .where(
+                              (m) => (mealsByMember[m.id]?.breakfast ?? 0) > 0,
+                            )
                             .length,
                         lunchMarked: members
                             .where((m) => (mealsByMember[m.id]?.lunch ?? 0) > 0)
                             .length,
                         dinnerMarked: members
-                            .where((m) => (mealsByMember[m.id]?.dinner ?? 0) > 0)
+                            .where(
+                              (m) => (mealsByMember[m.id]?.dinner ?? 0) > 0,
+                            )
                             .length,
                         showBreakfast: mess.trackBreakfast,
                         showLunch: mess.trackLunch,
                         showDinner: mess.trackDinner,
+                        enabled: !locked,
                         onToggleBreakfast: () => _toggleAllForSlot(
+                          context,
                           ref,
                           members: members,
                           mealsByMember: mealsByMember,
@@ -204,6 +280,7 @@ class MealsScreen extends ConsumerWidget {
                               ),
                         ),
                         onToggleLunch: () => _toggleAllForSlot(
+                          context,
                           ref,
                           members: members,
                           mealsByMember: mealsByMember,
@@ -219,6 +296,7 @@ class MealsScreen extends ConsumerWidget {
                               ),
                         ),
                         onToggleDinner: () => _toggleAllForSlot(
+                          context,
                           ref,
                           members: members,
                           mealsByMember: mealsByMember,
@@ -256,30 +334,40 @@ class MealsScreen extends ConsumerWidget {
                               showBreakfast: mess.trackBreakfast,
                               showLunch: mess.trackLunch,
                               showDinner: mess.trackDinner,
-                              onBreakfastChanged: (value) => ref
-                                  .read(mealRepositoryProvider)
-                                  .setMeal(
-                                    messId: messId,
-                                    memberId: member.id,
-                                    date: date,
-                                    breakfast: value,
-                                  ),
-                              onLunchChanged: (value) => ref
-                                  .read(mealRepositoryProvider)
-                                  .setMeal(
-                                    messId: messId,
-                                    memberId: member.id,
-                                    date: date,
-                                    lunch: value,
-                                  ),
-                              onDinnerChanged: (value) => ref
-                                  .read(mealRepositoryProvider)
-                                  .setMeal(
-                                    messId: messId,
-                                    memberId: member.id,
-                                    date: date,
-                                    dinner: value,
-                                  ),
+                              enabled: !locked,
+                              onBreakfastChanged: (value) => _save(
+                                context,
+                                () => ref
+                                    .read(mealRepositoryProvider)
+                                    .setMeal(
+                                      messId: messId,
+                                      memberId: member.id,
+                                      date: date,
+                                      breakfast: value,
+                                    ),
+                              ),
+                              onLunchChanged: (value) => _save(
+                                context,
+                                () => ref
+                                    .read(mealRepositoryProvider)
+                                    .setMeal(
+                                      messId: messId,
+                                      memberId: member.id,
+                                      date: date,
+                                      lunch: value,
+                                    ),
+                              ),
+                              onDinnerChanged: (value) => _save(
+                                context,
+                                () => ref
+                                    .read(mealRepositoryProvider)
+                                    .setMeal(
+                                      messId: messId,
+                                      memberId: member.id,
+                                      date: date,
+                                      dinner: value,
+                                    ),
+                              ),
                             );
                           },
                         ),
@@ -304,11 +392,20 @@ class MealsScreen extends ConsumerWidget {
       builder: (sheetContext) {
         final l10n = AppLocalizations.of(sheetContext);
         final result = ref.watch(
-          monthCalculationProvider((messId: messId, year: date.year, month: date.month)),
+          monthCalculationProvider((
+            messId: messId,
+            year: date.year,
+            month: date.month,
+          )),
         );
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,10 +417,13 @@ class MealsScreen extends ConsumerWidget {
                   style: Theme.of(sheetContext).textTheme.titleMedium,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                if (result.memberBalances.isEmpty) Text(l10n.noMembersYetInline),
+                if (result.memberBalances.isEmpty)
+                  Text(l10n.noMembersYetInline),
                 for (final balance in result.memberBalances)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -340,6 +440,50 @@ class MealsScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Explains why a closed month's toggles don't respond, and where to go
+/// to change them — so a locked day never looks like a broken screen.
+class _LockedBanner extends StatelessWidget {
+  final String monthYear;
+
+  const _LockedBanner({required this.monthYear});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        0,
+        AppSpacing.md,
+        AppSpacing.sm,
+      ),
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.lock_outline,
+            size: 18,
+            color: colorScheme.onSecondaryContainer,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context).mealsLockedBanner(monthYear),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: colorScheme.onSecondaryContainer),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -365,7 +509,10 @@ class _DateBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       child: Row(
         children: [
           IconButton(
@@ -399,7 +546,8 @@ class _DateBar extends StatelessWidget {
             icon: const Icon(Icons.chevron_right),
             tooltip: l10n.nextDayTooltip,
           ),
-          if (!isToday) TextButton(onPressed: onToday, child: Text(l10n.todayLabel)),
+          if (!isToday)
+            TextButton(onPressed: onToday, child: Text(l10n.todayLabel)),
         ],
       ),
     );

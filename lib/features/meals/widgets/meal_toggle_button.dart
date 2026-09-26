@@ -14,20 +14,23 @@ import '../../../l10n/gen/app_localizations.dart';
 /// The toggle squishes slightly while pressed, cross-fades its colors when
 /// flipped, and pops the extra-meal badge in and out, with a light haptic
 /// tick on each tap so the change registers without looking.
+///
+/// Passing null for [onTap] locks the toggle (e.g. its month is closed): it
+/// still shows the recorded count, dimmed, but can't be changed.
 class MealToggleButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final int count;
-  final VoidCallback onTap;
-  final VoidCallback onLongPress;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   const MealToggleButton({
     super.key,
     required this.icon,
     required this.label,
     required this.count,
-    required this.onTap,
-    required this.onLongPress,
+    this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -39,7 +42,7 @@ class _MealToggleButtonState extends State<MealToggleButton> {
 
   void _handleTap() {
     HapticFeedback.lightImpact();
-    widget.onTap();
+    widget.onTap!();
   }
 
   @override
@@ -47,6 +50,7 @@ class _MealToggleButtonState extends State<MealToggleButton> {
     final colorScheme = Theme.of(context).colorScheme;
     final count = widget.count;
     final isOn = count > 0;
+    final enabled = widget.onTap != null;
     final background = isOn
         ? colorScheme.primary
         : colorScheme.surfaceContainerHighest;
@@ -64,64 +68,69 @@ class _MealToggleButtonState extends State<MealToggleButton> {
 
     return Semantics(
       button: true,
+      enabled: enabled,
       label: l10n.mealSemanticsLabel(widget.label, stateLabel),
-      child: AnimatedScale(
-        scale: _pressed ? 0.94 : 1,
+      child: AnimatedOpacity(
+        opacity: enabled ? 1 : 0.55,
         duration: short,
-        curve: AppMotion.emphasized,
-        child: InkWell(
-          onTap: _handleTap,
-          onLongPress: widget.onLongPress,
-          onHighlightChanged: (value) => setState(() => _pressed = value),
-          borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-          child: AnimatedContainer(
-            duration: short,
-            curve: AppMotion.emphasized,
-            constraints: const BoxConstraints(minHeight: 56, minWidth: 72),
-            padding: const EdgeInsets.symmetric(
-              vertical: AppSpacing.sm,
-              horizontal: AppSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: background,
-              borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                TweenAnimationBuilder<Color?>(
-                  tween: ColorTween(end: foreground),
-                  duration: short,
-                  builder: (context, color, _) => Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(widget.icon, color: color, size: 20),
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.label,
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: -6,
-                  right: -6,
-                  child: AnimatedSwitcher(
+        child: AnimatedScale(
+          scale: _pressed ? 0.94 : 1,
+          duration: short,
+          curve: AppMotion.emphasized,
+          child: InkWell(
+            onTap: enabled ? _handleTap : null,
+            onLongPress: widget.onLongPress,
+            onHighlightChanged: (value) => setState(() => _pressed = value),
+            borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+            child: AnimatedContainer(
+              duration: short,
+              curve: AppMotion.emphasized,
+              constraints: const BoxConstraints(minHeight: 56, minWidth: 72),
+              padding: const EdgeInsets.symmetric(
+                vertical: AppSpacing.sm,
+                horizontal: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                color: background,
+                borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  TweenAnimationBuilder<Color?>(
+                    tween: ColorTween(end: foreground),
                     duration: short,
-                    switchInCurve: AppMotion.pop,
-                    transitionBuilder: (child, animation) =>
-                        ScaleTransition(scale: animation, child: child),
-                    child: count > 1
-                        ? _CountBadge(key: ValueKey(count), count: count)
-                        : const SizedBox.shrink(),
+                    builder: (context, color, _) => Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(widget.icon, color: color, size: 20),
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.label,
+                          style: TextStyle(
+                            color: color,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    top: -6,
+                    right: -6,
+                    child: AnimatedSwitcher(
+                      duration: short,
+                      switchInCurve: AppMotion.pop,
+                      transitionBuilder: (child, animation) =>
+                          ScaleTransition(scale: animation, child: child),
+                      child: count > 1
+                          ? _CountBadge(key: ValueKey(count), count: count)
+                          : const SizedBox.shrink(),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

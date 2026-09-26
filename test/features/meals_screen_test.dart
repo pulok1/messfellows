@@ -1,0 +1,134 @@
+import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:messfellows/core/theme/app_theme.dart';
+import 'package:messfellows/core/utils/date_utils.dart';
+import 'package:messfellows/core/utils/money.dart';
+import 'package:messfellows/database/app_database.dart';
+import 'package:messfellows/features/meals/meals_screen.dart';
+import 'package:messfellows/features/meals/widgets/meal_toggle_button.dart';
+import 'package:messfellows/l10n/gen/app_localizations.dart';
+import 'package:messfellows/models/member.dart';
+import 'package:messfellows/models/mess.dart';
+import 'package:messfellows/providers/database_provider.dart';
+import 'package:messfellows/repositories/local/local_meal_repository.dart';
+import 'package:messfellows/repositories/local/local_member_repository.dart';
+import 'package:messfellows/repositories/local/local_mess_repository.dart';
+import 'package:messfellows/repositories/local/local_settlement_repository.dart';
+
+void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('en');
+  });
+
+  late AppDatabase db;
+  late Mess mess;
+  late Member rahim;
+  late Member karim;
+  final today = dateOnly(DateTime.now());
+
+  Future<void> pumpScreen(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(db)],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: MealsScreen(mess: mess),
+        ),
+      ),
+    );
+    await settle(tester);
+  }
+
+  // Unmounts the screen after the body so Drift's zero-duration stream
+  // cleanup timers fire before the framework's "no pending timers" check.
+  void screenTest(
+    String description,
+    Future<void> Function(WidgetTester tester) body,
+  ) {
+    testWidgets(description, (tester) async {
+      await body(tester);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump(Duration.zero);
+    });
+  }
+
+  setUp(() async {
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+    mess = await LocalMessRepository(
+      db,
+    ).createMess(name: 'Test Mess', currencyCode: 'BDT', currencySymbol: '৳');
+    final memberRepo = LocalMemberRepository(db);
+    rahim = await memberRepo.addMember(messId: mess.id, name: 'Rahim');
+    karim = await memberRepo.addMember(messId: mess.id, name: 'Karim');
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  Future<int> totalMealsOn(WidgetTester tester, DateTime date) async {
+    final meals = await tester.runAsync(
+      () => LocalMealRepository(db).watchMealsForDate(mess.id, date).first,
+    );
+    return meals!.fold<int>(0, (sum, m) => sum + m.totalMeals);
+  }
+
+  screenTest('tapping a meal toggle records it', (tester) async {
+    await pumpScreen(tester);
+
+    await tester.tap(find.byType(MealToggleButton).first);
+    await settle(tester);
+
+    expect(await totalMealsOn(tester, today), 1);
+  });
+
+  screenTest('a closed month is shown read-only with a way forward', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      await LocalMealRepository(
+        db,
+      ).setMeal(messId: mess.id, memberId: rahim.id, date: today, lunch: 1);
+      await LocalSettlementRepository(db).closeMonth(
+        messId: mess.id,
+        year: today.year,
+        month: today.month,
+        totalExpense: const Money(0),
+        totalMeals: 1,
+        mealRate: const Money(0),
+        balances: const [],
+      );
+    });
+    await pumpScreen(tester);
+
+    expect(find.textContaining('is closed, so its meals are locked'), findsOneWidget);
+
+    await tester.tap(find.byType(MealToggleButton).first);
+    await settle(tester);
+
+    expect(await totalMealsOn(tester, today), 1);
+    // Karim is listed too, so the lock isn't hiding anyone.
+    expect(find.text(karim.name), findsOneWidget);
+  });
+}
+
+/// Lets Drift's real async I/O finish and the resulting stream emissions
+/// rebuild the screen.
+Future<void> settle(WidgetTester tester) async {
+  for (var i = 0; i < 3; i++) {
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.pump();
+  }
+  await tester.pump(const Duration(milliseconds: 500));
+}

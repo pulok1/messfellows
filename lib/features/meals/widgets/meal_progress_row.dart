@@ -19,6 +19,10 @@ class MealProgressRow extends StatelessWidget {
   final bool showBreakfast;
   final bool showLunch;
   final bool showDinner;
+
+  /// False when the day can't be changed (its month is closed): the
+  /// progress still shows, but tapping a chip does nothing.
+  final bool enabled;
   final VoidCallback onToggleBreakfast;
   final VoidCallback onToggleLunch;
   final VoidCallback onToggleDinner;
@@ -32,6 +36,7 @@ class MealProgressRow extends StatelessWidget {
     this.showBreakfast = true,
     this.showLunch = true,
     this.showDinner = true,
+    this.enabled = true,
     required this.onToggleBreakfast,
     required this.onToggleLunch,
     required this.onToggleDinner,
@@ -54,7 +59,7 @@ class MealProgressRow extends StatelessWidget {
           label: l10n.breakfastLabel,
           marked: breakfastMarked,
           total: totalMembers,
-          onTap: onToggleBreakfast,
+          onTap: enabled ? onToggleBreakfast : null,
         ),
       );
     }
@@ -65,7 +70,7 @@ class MealProgressRow extends StatelessWidget {
           label: l10n.lunchLabel,
           marked: lunchMarked,
           total: totalMembers,
-          onTap: onToggleLunch,
+          onTap: enabled ? onToggleLunch : null,
         ),
       );
     }
@@ -76,7 +81,7 @@ class MealProgressRow extends StatelessWidget {
           label: l10n.dinnerLabel,
           marked: dinnerMarked,
           total: totalMembers,
-          onTap: onToggleDinner,
+          onTap: enabled ? onToggleDinner : null,
         ),
       );
     }
@@ -98,14 +103,14 @@ class _ProgressChip extends StatelessWidget {
   final String label;
   final int marked;
   final int total;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _ProgressChip({
     required this.icon,
     required this.label,
     required this.marked,
     required this.total,
-    required this.onTap,
+    this.onTap,
   });
 
   @override
@@ -127,12 +132,19 @@ class _ProgressChip extends StatelessWidget {
         label,
         l10n.mealProgressLabel(label, marked, total),
       ),
-      hint: complete ? l10n.clearAllAction : l10n.markAllAction,
+      enabled: onTap != null,
+      hint: onTap == null
+          ? null
+          : complete
+          ? l10n.clearAllAction
+          : l10n.markAllAction,
       child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onTap();
-        },
+        onTap: onTap == null
+            ? null
+            : () {
+                HapticFeedback.lightImpact();
+                onTap!();
+              },
         borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
         child: AnimatedContainer(
           duration: short,
@@ -148,7 +160,11 @@ class _ProgressChip extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(complete ? Icons.check_circle : icon, size: 18, color: foreground),
+              Icon(
+                complete ? Icons.check_circle : icon,
+                size: 18,
+                color: foreground,
+              ),
               const SizedBox(height: 2),
               Text(
                 '$marked/$total',
