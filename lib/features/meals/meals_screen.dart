@@ -7,6 +7,7 @@ import '../../core/utils/date_utils.dart';
 import '../../core/utils/localized_date.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/meal_entry.dart';
+import '../../models/meal_slot.dart';
 import '../../models/member.dart';
 import '../../models/mess.dart';
 import '../../providers/meal_providers.dart';
@@ -61,30 +62,89 @@ class MealsScreen extends ConsumerWidget {
     }
   }
 
-  /// Marks everyone who hasn't eaten yet in [countOf]'s slot (leaving
-  /// anyone already at 1+, including a guest-meal count, untouched) —
-  /// or, if everyone's already marked, clears the whole slot back to 0.
-  /// Runs every write in parallel; a household mess is small enough that
-  /// this is instant either way.
+  /// Writes [changes] for [date] in one atomic step, then offers an Undo
+  /// that puts back exactly what those members had before — one tap here
+  /// can change the whole mess's day, so it must be just as easy to take
+  /// back.
+  Future<void> _applyBulk(
+    BuildContext context,
+    WidgetRef ref, {
+    required DateTime date,
+    required Map<String, MealEntry> mealsByMember,
+    required Map<String, MealCounts> changes,
+    required String message,
+  }) async {
+    if (changes.isEmpty) return;
+    final repo = ref.read(mealRepositoryProvider);
+    final previous = {
+      for (final memberId in changes.keys)
+        memberId: mealsByMember[memberId]?.counts ?? noMeals,
+    };
+
+    final saved = await _save(
+      context,
+      () => repo.setMealsForDate(
+        messId: messId,
+        date: date,
+        countsByMember: changes,
+      ),
+    );
+    if (!saved || !context.mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          action: SnackBarAction(
+            label: AppLocalizations.of(context).undoAction,
+            onPressed: () => _save(
+              context,
+              () => repo.setMealsForDate(
+                messId: messId,
+                date: date,
+                countsByMember: previous,
+              ),
+            ),
+          ),
+        ),
+      );
+  }
+
+  /// Marks [slot] for everyone who hasn't had it yet (leaving anyone
+  /// already at 1+, including a guest-meal count, untouched) — or, if
+  /// everyone's already marked, clears it for the whole mess.
   Future<void> _toggleAllForSlot(
     BuildContext context,
     WidgetRef ref, {
+    required MealSlot slot,
+    required String label,
     required List<Member> members,
     required Map<String, MealEntry> mealsByMember,
     required DateTime date,
-    required int Function(MealEntry?) countOf,
-    required Future<void> Function(String memberId, int value) setValue,
-  }) async {
+  }) {
+    int countOf(Member m) =>
+        slot.countIn(mealsByMember[m.id]?.counts ?? noMeals);
     final allMarked =
-        members.isNotEmpty &&
-        members.every((m) => countOf(mealsByMember[m.id]) > 0);
-    await _save(
+        members.isNotEmpty && members.every((m) => countOf(m) > 0);
+    final changes = {
+      for (final member in members)
+        if (allMarked || countOf(member) == 0)
+          member.id: slot.setIn(
+            mealsByMember[member.id]?.counts ?? noMeals,
+            allMarked ? 0 : 1,
+          ),
+    };
+    final l10n = AppLocalizations.of(context);
+    return _applyBulk(
       context,
-      () => Future.wait([
-        for (final member in members)
-          if (allMarked || countOf(mealsByMember[member.id]) == 0)
-            setValue(member.id, allMarked ? 0 : 1),
-      ]),
+      ref,
+      date: date,
+      mealsByMember: mealsByMember,
+      changes: changes,
+      message: allMarked
+          ? l10n.clearedSlotSnackbar(label)
+          : l10n.markedSlotSnackbar(changes.length, label),
     );
   }
 
@@ -113,37 +173,31 @@ class MealsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref, {
     required DateTime date,
+    required List<Member> members,
+    required Map<String, MealEntry> mealsByMember,
     required List<MealEntry> previousMeals,
-  }) async {
-    final members =
-        ref.read(activeMembersProvider(messId)).value ?? const <Member>[];
+  }) {
     final previousByMember = {for (final m in previousMeals) m.memberId: m};
-    final repo = ref.read(mealRepositoryProvider);
-
-    final saved = await _save(
-      context,
-      () => Future.wait([
-        for (final member in members)
-          if (previousByMember[member.id] case final prev?
-              when prev.totalMeals > 0)
-            repo.setMeal(
-              messId: messId,
-              memberId: member.id,
-              date: date,
-              breakfast: mess.trackBreakfast ? prev.breakfast : null,
-              lunch: mess.trackLunch ? prev.lunch : null,
-              dinner: mess.trackDinner ? prev.dinner : null,
-            ),
-      ]),
-    );
-
-    if (saved && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).copiedPreviousDaySnackbar),
-        ),
-      );
+    final changes = <String, MealCounts>{};
+    for (final member in members) {
+      final prev = previousByMember[member.id];
+      if (prev == null || prev.totalMeals == 0) continue;
+      var counts = mealsByMember[member.id]?.counts ?? noMeals;
+      for (final slot in MealSlot.values) {
+        if (slot.isTrackedBy(mess)) {
+          counts = slot.setIn(counts, slot.countIn(prev.counts));
+        }
+      }
+      changes[member.id] = counts;
     }
+    return _applyBulk(
+      context,
+      ref,
+      date: date,
+      mealsByMember: mealsByMember,
+      changes: changes,
+      message: AppLocalizations.of(context).copiedPreviousDaySnackbar,
+    );
   }
 
   @override
@@ -194,6 +248,12 @@ class MealsScreen extends ConsumerWidget {
                       context,
                       ref,
                       date: date,
+                      members: membersAsync.value ?? const [],
+                      mealsByMember: {
+                        for (final meal
+                            in mealsAsync.value ?? const <MealEntry>[])
+                          meal.memberId: meal,
+                      },
                       previousMeals: previousMeals!,
                     ),
                   ),
@@ -266,50 +326,29 @@ class MealsScreen extends ConsumerWidget {
                         onToggleBreakfast: () => _toggleAllForSlot(
                           context,
                           ref,
+                          slot: MealSlot.breakfast,
+                          label: l10n.breakfastLabel,
                           members: members,
                           mealsByMember: mealsByMember,
                           date: date,
-                          countOf: (m) => m?.breakfast ?? 0,
-                          setValue: (memberId, value) => ref
-                              .read(mealRepositoryProvider)
-                              .setMeal(
-                                messId: messId,
-                                memberId: memberId,
-                                date: date,
-                                breakfast: value,
-                              ),
                         ),
                         onToggleLunch: () => _toggleAllForSlot(
                           context,
                           ref,
+                          slot: MealSlot.lunch,
+                          label: l10n.lunchLabel,
                           members: members,
                           mealsByMember: mealsByMember,
                           date: date,
-                          countOf: (m) => m?.lunch ?? 0,
-                          setValue: (memberId, value) => ref
-                              .read(mealRepositoryProvider)
-                              .setMeal(
-                                messId: messId,
-                                memberId: memberId,
-                                date: date,
-                                lunch: value,
-                              ),
                         ),
                         onToggleDinner: () => _toggleAllForSlot(
                           context,
                           ref,
+                          slot: MealSlot.dinner,
+                          label: l10n.dinnerLabel,
                           members: members,
                           mealsByMember: mealsByMember,
                           date: date,
-                          countOf: (m) => m?.dinner ?? 0,
-                          setValue: (memberId, value) => ref
-                              .read(mealRepositoryProvider)
-                              .setMeal(
-                                messId: messId,
-                                memberId: memberId,
-                                date: date,
-                                dinner: value,
-                              ),
                         ),
                       ),
                       Expanded(

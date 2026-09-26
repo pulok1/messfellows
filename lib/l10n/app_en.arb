@@ -87,6 +87,11 @@
   "@mealsLockedBanner": {"placeholders": {"monthYear": {"type": "String"}}},
   "mealsLockedSnackbar": "This month is closed. Reopen it from Report to change its meals.",
   "couldntSaveMeal": "Couldn't save this meal. Please try again.",
+  "undoAction": "Undo",
+  "markedSlotSnackbar": "{count, plural, one{{meal} marked for 1 member} other{{meal} marked for {count} members}}",
+  "@markedSlotSnackbar": {"placeholders": {"count": {"type": "num"}, "meal": {"type": "String"}}},
+  "clearedSlotSnackbar": "{meal} cleared for everyone",
+  "@clearedSlotSnackbar": {"placeholders": {"meal": {"type": "String"}}},
 
   "couldntSaveMember": "Couldn't save this member. Please try again.",
   "editMemberTitle": "Edit Member",

@@ -93,6 +93,44 @@ void main() {
     expect(await totalMealsOn(tester, today), 1);
   });
 
+  screenTest('marking a whole slot can be undone in one tap', (tester) async {
+    await pumpScreen(tester);
+
+    // Breakfast is the first progress chip; nobody has had it yet.
+    await tester.tap(find.text('0/2').first);
+    await settle(tester);
+    expect(await totalMealsOn(tester, today), 2);
+    expect(find.text('Breakfast marked for 2 members'), findsOneWidget);
+
+    await tester.tap(find.text('Undo'));
+    await settle(tester);
+    expect(await totalMealsOn(tester, today), 0);
+  });
+
+  screenTest('clearing a slot for everyone restores guest meals on undo', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      final repo = LocalMealRepository(db);
+      await repo.setMeal(messId: mess.id, memberId: rahim.id, date: today, breakfast: 2);
+      await repo.setMeal(messId: mess.id, memberId: karim.id, date: today, breakfast: 1);
+    });
+    await pumpScreen(tester);
+
+    await tester.tap(find.text('2/2'));
+    await settle(tester);
+    expect(await totalMealsOn(tester, today), 0);
+    expect(find.text('Breakfast cleared for everyone'), findsOneWidget);
+
+    await tester.tap(find.text('Undo'));
+    await settle(tester);
+    final entry = await tester.runAsync(
+      () => LocalMealRepository(db).getMealEntry(mess.id, rahim.id, today),
+    );
+    expect(entry!.breakfast, 2);
+    expect(await totalMealsOn(tester, today), 3);
+  });
+
   screenTest('a closed month is shown read-only with a way forward', (
     tester,
   ) async {

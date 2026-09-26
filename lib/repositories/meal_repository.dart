@@ -1,10 +1,6 @@
 import '../core/errors/app_exception.dart';
 import '../models/meal_entry.dart';
 
-/// One member's breakfast/lunch/dinner counts for a day — the unit a bulk
-/// write (and its undo) works in.
-typedef MealCounts = ({int breakfast, int lunch, int dinner});
-
 abstract interface class MealRepository {
   /// One row per active-that-day member for [date] (date-only, time
   /// truncated) — the source for the daily meal tracker screen.
