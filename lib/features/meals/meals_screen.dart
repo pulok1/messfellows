@@ -148,6 +148,40 @@ class MealsScreen extends ConsumerWidget {
     );
   }
 
+  /// Turns off every tracked meal [member] has on [date] if they've had
+  /// any, otherwise marks every tracked meal — the one-tap "away today" /
+  /// "here all day" — with the same Undo as the slot-wide actions.
+  Future<void> _toggleDayForMember(
+    BuildContext context,
+    WidgetRef ref, {
+    required Member member,
+    required Map<String, MealEntry> mealsByMember,
+    required DateTime date,
+  }) {
+    final current = mealsByMember[member.id]?.counts ?? noMeals;
+    final tracked = MealSlot.values.where((slot) => slot.isTrackedBy(mess));
+    final hasAnyMeal = tracked.any((slot) => slot.countIn(current) > 0);
+    var counts = current;
+    for (final slot in tracked) {
+      if (hasAnyMeal) {
+        counts = slot.setIn(counts, 0);
+      } else if (slot.countIn(counts) == 0) {
+        counts = slot.setIn(counts, 1);
+      }
+    }
+    final l10n = AppLocalizations.of(context);
+    return _applyBulk(
+      context,
+      ref,
+      date: date,
+      mealsByMember: mealsByMember,
+      changes: {member.id: counts},
+      message: hasAnyMeal
+          ? l10n.clearedDaySnackbar(member.name)
+          : l10n.markedDaySnackbar(member.name),
+    );
+  }
+
   Future<void> _pickDate(
     BuildContext context,
     WidgetRef ref,
@@ -410,6 +444,13 @@ class MealsScreen extends ConsumerWidget {
                               showLunch: mess.trackLunch,
                               showDinner: mess.trackDinner,
                               enabled: !locked,
+                              onToggleDay: () => _toggleDayForMember(
+                                context,
+                                ref,
+                                member: member,
+                                mealsByMember: mealsByMember,
+                                date: date,
+                              ),
                               onBreakfastChanged: (value) => _save(
                                 context,
                                 () => ref

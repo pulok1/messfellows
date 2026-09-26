@@ -82,6 +82,10 @@
   "clearedSlotSnackbar": "সবার {meal} মুছে ফেলা হয়েছে",
   "dayMealTotal": "{count, plural, =0{এই দিনে এখনো কোনো মিল নেই} other{এই দিনে {count} মিল}}",
   "dayExtraMeals": "{count}টি অতিরিক্ত",
+  "markDayTooltip": "সব মিল চিহ্নিত করুন",
+  "clearDayTooltip": "সব মিল বন্ধ করুন",
+  "markedDaySnackbar": "{name}-এর সব মিল চিহ্নিত করা হয়েছে",
+  "clearedDaySnackbar": "{name}-এর সব মিল বন্ধ করা হয়েছে",
 
   "couldntSaveMember": "সদস্যকে সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
   "editMemberTitle": "সদস্য সম্পাদনা করুন",

@@ -31,6 +31,11 @@ class MealDayRow extends StatelessWidget {
   final ValueChanged<int> onLunchChanged;
   final ValueChanged<int> onDinnerChanged;
 
+  /// Flips [member]'s whole day at once — all tracked meals off if they've
+  /// had any, otherwise all on — for the common "away today" case that
+  /// would otherwise take a tap per meal. Hidden when [enabled] is false.
+  final VoidCallback? onToggleDay;
+
   const MealDayRow({
     super.key,
     required this.member,
@@ -45,7 +50,14 @@ class MealDayRow extends StatelessWidget {
     required this.onBreakfastChanged,
     required this.onLunchChanged,
     required this.onDinnerChanged,
+    this.onToggleDay,
   });
+
+  /// Whether [member] has any meal in a slot this mess tracks.
+  bool get _hasAnyMeal =>
+      (showBreakfast && breakfast > 0) ||
+      (showLunch && lunch > 0) ||
+      (showDinner && dinner > 0);
 
   @override
   Widget build(BuildContext context) {
@@ -59,23 +71,39 @@ class MealDayRow extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    member.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        member.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        l10n.mealsThisMonth(monthMeals),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (!member.isActive)
                   _ArchivedTag(label: l10n.archivedSectionHeader),
+                if (enabled && onToggleDay != null)
+                  IconButton(
+                    onPressed: onToggleDay,
+                    visualDensity: VisualDensity.compact,
+                    tooltip: _hasAnyMeal
+                        ? l10n.clearDayTooltip
+                        : l10n.markDayTooltip,
+                    icon: Icon(
+                      _hasAnyMeal ? Icons.no_meals_outlined : Icons.done_all,
+                    ),
+                  ),
               ],
-            ),
-            Text(
-              l10n.mealsThisMonth(monthMeals),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Row(children: _buildSlots(context, l10n)),

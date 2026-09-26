@@ -115,6 +115,31 @@ void main() {
     expect(find.text('0 meals this month'), findsOneWidget); // Karim
   });
 
+  screenTest('a member\'s whole day can be marked, turned off and undone', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+
+    // Karim sorts first; both rows offer "Mark all meals".
+    await tester.tap(find.byTooltip('Mark all meals').first);
+    await settle(tester);
+    expect(find.text('All meals marked for Karim'), findsOneWidget);
+    expect(await totalMealsOn(tester, today), 3);
+
+    await tester.tap(find.byTooltip('Turn off all meals'));
+    await settle(tester);
+    expect(find.text("Karim's meals turned off"), findsOneWidget);
+    expect(await totalMealsOn(tester, today), 0);
+
+    // Let the first snackbar finish sliding away so only the latest Undo
+    // — the one for turning the day off — is on screen.
+    await tester.pumpAndSettle();
+    expect(find.text('Undo'), findsOneWidget);
+    await tester.tap(find.text('Undo'));
+    await settle(tester);
+    expect(await totalMealsOn(tester, today), 3);
+  });
+
   screenTest('marking a whole slot can be undone in one tap', (tester) async {
     await pumpScreen(tester);
 

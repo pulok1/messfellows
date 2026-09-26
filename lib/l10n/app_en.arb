@@ -96,6 +96,12 @@
   "@dayMealTotal": {"placeholders": {"count": {"type": "num"}}},
   "dayExtraMeals": "{count, plural, one{1 extra} other{{count} extra}}",
   "@dayExtraMeals": {"placeholders": {"count": {"type": "num"}}},
+  "markDayTooltip": "Mark all meals",
+  "clearDayTooltip": "Turn off all meals",
+  "markedDaySnackbar": "All meals marked for {name}",
+  "@markedDaySnackbar": {"placeholders": {"name": {"type": "String"}}},
+  "clearedDaySnackbar": "{name}'s meals turned off",
+  "@clearedDaySnackbar": {"placeholders": {"name": {"type": "String"}}},
 
   "couldntSaveMember": "Couldn't save this member. Please try again.",
   "editMemberTitle": "Edit Member",
