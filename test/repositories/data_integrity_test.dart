@@ -32,15 +32,15 @@ void main() {
     final member = await memberRepo.addMember(messId: mess.id, name: 'Rahim');
     final date = DateTime(2026, 9, 16);
 
-    await mealRepo.setMeal(messId: mess.id, memberId: member.id, date: date, lunch: true);
+    await mealRepo.setMeal(messId: mess.id, memberId: member.id, date: date, lunch: 1);
     // A second call for the same member/date must update the existing row,
     // not create a second one.
-    await mealRepo.setMeal(messId: mess.id, memberId: member.id, date: date, dinner: true);
+    await mealRepo.setMeal(messId: mess.id, memberId: member.id, date: date, dinner: 1);
 
     final entry = await mealRepo.getMealEntry(mess.id, member.id, date);
     expect(entry, isNotNull);
-    expect(entry!.lunch, isTrue);
-    expect(entry.dinner, isTrue);
+    expect(entry!.lunch, 1);
+    expect(entry.dinner, 1);
 
     final allForDate = await mealRepo.watchMealsForDate(mess.id, date).first;
     expect(allForDate.length, 1);
@@ -92,7 +92,7 @@ void main() {
         date: DateTime(2026, 9, 16),
         amount: const Money(10000),
         paidByMemberId: 'no-such-member',
-        category: 'Grocery',
+        bazarList: 'Rice, dal',
       ),
       throwsA(isA<Exception>()),
     );
@@ -111,7 +111,7 @@ void main() {
         date: DateTime(2026, 9, 16),
         amount: const Money(0),
         paidByMemberId: member.id,
-        category: 'Grocery',
+        bazarList: 'Rice, dal',
       ),
       throwsA(isA<ValidationException>()),
     );
@@ -121,7 +121,7 @@ void main() {
         date: DateTime(2026, 9, 16),
         amount: const Money(-500),
         paidByMemberId: member.id,
-        category: 'Grocery',
+        bazarList: 'Rice, dal',
       ),
       throwsA(isA<ValidationException>()),
     );
@@ -168,22 +168,22 @@ void main() {
     final member = await memberRepo.addMember(messId: mess.id, name: 'Rahim');
     final date = DateTime(2026, 9, 16);
 
-    await mealRepo.setMeal(messId: mess.id, memberId: member.id, date: date, lunch: true);
+    await mealRepo.setMeal(messId: mess.id, memberId: member.id, date: date, lunch: 1);
     var entry = await mealRepo.getMealEntry(mess.id, member.id, date);
-    expect(entry!.lunch, isTrue);
-    expect(entry.dinner, isFalse);
+    expect(entry!.lunch, 1);
+    expect(entry.dinner, 0);
 
-    await mealRepo.setMeal(messId: mess.id, memberId: member.id, date: date, dinner: true);
+    await mealRepo.setMeal(messId: mess.id, memberId: member.id, date: date, dinner: 1);
     entry = await mealRepo.getMealEntry(mess.id, member.id, date);
-    expect(entry!.lunch, isTrue);
-    expect(entry.dinner, isTrue);
+    expect(entry!.lunch, 1);
+    expect(entry.dinner, 1);
 
     final expense = await expenseRepo.addExpense(
       messId: mess.id,
       date: date,
       amount: const Money(10000),
       paidByMemberId: member.id,
-      category: 'Grocery',
+      bazarList: 'Rice, dal',
     );
     await expenseRepo.updateExpense(expense.copyWith(amount: const Money(25000)));
     final expenses = await expenseRepo.watchExpensesForMonth(mess.id, date.year, date.month).first;

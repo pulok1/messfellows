@@ -35,9 +35,9 @@ MealEntry _meal(
     messId: 'mess-1',
     memberId: memberId,
     date: date,
-    breakfast: breakfast,
-    lunch: lunch,
-    dinner: dinner,
+    breakfast: breakfast ? 1 : 0,
+    lunch: lunch ? 1 : 0,
+    dinner: dinner ? 1 : 0,
     createdAt: now,
     updatedAt: now,
   );
@@ -55,7 +55,7 @@ Expense _expense(String id, Money amount, {String paidBy = 'external-payer'}) {
     date: now,
     amount: amount,
     paidByMemberId: paidBy,
-    category: 'Grocery',
+    bazarList: 'Rice, dal',
     createdAt: now,
     updatedAt: now,
   );
@@ -116,6 +116,38 @@ void main() {
     final karim = result.memberBalances.firstWhere((b) => b.memberId == 'm2');
     expect(rahim.mealCost, const Money(30000));
     expect(karim.mealCost, const Money(20000));
+  });
+
+  test('a guest meal (a slot count above 1) is charged to the host member', () {
+    final m1 = _member('m1', name: 'Rahim');
+    final m2 = _member('m2', name: 'Karim');
+    final now = DateTime(2026, 9, 1);
+    final result = engine.calculateMonth(
+      members: [m1, m2],
+      mealEntries: [
+        // Rahim had lunch with a guest: 2 lunches under his name.
+        MealEntry(
+          id: 'guest',
+          messId: 'mess-1',
+          memberId: 'm1',
+          date: d1,
+          breakfast: 0,
+          lunch: 2,
+          dinner: 0,
+          createdAt: now,
+          updatedAt: now,
+        ),
+        _meal('m2', d1, lunch: true),
+      ],
+      expenses: [_expense('e1', const Money(30000))], // ৳300 / 3 meals = ৳100/meal
+      payments: const [],
+    );
+
+    expect(result.totalMeals, 3);
+    expect(result.mealRate, const Money(10000));
+    final rahim = result.memberBalances.firstWhere((b) => b.memberId == 'm1');
+    expect(rahim.mealCount, 2);
+    expect(rahim.mealCost, const Money(20000));
   });
 
   test('different meal counts per member are reflected in meal cost', () {
