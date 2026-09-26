@@ -161,6 +161,18 @@ void main() {
     expect(await totalMealsOn(tester, today), 3);
   });
 
+  screenTest('the undo snackbar goes away on its own', (tester) async {
+    await pumpScreen(tester);
+
+    await tester.tap(find.byTooltip('Mark all meals').first);
+    await settle(tester);
+    expect(find.text('All meals marked for Karim'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(find.text('All meals marked for Karim'), findsNothing);
+  });
+
   screenTest('marking a whole slot can be undone in one tap', (tester) async {
     await pumpScreen(tester);
 

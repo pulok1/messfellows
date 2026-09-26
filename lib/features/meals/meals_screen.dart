@@ -97,6 +97,10 @@ class MealsScreen extends ConsumerWidget {
       ..showSnackBar(
         SnackBar(
           content: Text(message),
+          // A snackbar with an action persists until dismissed by default;
+          // this one is a quick confirmation, so let it time out.
+          persist: false,
+          duration: const Duration(seconds: 2),
           action: SnackBarAction(
             label: AppLocalizations.of(context).undoAction,
             onPressed: () => _save(
