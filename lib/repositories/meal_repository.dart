@@ -1,4 +1,9 @@
+import '../core/errors/app_exception.dart';
 import '../models/meal_entry.dart';
+
+/// One member's breakfast/lunch/dinner counts for a day — the unit a bulk
+/// write (and its undo) works in.
+typedef MealCounts = ({int breakfast, int lunch, int dinner});
 
 abstract interface class MealRepository {
   /// One row per active-that-day member for [date] (date-only, time
@@ -30,5 +35,16 @@ abstract interface class MealRepository {
     int? breakfast,
     int? lunch,
     int? dinner,
+  });
+
+  /// Sets every slot for each member in [countsByMember] on [date], all in
+  /// one transaction — so a mark-all, a copied day or an undo either lands
+  /// completely or not at all, never leaving the day half-changed.
+  ///
+  /// Throws [MonthClosedException] if [date]'s month has been closed.
+  Future<void> setMealsForDate({
+    required String messId,
+    required DateTime date,
+    required Map<String, MealCounts> countsByMember,
   });
 }

@@ -15,6 +15,14 @@ class ValidationException extends AppException {
   const ValidationException(super.message);
 }
 
+/// A write was rejected because it falls in a month that has been closed —
+/// its settlement is frozen, so changing the records under it would make
+/// the saved numbers silently disagree with the data. Reopen the month
+/// first.
+class MonthClosedException extends AppException {
+  const MonthClosedException(super.message);
+}
+
 /// A local database read/write failed unexpectedly.
 class StorageException extends AppException {
   const StorageException(super.message);
