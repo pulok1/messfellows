@@ -359,160 +359,178 @@ class MealsScreen extends ConsumerWidget {
                 monthYear: formatMonthYear(context, date.year, date.month),
               ),
             Expanded(
-              child: membersAsync.when(
-                data: (members) {
-                  if (members.isEmpty) {
-                    return EmptyState(
-                      icon: Icons.group_outlined,
-                      title: l10n.noMembersYetTitle,
-                      message: l10n.addMembersToTrackMeals,
-                      actionLabel: l10n.addMember,
-                      onAction: () =>
-                          showAddEditMemberDialog(context, messId: messId),
-                    );
+              // Swiping sideways steps a day back or forward, like turning
+              // a page — quicker than reaching up for the arrows when
+              // catching up on the last few days.
+              child: GestureDetector(
+                onHorizontalDragEnd: (details) {
+                  final velocity = details.primaryVelocity ?? 0;
+                  final notifier = ref.read(selectedMealDateProvider.notifier);
+                  if (velocity > _swipeVelocity) {
+                    notifier.goToPreviousDay();
+                  } else if (velocity < -_swipeVelocity) {
+                    notifier.goToNextDay();
                   }
-
-                  final meals = mealsAsync.value ?? const <MealEntry>[];
-                  final mealsByMember = {
-                    for (final meal in meals) meal.memberId: meal,
-                  };
-                  // Someone archived since still owns the meals they ate
-                  // here, and those still count toward the month — so
-                  // they're listed (after everyone active) rather than
-                  // silently hidden. They're left out of the progress
-                  // counts and mark-all, which are about today's mess.
-                  final listed = [
-                    ...members,
-                    ...allMembers.where(
-                      (m) =>
-                          !m.isActive &&
-                          (mealsByMember[m.id]?.totalMeals ?? 0) > 0,
-                    ),
-                  ];
-
-                  return Column(
-                    children: [
-                      MealProgressRow(
-                        totalMembers: members.length,
-                        breakfastMarked: members
-                            .where(
-                              (m) => (mealsByMember[m.id]?.breakfast ?? 0) > 0,
-                            )
-                            .length,
-                        lunchMarked: members
-                            .where((m) => (mealsByMember[m.id]?.lunch ?? 0) > 0)
-                            .length,
-                        dinnerMarked: members
-                            .where(
-                              (m) => (mealsByMember[m.id]?.dinner ?? 0) > 0,
-                            )
-                            .length,
-                        showBreakfast: mess.trackBreakfast,
-                        showLunch: mess.trackLunch,
-                        showDinner: mess.trackDinner,
-                        enabled: !locked,
-                        summary: _daySummary(l10n, meals),
-                        onToggleBreakfast: () => _toggleAllForSlot(
-                          context,
-                          ref,
-                          slot: MealSlot.breakfast,
-                          label: l10n.breakfastLabel,
-                          members: members,
-                          mealsByMember: mealsByMember,
-                          date: date,
-                        ),
-                        onToggleLunch: () => _toggleAllForSlot(
-                          context,
-                          ref,
-                          slot: MealSlot.lunch,
-                          label: l10n.lunchLabel,
-                          members: members,
-                          mealsByMember: mealsByMember,
-                          date: date,
-                        ),
-                        onToggleDinner: () => _toggleAllForSlot(
-                          context,
-                          ref,
-                          slot: MealSlot.dinner,
-                          label: l10n.dinnerLabel,
-                          members: members,
-                          mealsByMember: mealsByMember,
-                          date: date,
-                        ),
-                      ),
-                      Expanded(
-                        child: ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.md,
-                            0,
-                            AppSpacing.md,
-                            AppSpacing.md,
-                          ),
-                          itemCount: listed.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: AppSpacing.sm),
-                          itemBuilder: (context, index) {
-                            final member = listed[index];
-                            final meal = mealsByMember[member.id];
-                            return MealDayRow(
-                              member: member,
-                              breakfast: meal?.breakfast ?? 0,
-                              lunch: meal?.lunch ?? 0,
-                              dinner: meal?.dinner ?? 0,
-                              monthMeals: monthMealsByMember[member.id] ?? 0,
-                              showBreakfast: mess.trackBreakfast,
-                              showLunch: mess.trackLunch,
-                              showDinner: mess.trackDinner,
-                              enabled: !locked,
-                              onToggleDay: () => _toggleDayForMember(
-                                context,
-                                ref,
-                                member: member,
-                                mealsByMember: mealsByMember,
-                                date: date,
-                              ),
-                              onBreakfastChanged: (value) => _save(
-                                context,
-                                () => ref
-                                    .read(mealRepositoryProvider)
-                                    .setMeal(
-                                      messId: messId,
-                                      memberId: member.id,
-                                      date: date,
-                                      breakfast: value,
-                                    ),
-                              ),
-                              onLunchChanged: (value) => _save(
-                                context,
-                                () => ref
-                                    .read(mealRepositoryProvider)
-                                    .setMeal(
-                                      messId: messId,
-                                      memberId: member.id,
-                                      date: date,
-                                      lunch: value,
-                                    ),
-                              ),
-                              onDinnerChanged: (value) => _save(
-                                context,
-                                () => ref
-                                    .read(mealRepositoryProvider)
-                                    .setMeal(
-                                      messId: messId,
-                                      memberId: member.id,
-                                      date: date,
-                                      dinner: value,
-                                    ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
                 },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) => Center(child: Text(l10n.couldntLoadMembers)),
+                child: membersAsync.when(
+                  data: (members) {
+                    if (members.isEmpty) {
+                      return EmptyState(
+                        icon: Icons.group_outlined,
+                        title: l10n.noMembersYetTitle,
+                        message: l10n.addMembersToTrackMeals,
+                        actionLabel: l10n.addMember,
+                        onAction: () =>
+                            showAddEditMemberDialog(context, messId: messId),
+                      );
+                    }
+
+                    final meals = mealsAsync.value ?? const <MealEntry>[];
+                    final mealsByMember = {
+                      for (final meal in meals) meal.memberId: meal,
+                    };
+                    // Someone archived since still owns the meals they ate
+                    // here, and those still count toward the month — so
+                    // they're listed (after everyone active) rather than
+                    // silently hidden. They're left out of the progress
+                    // counts and mark-all, which are about today's mess.
+                    final listed = [
+                      ...members,
+                      ...allMembers.where(
+                        (m) =>
+                            !m.isActive &&
+                            (mealsByMember[m.id]?.totalMeals ?? 0) > 0,
+                      ),
+                    ];
+
+                    return Column(
+                      children: [
+                        MealProgressRow(
+                          totalMembers: members.length,
+                          breakfastMarked: members
+                              .where(
+                                (m) =>
+                                    (mealsByMember[m.id]?.breakfast ?? 0) > 0,
+                              )
+                              .length,
+                          lunchMarked: members
+                              .where(
+                                (m) => (mealsByMember[m.id]?.lunch ?? 0) > 0,
+                              )
+                              .length,
+                          dinnerMarked: members
+                              .where(
+                                (m) => (mealsByMember[m.id]?.dinner ?? 0) > 0,
+                              )
+                              .length,
+                          showBreakfast: mess.trackBreakfast,
+                          showLunch: mess.trackLunch,
+                          showDinner: mess.trackDinner,
+                          enabled: !locked,
+                          summary: _daySummary(l10n, meals),
+                          onToggleBreakfast: () => _toggleAllForSlot(
+                            context,
+                            ref,
+                            slot: MealSlot.breakfast,
+                            label: l10n.breakfastLabel,
+                            members: members,
+                            mealsByMember: mealsByMember,
+                            date: date,
+                          ),
+                          onToggleLunch: () => _toggleAllForSlot(
+                            context,
+                            ref,
+                            slot: MealSlot.lunch,
+                            label: l10n.lunchLabel,
+                            members: members,
+                            mealsByMember: mealsByMember,
+                            date: date,
+                          ),
+                          onToggleDinner: () => _toggleAllForSlot(
+                            context,
+                            ref,
+                            slot: MealSlot.dinner,
+                            label: l10n.dinnerLabel,
+                            members: members,
+                            mealsByMember: mealsByMember,
+                            date: date,
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppSpacing.md,
+                              0,
+                              AppSpacing.md,
+                              AppSpacing.md,
+                            ),
+                            itemCount: listed.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: AppSpacing.sm),
+                            itemBuilder: (context, index) {
+                              final member = listed[index];
+                              final meal = mealsByMember[member.id];
+                              return MealDayRow(
+                                member: member,
+                                breakfast: meal?.breakfast ?? 0,
+                                lunch: meal?.lunch ?? 0,
+                                dinner: meal?.dinner ?? 0,
+                                monthMeals: monthMealsByMember[member.id] ?? 0,
+                                showBreakfast: mess.trackBreakfast,
+                                showLunch: mess.trackLunch,
+                                showDinner: mess.trackDinner,
+                                enabled: !locked,
+                                onToggleDay: () => _toggleDayForMember(
+                                  context,
+                                  ref,
+                                  member: member,
+                                  mealsByMember: mealsByMember,
+                                  date: date,
+                                ),
+                                onBreakfastChanged: (value) => _save(
+                                  context,
+                                  () => ref
+                                      .read(mealRepositoryProvider)
+                                      .setMeal(
+                                        messId: messId,
+                                        memberId: member.id,
+                                        date: date,
+                                        breakfast: value,
+                                      ),
+                                ),
+                                onLunchChanged: (value) => _save(
+                                  context,
+                                  () => ref
+                                      .read(mealRepositoryProvider)
+                                      .setMeal(
+                                        messId: messId,
+                                        memberId: member.id,
+                                        date: date,
+                                        lunch: value,
+                                      ),
+                                ),
+                                onDinnerChanged: (value) => _save(
+                                  context,
+                                  () => ref
+                                      .read(mealRepositoryProvider)
+                                      .setMeal(
+                                        messId: messId,
+                                        memberId: member.id,
+                                        date: date,
+                                        dinner: value,
+                                      ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, _) => Center(child: Text(l10n.couldntLoadMembers)),
+                ),
               ),
             ),
           ],
@@ -646,6 +664,10 @@ class _DateBar extends StatelessWidget {
     );
   }
 }
+
+/// How fast (logical pixels/second) a sideways fling must be to change the
+/// day, so a slightly diagonal scroll through the list doesn't.
+const _swipeVelocity = 300.0;
 
 bool _isSameDay(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month && a.day == b.day;

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:messfellows/core/theme/app_theme.dart';
 import 'package:messfellows/core/utils/date_utils.dart';
 import 'package:messfellows/core/utils/money.dart';
@@ -264,6 +265,25 @@ void main() {
       find.descendant(of: find.byType(Badge), matching: find.text('2')),
       findsOneWidget,
     );
+  });
+
+  screenTest('swiping sideways changes the day, but not past tomorrow', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    String dayLabel(DateTime d) => DateFormat('d MMMM y', 'en').format(d);
+    Future<void> fling(double dx) async {
+      await tester.fling(find.text('Rahim'), Offset(dx, 0), 1000);
+      await settle(tester);
+    }
+
+    await fling(300);
+    expect(find.text(dayLabel(addDays(today, -1))), findsOneWidget);
+
+    await fling(-300);
+    await fling(-300);
+    await fling(-300);
+    expect(find.text(dayLabel(addDays(today, 1))), findsOneWidget);
   });
 
   screenTest('a closed month is shown read-only with a way forward', (
