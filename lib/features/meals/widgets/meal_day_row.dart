@@ -8,6 +8,9 @@ import 'meal_toggle_button.dart';
 /// One member's row on the daily meal tracker: name plus three
 /// independently-tappable meal toggles. Tap flips a slot off/on; long-press
 /// opens a count picker for an extra/guest meal (2 or more) in that slot.
+///
+/// An archived member only appears here on a day they have meals recorded
+/// — tagged so it's clear why someone who left is still on the list.
 class MealDayRow extends StatelessWidget {
   final Member member;
   final int breakfast;
@@ -48,10 +51,20 @@ class MealDayRow extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              member.name,
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w600),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    member.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                if (!member.isActive)
+                  _ArchivedTag(label: l10n.archivedSectionHeader),
+              ],
             ),
             const SizedBox(height: AppSpacing.sm),
             Row(children: _buildSlots(context, l10n)),
@@ -130,6 +143,32 @@ class MealDayRow extends StatelessWidget {
     }
 
     return slots;
+  }
+}
+
+class _ArchivedTag extends StatelessWidget {
+  final String label;
+
+  const _ArchivedTag({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall
+            ?.copyWith(color: colorScheme.onSurfaceVariant),
+      ),
+    );
   }
 }
 

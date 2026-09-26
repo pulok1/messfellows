@@ -205,6 +205,8 @@ class MealsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final date = ref.watch(selectedMealDateProvider);
     final membersAsync = ref.watch(activeMembersProvider(messId));
+    final allMembers =
+        ref.watch(allMembersProvider(messId)).value ?? const <Member>[];
     final mealsAsync = ref.watch(
       mealsForDateProvider((messId: messId, date: date)),
     );
@@ -301,6 +303,19 @@ class MealsScreen extends ConsumerWidget {
                   final mealsByMember = {
                     for (final meal in meals) meal.memberId: meal,
                   };
+                  // Someone archived since still owns the meals they ate
+                  // here, and those still count toward the month — so
+                  // they're listed (after everyone active) rather than
+                  // silently hidden. They're left out of the progress
+                  // counts and mark-all, which are about today's mess.
+                  final listed = [
+                    ...members,
+                    ...allMembers.where(
+                      (m) =>
+                          !m.isActive &&
+                          (mealsByMember[m.id]?.totalMeals ?? 0) > 0,
+                    ),
+                  ];
 
                   return Column(
                     children: [
@@ -359,11 +374,11 @@ class MealsScreen extends ConsumerWidget {
                             AppSpacing.md,
                             AppSpacing.md,
                           ),
-                          itemCount: members.length,
+                          itemCount: listed.length,
                           separatorBuilder: (_, _) =>
                               const SizedBox(height: AppSpacing.sm),
                           itemBuilder: (context, index) {
-                            final member = members[index];
+                            final member = listed[index];
                             final meal = mealsByMember[member.id];
                             return MealDayRow(
                               member: member,

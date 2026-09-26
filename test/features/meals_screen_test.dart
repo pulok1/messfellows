@@ -131,6 +131,29 @@ void main() {
     expect(await totalMealsOn(tester, today), 3);
   });
 
+  screenTest('an archived member stays visible on days they ate', (tester) async {
+    final yesterday = addDays(today, -1);
+    await tester.runAsync(() async {
+      await LocalMealRepository(
+        db,
+      ).setMeal(messId: mess.id, memberId: karim.id, date: yesterday, lunch: 1);
+      await LocalMemberRepository(db).archiveMember(karim.id);
+    });
+    await pumpScreen(tester);
+
+    // Today: Karim ate nothing, so only the active member is listed.
+    expect(find.text('Karim'), findsNothing);
+    expect(find.text('0/1'), findsWidgets);
+
+    await tester.tap(find.byTooltip('Previous day'));
+    await settle(tester);
+
+    expect(find.text('Karim'), findsOneWidget);
+    expect(find.text('Archived'), findsOneWidget);
+    // Progress still counts only the active mess.
+    expect(find.text('0/1'), findsWidgets);
+  });
+
   screenTest('a closed month is shown read-only with a way forward', (
     tester,
   ) async {
