@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/date_utils.dart';
 import '../../core/utils/localized_date.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/meal_entry.dart';
@@ -56,7 +57,7 @@ class MealsScreen extends ConsumerWidget {
       context: context,
       initialDate: current,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 1)),
+      lastDate: latestMealDate(),
     );
     if (picked != null) {
       ref.read(selectedMealDateProvider.notifier).goTo(picked);
@@ -108,7 +109,7 @@ class MealsScreen extends ConsumerWidget {
         .watch(
           mealsForDateProvider((
             messId: messId,
-            date: date.subtract(const Duration(days: 1)),
+            date: addDays(date, -1),
           )),
         )
         .value;
@@ -149,7 +150,9 @@ class MealsScreen extends ConsumerWidget {
                 isToday: isToday,
                 onToday: () => ref.read(selectedMealDateProvider.notifier).goToToday(),
                 onPrevious: () => ref.read(selectedMealDateProvider.notifier).goToPreviousDay(),
-                onNext: () => ref.read(selectedMealDateProvider.notifier).goToNextDay(),
+                onNext: date.isBefore(latestMealDate())
+                    ? () => ref.read(selectedMealDateProvider.notifier).goToNextDay()
+                    : null,
                 onPickDate: () => _pickDate(context, ref, date),
               ),
             ),
@@ -346,7 +349,7 @@ class _DateBar extends StatelessWidget {
   final bool isToday;
   final VoidCallback onToday;
   final VoidCallback onPrevious;
-  final VoidCallback onNext;
+  final VoidCallback? onNext;
   final VoidCallback onPickDate;
 
   const _DateBar({

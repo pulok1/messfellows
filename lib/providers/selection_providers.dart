@@ -9,8 +9,15 @@ class SelectedMealDate extends Notifier<DateTime> {
   DateTime build() => dateOnly(DateTime.now());
 
   void goToToday() => state = dateOnly(DateTime.now());
-  void goToPreviousDay() => state = state.subtract(const Duration(days: 1));
-  void goToNextDay() => state = state.add(const Duration(days: 1));
+  void goToPreviousDay() => state = addDays(state, -1);
+
+  /// No-op past [latestMealDate], so the next-day arrow can't wander into
+  /// the future.
+  void goToNextDay() {
+    final next = addDays(state, 1);
+    if (!next.isAfter(latestMealDate())) state = next;
+  }
+
   void goTo(DateTime date) => state = dateOnly(date);
 }
 
