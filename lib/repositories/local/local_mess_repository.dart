@@ -85,6 +85,7 @@ class LocalMessRepository implements MessRepository {
     // Children before parents so foreign-key constraints don't reject the
     // deletes (PRAGMA foreign_keys is on — see AppDatabase.beforeOpen).
     await _db.transaction(() async {
+      await _db.delete(_db.activityLogs).go();
       await _db.delete(_db.monthlySettlementMembers).go();
       await _db.delete(_db.monthlySettlements).go();
       await _db.delete(_db.mealEntries).go();

@@ -91,6 +91,7 @@ class BackupService {
 
     try {
       await _db.transaction(() async {
+        await _db.delete(_db.activityLogs).go();
         await _db.delete(_db.monthlySettlementMembers).go();
         await _db.delete(_db.monthlySettlements).go();
         await _db.delete(_db.mealEntries).go();
