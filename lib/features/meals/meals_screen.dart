@@ -5,6 +5,7 @@ import '../../core/errors/app_exception.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/utils/localized_date.dart';
+import '../../core/utils/meal_gaps.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/meal_entry.dart';
 import '../../models/meal_slot.dart';
@@ -280,6 +281,16 @@ class MealsScreen extends ConsumerWidget {
             )
             ?.isClosed ??
         false;
+    // Earlier days this month with nothing marked, badged on the monthly
+    // sheet's button so a forgotten day gets noticed without opening it.
+    final unrecordedDays = locked
+        ? const <DateTime>[]
+        : unrecordedMealDays(
+            monthMeals,
+            year: date.year,
+            month: date.month,
+            today: dateOnly(DateTime.now()),
+          );
     // Offered only when today has nothing recorded yet and yesterday has
     // something to copy — never as a way to overwrite a day in progress.
     final canCopyPreviousDay =
@@ -315,6 +326,7 @@ class MealsScreen extends ConsumerWidget {
                 HeaderIconButton(
                   icon: Icons.bar_chart_outlined,
                   tooltip: l10n.monthlyTotalsTooltip,
+                  badgeCount: unrecordedDays.length,
                   onPressed: () => showMonthlyMealsSheet(
                     context,
                     mess: mess,

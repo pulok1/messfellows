@@ -14,6 +14,7 @@ import 'package:messfellows/l10n/gen/app_localizations.dart';
 import 'package:messfellows/models/member.dart';
 import 'package:messfellows/models/mess.dart';
 import 'package:messfellows/providers/database_provider.dart';
+import 'package:messfellows/providers/selection_providers.dart';
 import 'package:messfellows/repositories/local/local_meal_repository.dart';
 import 'package:messfellows/repositories/local/local_member_repository.dart';
 import 'package:messfellows/repositories/local/local_mess_repository.dart';
@@ -30,14 +31,22 @@ void main() {
   late Member karim;
   final today = dateOnly(DateTime.now());
 
-  Future<void> pumpScreen(WidgetTester tester, {Widget? home}) async {
+  Future<void> pumpScreen(
+    WidgetTester tester, {
+    Widget? home,
+    DateTime? date,
+  }) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [appDatabaseProvider.overrideWithValue(db)],
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          if (date != null)
+            selectedMealDateProvider.overrideWith(() => _FixedMealDate(date)),
+        ],
         child: MaterialApp(
           theme: AppTheme.light(),
           locale: const Locale('en'),
@@ -241,6 +250,22 @@ void main() {
     expect(find.byType(MonthlyMealsSheet), findsNothing);
   });
 
+  screenTest('the monthly button is badged with the count of missed days', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      final repo = LocalMealRepository(db);
+      await repo.setMeal(messId: mess.id, memberId: rahim.id, date: DateTime(2026, 2, 25), lunch: 1);
+      await repo.setMeal(messId: mess.id, memberId: rahim.id, date: DateTime(2026, 2, 28), lunch: 1);
+    });
+    await pumpScreen(tester, date: DateTime(2026, 2, 28));
+
+    expect(
+      find.descendant(of: find.byType(Badge), matching: find.text('2')),
+      findsOneWidget,
+    );
+  });
+
   screenTest('a closed month is shown read-only with a way forward', (
     tester,
   ) async {
@@ -279,4 +304,13 @@ Future<void> settle(WidgetTester tester) async {
     await tester.pump();
   }
   await tester.pump(const Duration(milliseconds: 500));
+}
+
+class _FixedMealDate extends SelectedMealDate {
+  final DateTime date;
+
+  _FixedMealDate(this.date);
+
+  @override
+  DateTime build() => date;
 }

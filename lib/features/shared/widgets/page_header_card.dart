@@ -122,12 +122,17 @@ class HeaderIconButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Color? color;
 
+  /// A small count on the icon's corner for something worth a look behind
+  /// this action; hidden when null or 0.
+  final int? badgeCount;
+
   const HeaderIconButton({
     super.key,
     required this.icon,
     required this.tooltip,
     required this.onPressed,
     this.color,
+    this.badgeCount,
   });
 
   @override
@@ -137,6 +142,7 @@ class HeaderIconButton extends StatelessWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       color: color,
+      badgeCount: badgeCount,
     );
   }
 }
@@ -146,12 +152,14 @@ class _HeaderIconButton extends StatelessWidget {
   final String tooltip;
   final VoidCallback onPressed;
   final Color? color;
+  final int? badgeCount;
 
   const _HeaderIconButton({
     required this.icon,
     required this.tooltip,
     required this.onPressed,
     this.color,
+    this.badgeCount,
   });
 
   @override
@@ -159,7 +167,11 @@ class _HeaderIconButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return IconButton(
       tooltip: tooltip,
-      icon: Icon(icon, size: 20),
+      icon: Badge.count(
+        count: badgeCount ?? 0,
+        isLabelVisible: (badgeCount ?? 0) > 0,
+        child: Icon(icon, size: 20),
+      ),
       onPressed: onPressed,
       color: color ?? colorScheme.onSurfaceVariant,
       style: IconButton.styleFrom(
