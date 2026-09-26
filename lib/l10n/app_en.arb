@@ -92,6 +92,10 @@
   "@markedSlotSnackbar": {"placeholders": {"count": {"type": "num"}, "meal": {"type": "String"}}},
   "clearedSlotSnackbar": "{meal} cleared for everyone",
   "@clearedSlotSnackbar": {"placeholders": {"meal": {"type": "String"}}},
+  "dayMealTotal": "{count, plural, =0{No meals this day yet} one{1 meal this day} other{{count} meals this day}}",
+  "@dayMealTotal": {"placeholders": {"count": {"type": "num"}}},
+  "dayExtraMeals": "{count, plural, one{1 extra} other{{count} extra}}",
+  "@dayExtraMeals": {"placeholders": {"count": {"type": "num"}}},
 
   "couldntSaveMember": "Couldn't save this member. Please try again.",
   "editMemberTitle": "Edit Member",

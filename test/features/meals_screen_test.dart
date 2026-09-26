@@ -93,6 +93,28 @@ void main() {
     expect(await totalMealsOn(tester, today), 1);
   });
 
+  screenTest('shows the day total with extras and each member\'s month count', (
+    tester,
+  ) async {
+    // Pick a day in the same month as today so both land in one month.
+    final earlier = today.day > 1 ? addDays(today, -1) : today;
+    await tester.runAsync(() async {
+      final repo = LocalMealRepository(db);
+      await repo.setMeal(messId: mess.id, memberId: rahim.id, date: today, lunch: 2, dinner: 1);
+      if (earlier != today) {
+        await repo.setMeal(messId: mess.id, memberId: rahim.id, date: earlier, lunch: 1);
+      }
+    });
+    await pumpScreen(tester);
+
+    expect(find.text('3 meals this day · 1 extra'), findsOneWidget);
+    expect(
+      find.text(earlier != today ? '4 meals this month' : '3 meals this month'),
+      findsOneWidget,
+    );
+    expect(find.text('0 meals this month'), findsOneWidget); // Karim
+  });
+
   screenTest('marking a whole slot can be undone in one tap', (tester) async {
     await pumpScreen(tester);
 

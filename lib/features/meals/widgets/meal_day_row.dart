@@ -16,6 +16,10 @@ class MealDayRow extends StatelessWidget {
   final int breakfast;
   final int lunch;
   final int dinner;
+
+  /// [member]'s meals so far in this day's month, shown under their name
+  /// so anyone can check their own running count against the report.
+  final int monthMeals;
   final bool showBreakfast;
   final bool showLunch;
   final bool showDinner;
@@ -33,6 +37,7 @@ class MealDayRow extends StatelessWidget {
     required this.breakfast,
     required this.lunch,
     required this.dinner,
+    required this.monthMeals,
     this.showBreakfast = true,
     this.showLunch = true,
     this.showDinner = true,
@@ -65,6 +70,12 @@ class MealDayRow extends StatelessWidget {
                 if (!member.isActive)
                   _ArchivedTag(label: l10n.archivedSectionHeader),
               ],
+            ),
+            Text(
+              l10n.mealsThisMonth(monthMeals),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Row(children: _buildSlots(context, l10n)),

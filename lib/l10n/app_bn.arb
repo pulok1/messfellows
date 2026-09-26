@@ -80,6 +80,8 @@
   "undoAction": "ফিরিয়ে নিন",
   "markedSlotSnackbar": "{count} জনের {meal} চিহ্নিত করা হয়েছে",
   "clearedSlotSnackbar": "সবার {meal} মুছে ফেলা হয়েছে",
+  "dayMealTotal": "{count, plural, =0{এই দিনে এখনো কোনো মিল নেই} other{এই দিনে {count} মিল}}",
+  "dayExtraMeals": "{count}টি অতিরিক্ত",
 
   "couldntSaveMember": "সদস্যকে সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
   "editMemberTitle": "সদস্য সম্পাদনা করুন",

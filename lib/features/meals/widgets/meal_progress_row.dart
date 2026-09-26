@@ -23,6 +23,10 @@ class MealProgressRow extends StatelessWidget {
   /// False when the day can't be changed (its month is closed): the
   /// progress still shows, but tapping a chip does nothing.
   final bool enabled;
+
+  /// A one-line tally under the chips (e.g. "7 meals this day · 1 extra"),
+  /// so the day's total is visible without adding up the rows.
+  final String? summary;
   final VoidCallback onToggleBreakfast;
   final VoidCallback onToggleLunch;
   final VoidCallback onToggleDinner;
@@ -37,6 +41,7 @@ class MealProgressRow extends StatelessWidget {
     this.showLunch = true,
     this.showDinner = true,
     this.enabled = true,
+    this.summary,
     required this.onToggleBreakfast,
     required this.onToggleLunch,
     required this.onToggleDinner,
@@ -93,7 +98,21 @@ class MealProgressRow extends StatelessWidget {
         AppSpacing.md,
         AppSpacing.sm,
       ),
-      child: Row(children: chips),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(children: chips),
+          if (summary != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              summary!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

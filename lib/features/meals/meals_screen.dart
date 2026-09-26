@@ -207,6 +207,25 @@ class MealsScreen extends ConsumerWidget {
     final membersAsync = ref.watch(activeMembersProvider(messId));
     final allMembers =
         ref.watch(allMembersProvider(messId)).value ?? const <Member>[];
+    final monthMeals =
+        ref
+            .watch(
+              mealsForMonthProvider((
+                messId: messId,
+                year: date.year,
+                month: date.month,
+              )),
+            )
+            .value ??
+        const <MealEntry>[];
+    final monthMealsByMember = <String, int>{};
+    for (final meal in monthMeals) {
+      monthMealsByMember.update(
+        meal.memberId,
+        (total) => total + meal.totalMeals,
+        ifAbsent: () => meal.totalMeals,
+      );
+    }
     final mealsAsync = ref.watch(
       mealsForDateProvider((messId: messId, date: date)),
     );
@@ -338,6 +357,7 @@ class MealsScreen extends ConsumerWidget {
                         showLunch: mess.trackLunch,
                         showDinner: mess.trackDinner,
                         enabled: !locked,
+                        summary: _daySummary(l10n, meals),
                         onToggleBreakfast: () => _toggleAllForSlot(
                           context,
                           ref,
@@ -385,6 +405,7 @@ class MealsScreen extends ConsumerWidget {
                               breakfast: meal?.breakfast ?? 0,
                               lunch: meal?.lunch ?? 0,
                               dinner: meal?.dinner ?? 0,
+                              monthMeals: monthMealsByMember[member.id] ?? 0,
                               showBreakfast: mess.trackBreakfast,
                               showLunch: mess.trackLunch,
                               showDinner: mess.trackDinner,
@@ -437,6 +458,21 @@ class MealsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// "7 meals this day · 1 extra" — extras being every meal past the first
+  /// in a slot, i.e. guests and second helpings.
+  String _daySummary(AppLocalizations l10n, List<MealEntry> meals) {
+    var total = 0;
+    var extra = 0;
+    for (final meal in meals) {
+      total += meal.totalMeals;
+      for (final count in [meal.breakfast, meal.lunch, meal.dinner]) {
+        if (count > 1) extra += count - 1;
+      }
+    }
+    final summary = l10n.dayMealTotal(total);
+    return extra > 0 ? '$summary · ${l10n.dayExtraMeals(extra)}' : summary;
   }
 
   void _showMonthlyTotals(BuildContext context, WidgetRef ref, DateTime date) {
