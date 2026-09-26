@@ -86,6 +86,8 @@
   "clearDayTooltip": "সব মিল বন্ধ করুন",
   "markedDaySnackbar": "{name}-এর সব মিল চিহ্নিত করা হয়েছে",
   "clearedDaySnackbar": "{name}-এর সব মিল বন্ধ করা হয়েছে",
+  "unrecordedDaysTitle": "{count} দিনের কোনো মিল লেখা হয়নি",
+  "unrecordedDaysHint": "কোনো দিন বাদ পড়লে মোট মিল কমে যায় আর সবার মিল রেট বেড়ে যায়। পূরণ করতে একটি দিনে ট্যাপ করুন।",
 
   "couldntSaveMember": "সদস্যকে সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
   "editMemberTitle": "সদস্য সম্পাদনা করুন",

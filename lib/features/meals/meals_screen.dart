@@ -12,7 +12,6 @@ import '../../models/member.dart';
 import '../../models/mess.dart';
 import '../../providers/meal_providers.dart';
 import '../../providers/member_providers.dart';
-import '../../providers/month_calculation_provider.dart';
 import '../../providers/repository_providers.dart';
 import '../../providers/selection_providers.dart';
 import '../../providers/settlement_providers.dart';
@@ -21,6 +20,7 @@ import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/page_header_card.dart';
 import 'widgets/meal_day_row.dart';
 import 'widgets/meal_progress_row.dart';
+import 'widgets/monthly_meals_sheet.dart';
 
 /// The daily meal tracker (sections 14/15) — the screen a manager is
 /// expected to open several times a day, so it defaults to today and
@@ -315,7 +315,15 @@ class MealsScreen extends ConsumerWidget {
                 HeaderIconButton(
                   icon: Icons.bar_chart_outlined,
                   tooltip: l10n.monthlyTotalsTooltip,
-                  onPressed: () => _showMonthlyTotals(context, ref, date),
+                  onPressed: () => showMonthlyMealsSheet(
+                    context,
+                    mess: mess,
+                    year: date.year,
+                    month: date.month,
+                    onJumpToDay: ref
+                        .read(selectedMealDateProvider.notifier)
+                        .goTo,
+                  ),
                 ),
               ],
               bottom: _DateBar(
@@ -514,64 +522,6 @@ class MealsScreen extends ConsumerWidget {
     }
     final summary = l10n.dayMealTotal(total);
     return extra > 0 ? '$summary · ${l10n.dayExtraMeals(extra)}' : summary;
-  }
-
-  void _showMonthlyTotals(BuildContext context, WidgetRef ref, DateTime date) {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) {
-        final l10n = AppLocalizations.of(sheetContext);
-        final result = ref.watch(
-          monthCalculationProvider((
-            messId: messId,
-            year: date.year,
-            month: date.month,
-          )),
-        );
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              0,
-              AppSpacing.lg,
-              AppSpacing.lg,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.monthlyMealCountsTitle(
-                    formatMonthYear(sheetContext, date.year, date.month),
-                  ),
-                  style: Theme.of(sheetContext).textTheme.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                if (result.memberBalances.isEmpty)
-                  Text(l10n.noMembersYetInline),
-                for (final balance in result.memberBalances)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.xs,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(balance.memberName),
-                        Text(
-                          l10n.mealsCount(balance.mealCount),
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 }
 

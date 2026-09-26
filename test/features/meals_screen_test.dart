@@ -9,6 +9,7 @@ import 'package:messfellows/core/utils/money.dart';
 import 'package:messfellows/database/app_database.dart';
 import 'package:messfellows/features/meals/meals_screen.dart';
 import 'package:messfellows/features/meals/widgets/meal_toggle_button.dart';
+import 'package:messfellows/features/meals/widgets/monthly_meals_sheet.dart';
 import 'package:messfellows/l10n/gen/app_localizations.dart';
 import 'package:messfellows/models/member.dart';
 import 'package:messfellows/models/mess.dart';
@@ -29,7 +30,7 @@ void main() {
   late Member karim;
   final today = dateOnly(DateTime.now());
 
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(WidgetTester tester, {Widget? home}) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -42,7 +43,7 @@ void main() {
           locale: const Locale('en'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
-          home: MealsScreen(mess: mess),
+          home: home ?? MealsScreen(mess: mess),
         ),
       ),
     );
@@ -199,6 +200,45 @@ void main() {
     expect(find.text('Archived'), findsOneWidget);
     // Progress still counts only the active mess.
     expect(find.text('0/1'), findsWidgets);
+  });
+
+  screenTest('the monthly sheet breaks counts down and jumps to missed days', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      final repo = LocalMealRepository(db);
+      await repo.setMeal(messId: mess.id, memberId: rahim.id, date: DateTime(2026, 2, 26), breakfast: 1, lunch: 1);
+      await repo.setMeal(messId: mess.id, memberId: rahim.id, date: DateTime(2026, 2, 28), lunch: 1);
+    });
+    DateTime? jumpedTo;
+    await pumpScreen(
+      tester,
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showMonthlyMealsSheet(
+              context,
+              mess: mess,
+              year: 2026,
+              month: 2,
+              onJumpToDay: (day) => jumpedTo = day,
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await settle(tester);
+
+    expect(find.text('Total Meals: 3'), findsOneWidget);
+    expect(find.text('Breakfast 1 · Lunch 2 · Dinner 0'), findsOneWidget);
+    expect(find.text('1 day has no meals recorded'), findsOneWidget);
+
+    await tester.tap(find.text('27 Feb'));
+    await tester.pumpAndSettle();
+    expect(jumpedTo, DateTime(2026, 2, 27));
+    expect(find.byType(MonthlyMealsSheet), findsNothing);
   });
 
   screenTest('a closed month is shown read-only with a way forward', (

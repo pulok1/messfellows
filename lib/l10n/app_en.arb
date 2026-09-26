@@ -102,6 +102,9 @@
   "@markedDaySnackbar": {"placeholders": {"name": {"type": "String"}}},
   "clearedDaySnackbar": "{name}'s meals turned off",
   "@clearedDaySnackbar": {"placeholders": {"name": {"type": "String"}}},
+  "unrecordedDaysTitle": "{count, plural, one{1 day has no meals recorded} other{{count} days have no meals recorded}}",
+  "@unrecordedDaysTitle": {"placeholders": {"count": {"type": "num"}}},
+  "unrecordedDaysHint": "A missed day lowers the meal count and raises everyone's rate. Tap a day to fill it in.",
 
   "couldntSaveMember": "Couldn't save this member. Please try again.",
   "editMemberTitle": "Edit Member",

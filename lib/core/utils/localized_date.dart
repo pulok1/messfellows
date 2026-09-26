@@ -32,3 +32,8 @@ String formatWeekday(BuildContext context, DateTime date) {
 String formatTimeOfDay(BuildContext context, DateTime date) {
   return DateFormat.jm(_tag(context)).format(date);
 }
+
+/// "16 Sep"
+String formatDayMonth(BuildContext context, DateTime date) {
+  return DateFormat('d MMM', _tag(context)).format(date);
+}
