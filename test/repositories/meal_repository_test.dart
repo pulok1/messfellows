@@ -21,7 +21,7 @@ void main() {
 
   setUp(() async {
     db = AppDatabase.forTesting(NativeDatabase.memory());
-    mealRepo = LocalMealRepository(db);
+    mealRepo = LocalMealRepository(db, clock: _seedClock);
     settlementRepo = LocalSettlementRepository(db);
     mess = await LocalMessRepository(
       db,
@@ -120,3 +120,8 @@ void main() {
     expect(entry!.totalMeals, 2);
   });
 }
+
+/// Seeds and checks data as if it were long ago, so any test date counts
+/// as today-or-later and needs no late-edit reason. Late edits have their
+/// own tests.
+DateTime _seedClock() => DateTime(2000);

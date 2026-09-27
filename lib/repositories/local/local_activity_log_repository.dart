@@ -1,8 +1,10 @@
 import 'package:drift/drift.dart';
 
+import '../../core/utils/date_utils.dart';
 import '../../core/utils/money.dart';
 import '../../database/app_database.dart';
 import '../../models/activity_log_entry.dart';
+import '../../models/activity_type.dart';
 import '../activity_log_repository.dart';
 
 class LocalActivityLogRepository implements ActivityLogRepository {
@@ -31,6 +33,27 @@ class LocalActivityLogRepository implements ActivityLogRepository {
     final query = _db.select(_db.activityLogs)
       ..where((t) => t.messId.equals(messId))
       ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
+    return query.watch().map((rows) => rows.map(_toModel).toList());
+  }
+
+  @override
+  Stream<List<ActivityLogEntry>> watchMealChangesForDate(
+    String messId,
+    DateTime date,
+  ) {
+    final query = _db.select(_db.activityLogs)
+      ..where(
+        (t) =>
+            t.messId.equals(messId) &
+            t.type.equalsValue(ActivityType.mealChangedLater) &
+            t.mealDate.equals(dateOnly(date)),
+      )
+      // rowId breaks ties between changes saved in the same millisecond
+      // (one bulk write logs several), keeping them in the order written.
+      ..orderBy([
+        (t) => OrderingTerm.asc(t.createdAt),
+        (t) => OrderingTerm.asc(t.rowId),
+      ]);
     return query.watch().map((rows) => rows.map(_toModel).toList());
   }
 }

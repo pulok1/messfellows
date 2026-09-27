@@ -4,14 +4,21 @@ import '../../core/errors/app_exception.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/utils/id_generator.dart';
 import '../../database/app_database.dart';
+import '../../models/activity_type.dart';
 import '../../models/meal_entry.dart';
+import '../../models/meal_slot.dart';
 import '../../models/settlement_status.dart';
 import '../meal_repository.dart';
+import 'activity_logger.dart';
 
 class LocalMealRepository implements MealRepository {
   final AppDatabase _db;
 
-  LocalMealRepository(this._db);
+  /// What "now" is, so tests can decide which days count as past.
+  final DateTime Function() _clock;
+
+  LocalMealRepository(this._db, {DateTime Function()? clock})
+    : _clock = clock ?? DateTime.now;
 
   MealEntry _toModel(MealEntryRow row) => MealEntry(
     id: row.id,
@@ -77,9 +84,12 @@ class LocalMealRepository implements MealRepository {
     int? breakfast,
     int? lunch,
     int? dinner,
+    String? reason,
   }) async {
     _validateCounts([breakfast, lunch, dinner]);
     final day = dateOnly(date);
+    final now = _clock();
+    final lateReason = _lateReason(day, now, reason);
 
     await _db.transaction(() async {
       await _ensureMonthOpen(messId, day);
@@ -87,10 +97,11 @@ class LocalMealRepository implements MealRepository {
         messId: messId,
         memberId: memberId,
         day: day,
-        now: DateTime.now(),
+        now: now,
         breakfast: breakfast,
         lunch: lunch,
         dinner: dinner,
+        lateReason: lateReason,
       );
     });
   }
@@ -100,13 +111,15 @@ class LocalMealRepository implements MealRepository {
     required String messId,
     required DateTime date,
     required Map<String, MealCounts> countsByMember,
+    String? reason,
   }) async {
     for (final counts in countsByMember.values) {
       _validateCounts([counts.breakfast, counts.lunch, counts.dinner]);
     }
     if (countsByMember.isEmpty) return;
     final day = dateOnly(date);
-    final now = DateTime.now();
+    final now = _clock();
+    final lateReason = _lateReason(day, now, reason);
 
     await _db.transaction(() async {
       await _ensureMonthOpen(messId, day);
@@ -120,9 +133,24 @@ class LocalMealRepository implements MealRepository {
           breakfast: counts.breakfast,
           lunch: counts.lunch,
           dinner: counts.dinner,
+          lateReason: lateReason,
         );
       }
     });
+  }
+
+  /// The trimmed [reason] if [day] is before [now]'s day (so the change
+  /// must be logged), null for today or later. Throws if a past day has no
+  /// reason.
+  String? _lateReason(DateTime day, DateTime now, String? reason) {
+    if (!day.isBefore(dateOnly(now))) return null;
+    final trimmed = reason?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      throw const ReasonRequiredException(
+        'Changing a past day needs a reason.',
+      );
+    }
+    return trimmed;
   }
 
   void _validateCounts(List<int?> counts) {
@@ -154,7 +182,8 @@ class LocalMealRepository implements MealRepository {
   }
 
   /// Creates or updates [memberId]'s row for [day]. Null counts keep their
-  /// current value (or 0 on a new row).
+  /// current value (or 0 on a new row). With a [lateReason], logs one
+  /// Activity Log entry per slot whose count actually changes.
   Future<void> _upsert({
     required String messId,
     required String memberId,
@@ -163,6 +192,7 @@ class LocalMealRepository implements MealRepository {
     int? breakfast,
     int? lunch,
     int? dinner,
+    String? lateReason,
   }) async {
     final existing =
         await (_db.select(_db.mealEntries)..where(
@@ -194,11 +224,42 @@ class LocalMealRepository implements MealRepository {
         _db.mealEntries,
       )..where((t) => t.id.equals(existing.id))).write(
         MealEntriesCompanion(
-          breakfast: breakfast == null ? const Value.absent() : Value(breakfast),
+          breakfast: breakfast == null
+              ? const Value.absent()
+              : Value(breakfast),
           lunch: lunch == null ? const Value.absent() : Value(lunch),
           dinner: dinner == null ? const Value.absent() : Value(dinner),
           updatedAt: Value(now),
         ),
+      );
+    }
+
+    if (lateReason == null) return;
+    final before = existing == null
+        ? noMeals
+        : (
+            breakfast: existing.breakfast,
+            lunch: existing.lunch,
+            dinner: existing.dinner,
+          );
+    final requested = {
+      MealSlot.breakfast: breakfast,
+      MealSlot.lunch: lunch,
+      MealSlot.dinner: dinner,
+    };
+    for (final MapEntry(key: slot, value: after) in requested.entries) {
+      final previous = slot.countIn(before);
+      if (after == null || after == previous) continue;
+      await logActivity(
+        _db,
+        messId: messId,
+        type: ActivityType.mealChangedLater,
+        memberId: memberId,
+        mealDate: day,
+        mealSlot: slot,
+        previousCount: previous,
+        count: after,
+        detail: lateReason,
       );
     }
   }

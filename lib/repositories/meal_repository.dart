@@ -24,6 +24,13 @@ abstract interface class MealRepository {
   /// Only the meals explicitly passed are changed; omitted ones keep their
   /// current value (or default to 0 on first creation). A count above 1
   /// records an extra/guest meal in that slot.
+  ///
+  /// If [date] is before today, [reason] is required and every slot that
+  /// actually changes is recorded in the Activity Log with it — a past day
+  /// can still be corrected, but never silently.
+  ///
+  /// Throws [MonthClosedException] if [date]'s month has been closed, or
+  /// [ReasonRequiredException] for a past day with no [reason].
   Future<void> setMeal({
     required String messId,
     required String memberId,
@@ -31,16 +38,21 @@ abstract interface class MealRepository {
     int? breakfast,
     int? lunch,
     int? dinner,
+    String? reason,
   });
 
   /// Sets every slot for each member in [countsByMember] on [date], all in
   /// one transaction — so a mark-all, a copied day or an undo either lands
   /// completely or not at all, never leaving the day half-changed.
   ///
-  /// Throws [MonthClosedException] if [date]'s month has been closed.
+  /// Past days need a [reason] and are logged exactly as in [setMeal].
+  ///
+  /// Throws [MonthClosedException] if [date]'s month has been closed, or
+  /// [ReasonRequiredException] for a past day with no [reason].
   Future<void> setMealsForDate({
     required String messId,
     required DateTime date,
     required Map<String, MealCounts> countsByMember,
+    String? reason,
   });
 }

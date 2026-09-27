@@ -100,7 +100,7 @@ void main() {
 
   Future<int> totalMealsOn(WidgetTester tester, DateTime date) async {
     final meals = await tester.runAsync(
-      () => LocalMealRepository(db).watchMealsForDate(mess.id, date).first,
+      () => LocalMealRepository(db, clock: _seedClock).watchMealsForDate(mess.id, date).first,
     );
     return meals!.fold<int>(0, (sum, m) => sum + m.totalMeals);
   }
@@ -120,7 +120,7 @@ void main() {
     // Pick a day in the same month as today so both land in one month.
     final earlier = today.day > 1 ? addDays(today, -1) : today;
     await tester.runAsync(() async {
-      final repo = LocalMealRepository(db);
+      final repo = LocalMealRepository(db, clock: _seedClock);
       await repo.setMeal(messId: mess.id, memberId: rahim.id, date: today, lunch: 2, dinner: 1);
       if (earlier != today) {
         await repo.setMeal(messId: mess.id, memberId: rahim.id, date: earlier, lunch: 1);
@@ -191,7 +191,7 @@ void main() {
     tester,
   ) async {
     await tester.runAsync(() async {
-      final repo = LocalMealRepository(db);
+      final repo = LocalMealRepository(db, clock: _seedClock);
       await repo.setMeal(messId: mess.id, memberId: rahim.id, date: today, breakfast: 2);
       await repo.setMeal(messId: mess.id, memberId: karim.id, date: today, breakfast: 1);
     });
@@ -205,7 +205,7 @@ void main() {
     await tester.tap(find.text('Undo'));
     await settle(tester);
     final entry = await tester.runAsync(
-      () => LocalMealRepository(db).getMealEntry(mess.id, rahim.id, today),
+      () => LocalMealRepository(db, clock: _seedClock).getMealEntry(mess.id, rahim.id, today),
     );
     expect(entry!.breakfast, 2);
     expect(await totalMealsOn(tester, today), 3);
@@ -214,9 +214,7 @@ void main() {
   screenTest('an archived member stays visible on days they ate', (tester) async {
     final yesterday = addDays(today, -1);
     await tester.runAsync(() async {
-      await LocalMealRepository(
-        db,
-      ).setMeal(messId: mess.id, memberId: karim.id, date: yesterday, lunch: 1);
+      await LocalMealRepository(db, clock: _seedClock).setMeal(messId: mess.id, memberId: karim.id, date: yesterday, lunch: 1);
       await LocalMemberRepository(db).archiveMember(karim.id);
     });
     await pumpScreen(tester);
@@ -238,7 +236,7 @@ void main() {
     tester,
   ) async {
     await tester.runAsync(() async {
-      final repo = LocalMealRepository(db);
+      final repo = LocalMealRepository(db, clock: _seedClock);
       await repo.setMeal(messId: mess.id, memberId: rahim.id, date: DateTime(2026, 2, 26), breakfast: 1, lunch: 1);
       await repo.setMeal(messId: mess.id, memberId: rahim.id, date: DateTime(2026, 2, 28), lunch: 1);
     });
@@ -277,7 +275,7 @@ void main() {
     tester,
   ) async {
     await tester.runAsync(() async {
-      final repo = LocalMealRepository(db);
+      final repo = LocalMealRepository(db, clock: _seedClock);
       await repo.setMeal(messId: mess.id, memberId: rahim.id, date: DateTime(2026, 2, 25), lunch: 1);
       await repo.setMeal(messId: mess.id, memberId: rahim.id, date: DateTime(2026, 2, 28), lunch: 1);
     });
@@ -317,7 +315,7 @@ void main() {
         messId: mess.id,
         name: 'Mohammad Abdur Rahman Chowdhury',
       );
-      final repo = LocalMealRepository(db);
+      final repo = LocalMealRepository(db, clock: _seedClock);
       await repo.setMeal(messId: mess.id, memberId: longName.id, date: today, lunch: 3, dinner: 1);
       await repo.setMeal(messId: mess.id, memberId: karim.id, date: today, lunch: 1);
       await memberRepo.archiveMember(karim.id);
@@ -346,9 +344,7 @@ void main() {
     tester,
   ) async {
     await tester.runAsync(() async {
-      await LocalMealRepository(
-        db,
-      ).setMeal(messId: mess.id, memberId: rahim.id, date: today, lunch: 1);
+      await LocalMealRepository(db, clock: _seedClock).setMeal(messId: mess.id, memberId: rahim.id, date: today, lunch: 1);
       await LocalSettlementRepository(db).closeMonth(
         messId: mess.id,
         year: today.year,
@@ -390,3 +386,8 @@ class _FixedMealDate extends SelectedMealDate {
   @override
   DateTime build() => date;
 }
+
+/// Seeds and checks data as if it were long ago, so any test date counts
+/// as today-or-later and needs no late-edit reason. Late edits have their
+/// own tests.
+DateTime _seedClock() => DateTime(2000);

@@ -23,6 +23,13 @@ class MonthClosedException extends AppException {
   const MonthClosedException(super.message);
 }
 
+/// A write to a past day's meals was attempted without a reason. Changing
+/// a day after it has passed is allowed, but it's logged in the Activity
+/// Log with the reason, so other members can see what changed and why.
+class ReasonRequiredException extends AppException {
+  const ReasonRequiredException(super.message);
+}
+
 /// A local database read/write failed unexpectedly.
 class StorageException extends AppException {
   const StorageException(super.message);

@@ -26,7 +26,7 @@ void main() {
   test('duplicate meal record for the same member/date is impossible', () async {
     final messRepo = LocalMessRepository(db);
     final memberRepo = LocalMemberRepository(db);
-    final mealRepo = LocalMealRepository(db);
+    final mealRepo = LocalMealRepository(db, clock: _seedClock);
 
     final mess = await messRepo.createMess(name: 'Test Mess', currencyCode: 'BDT', currencySymbol: '৳');
     final member = await memberRepo.addMember(messId: mess.id, name: 'Rahim');
@@ -162,7 +162,7 @@ void main() {
   test('editing a meal, expense or payment is reflected on the next read', () async {
     final messRepo = LocalMessRepository(db);
     final memberRepo = LocalMemberRepository(db);
-    final mealRepo = LocalMealRepository(db);
+    final mealRepo = LocalMealRepository(db, clock: _seedClock);
     final expenseRepo = LocalExpenseRepository(db);
     final mess = await messRepo.createMess(name: 'Test Mess', currencyCode: 'BDT', currencySymbol: '৳');
     final member = await memberRepo.addMember(messId: mess.id, name: 'Rahim');
@@ -190,3 +190,8 @@ void main() {
     expect(expenses.single.amount, const Money(25000));
   });
 }
+
+/// Seeds and checks data as if it were long ago, so any test date counts
+/// as today-or-later and needs no late-edit reason. Late edits have their
+/// own tests.
+DateTime _seedClock() => DateTime(2000);
