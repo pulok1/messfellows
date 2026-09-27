@@ -1,5 +1,6 @@
 import '../core/utils/money.dart';
 import 'activity_type.dart';
+import 'meal_slot.dart';
 
 /// One row in the Activity Log: a record of something that changed, kept
 /// forever (unlike the Recycle Bin, this is meant to be a permanent audit
@@ -27,7 +28,16 @@ class ActivityLogEntry {
   final int? year;
   final int? month;
 
+  /// The new meal count for [ActivityType.mealChangedLater], or the number
+  /// of rules for [ActivityType.rulesBulkAdded].
   final int? count;
+
+  /// Set only for [ActivityType.mealChangedLater]: which day and meal
+  /// changed and what it was before ([count] is what it became; [detail]
+  /// is the reason given).
+  final DateTime? mealDate;
+  final MealSlot? mealSlot;
+  final int? previousCount;
 
   final DateTime createdAt;
 
@@ -41,6 +51,9 @@ class ActivityLogEntry {
     this.year,
     this.month,
     this.count,
+    this.mealDate,
+    this.mealSlot,
+    this.previousCount,
     required this.createdAt,
   });
 }

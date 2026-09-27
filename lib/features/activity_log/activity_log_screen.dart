@@ -272,6 +272,7 @@ class _ActivityTile extends ConsumerWidget {
       ActivityType.ruleDeleted => l10n.activityRuleDeleted,
       ActivityType.monthClosed => l10n.activityMonthClosed,
       ActivityType.monthReopened => l10n.activityMonthReopened,
+      ActivityType.mealChangedLater => l10n.activityMealChangedLater,
     };
   }
 
@@ -302,6 +303,7 @@ class _ActivityTile extends ConsumerWidget {
       ActivityType.memberArchived => (Icons.archive_outlined, _Tone.neutral),
       ActivityType.monthClosed => (Icons.lock_outline, _Tone.positive),
       ActivityType.monthReopened => (Icons.lock_open_outlined, _Tone.neutral),
+      ActivityType.mealChangedLater => (Icons.edit_calendar_outlined, _Tone.neutral),
     };
   }
 }

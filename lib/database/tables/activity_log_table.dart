@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../models/activity_type.dart';
+import '../../models/meal_slot.dart';
 import 'member_table.dart';
 import 'mess_table.dart';
 
@@ -33,7 +34,14 @@ class ActivityLogs extends Table {
 
   // Only set for rulesBulkAdded (starter templates), so it can read as
   // "5 starter rules added" instead of 5 separate identical-looking rows.
+  // Also the new meal count for mealChangedLater, whose reason is [detail].
   IntColumn get count => integer().nullable()();
+
+  // Only set for mealChangedLater: the day and slot that changed, and the
+  // count it had before, so the entry reads "Lunch 0 → 1 on 24 Sep".
+  DateTimeColumn get mealDate => dateTime().nullable()();
+  TextColumn get mealSlot => textEnum<MealSlot>().nullable()();
+  IntColumn get previousCount => integer().nullable()();
 
   DateTimeColumn get createdAt => dateTime()();
 

@@ -3,6 +3,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/activity_type.dart';
+import '../models/meal_slot.dart';
 import '../models/rule_category.dart';
 import '../models/settlement_status.dart';
 import 'tables/activity_log_table.dart';
@@ -44,7 +45,7 @@ class AppDatabase extends _$AppDatabase {
   // changes. Future sync-metadata columns (syncStatus, remoteId, ...) will
   // land as additive migrations here rather than a rewrite.
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -117,6 +118,14 @@ class AppDatabase extends _$AppDatabase {
         // Activity Log: a permanent history of meaningful changes, distinct
         // from the Recycle Bin (which is an undo buffer that auto-purges).
         await m.createTable(activityLogs);
+      }
+      if (from >= 6 && from < 7) {
+        // Meals changed after their day are now logged, with the day, slot
+        // and previous count. (A database created at v6 or earlier-than-6
+        // gets these from createTable above, which uses the current shape.)
+        await m.addColumn(activityLogs, activityLogs.mealDate);
+        await m.addColumn(activityLogs, activityLogs.mealSlot);
+        await m.addColumn(activityLogs, activityLogs.previousCount);
       }
     },
     beforeOpen: (details) async {

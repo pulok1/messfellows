@@ -20,6 +20,9 @@ class LocalActivityLogRepository implements ActivityLogRepository {
     year: row.year,
     month: row.month,
     count: row.count,
+    mealDate: row.mealDate,
+    mealSlot: row.mealSlot,
+    previousCount: row.previousCount,
     createdAt: row.createdAt,
   );
 

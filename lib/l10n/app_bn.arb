@@ -264,6 +264,7 @@
   "activityRuleDeleted": "নিয়ম মুছে ফেলা হয়েছে",
   "activityMonthClosed": "মাস বন্ধ হয়েছে",
   "activityMonthReopened": "মাস আবার খোলা হয়েছে",
+  "activityMealChangedLater": "পরে মিল পরিবর্তন",
 
   "noMessToExport": "এক্সপোর্ট করার জন্য এখনো কোনো মেস নেই।",
   "invalidBackupFile": "এটি একটি বৈধ Mess Fellows ব্যাকআপ ফাইল নয়।",

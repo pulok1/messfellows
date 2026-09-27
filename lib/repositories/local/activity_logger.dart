@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../core/utils/id_generator.dart';
 import '../../database/app_database.dart';
 import '../../models/activity_type.dart';
+import '../../models/meal_slot.dart';
 
 /// Inserts one Activity Log row. A plain top-level function rather than a
 /// repository method so every mutating repository can call it inline —
@@ -18,6 +19,9 @@ Future<void> logActivity(
   int? year,
   int? month,
   int? count,
+  DateTime? mealDate,
+  MealSlot? mealSlot,
+  int? previousCount,
 }) {
   return db
       .into(db.activityLogs)
@@ -32,6 +36,9 @@ Future<void> logActivity(
           year: Value(year),
           month: Value(month),
           count: Value(count),
+          mealDate: Value(mealDate),
+          mealSlot: Value(mealSlot),
+          previousCount: Value(previousCount),
           createdAt: DateTime.now(),
         ),
       );

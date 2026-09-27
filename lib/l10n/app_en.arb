@@ -298,6 +298,7 @@
   "activityRuleDeleted": "Rule deleted",
   "activityMonthClosed": "Month closed",
   "activityMonthReopened": "Month reopened",
+  "activityMealChangedLater": "Meal changed later",
 
   "noMessToExport": "No mess to export yet.",
   "invalidBackupFile": "This file is not a valid Mess Fellows backup.",

@@ -4755,6 +4755,37 @@ class $ActivityLogsTable extends ActivityLogs
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _mealDateMeta = const VerificationMeta(
+    'mealDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> mealDate = GeneratedColumn<DateTime>(
+    'meal_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<MealSlot?, String> mealSlot =
+      GeneratedColumn<String>(
+        'meal_slot',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<MealSlot?>($ActivityLogsTable.$convertermealSlotn);
+  static const VerificationMeta _previousCountMeta = const VerificationMeta(
+    'previousCount',
+  );
+  @override
+  late final GeneratedColumn<int> previousCount = GeneratedColumn<int>(
+    'previous_count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -4777,6 +4808,9 @@ class $ActivityLogsTable extends ActivityLogs
     year,
     month,
     count,
+    mealDate,
+    mealSlot,
+    previousCount,
     createdAt,
   ];
   @override
@@ -4843,6 +4877,21 @@ class $ActivityLogsTable extends ActivityLogs
         count.isAcceptableOrUnknown(data['count']!, _countMeta),
       );
     }
+    if (data.containsKey('meal_date')) {
+      context.handle(
+        _mealDateMeta,
+        mealDate.isAcceptableOrUnknown(data['meal_date']!, _mealDateMeta),
+      );
+    }
+    if (data.containsKey('previous_count')) {
+      context.handle(
+        _previousCountMeta,
+        previousCount.isAcceptableOrUnknown(
+          data['previous_count']!,
+          _previousCountMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -4898,6 +4947,20 @@ class $ActivityLogsTable extends ActivityLogs
         DriftSqlType.int,
         data['${effectivePrefix}count'],
       ),
+      mealDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}meal_date'],
+      ),
+      mealSlot: $ActivityLogsTable.$convertermealSlotn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}meal_slot'],
+        ),
+      ),
+      previousCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}previous_count'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -4912,6 +4975,10 @@ class $ActivityLogsTable extends ActivityLogs
 
   static JsonTypeConverter2<ActivityType, String, String> $convertertype =
       const EnumNameConverter<ActivityType>(ActivityType.values);
+  static JsonTypeConverter2<MealSlot, String, String> $convertermealSlot =
+      const EnumNameConverter<MealSlot>(MealSlot.values);
+  static JsonTypeConverter2<MealSlot?, String?, String?> $convertermealSlotn =
+      JsonTypeConverter2.asNullable($convertermealSlot);
 }
 
 class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
@@ -4924,6 +4991,9 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
   final int? year;
   final int? month;
   final int? count;
+  final DateTime? mealDate;
+  final MealSlot? mealSlot;
+  final int? previousCount;
   final DateTime createdAt;
   const ActivityLogRow({
     required this.id,
@@ -4935,6 +5005,9 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
     this.year,
     this.month,
     this.count,
+    this.mealDate,
+    this.mealSlot,
+    this.previousCount,
     required this.createdAt,
   });
   @override
@@ -4965,6 +5038,17 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
     if (!nullToAbsent || count != null) {
       map['count'] = Variable<int>(count);
     }
+    if (!nullToAbsent || mealDate != null) {
+      map['meal_date'] = Variable<DateTime>(mealDate);
+    }
+    if (!nullToAbsent || mealSlot != null) {
+      map['meal_slot'] = Variable<String>(
+        $ActivityLogsTable.$convertermealSlotn.toSql(mealSlot),
+      );
+    }
+    if (!nullToAbsent || previousCount != null) {
+      map['previous_count'] = Variable<int>(previousCount);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -4990,6 +5074,15 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
       count: count == null && nullToAbsent
           ? const Value.absent()
           : Value(count),
+      mealDate: mealDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mealDate),
+      mealSlot: mealSlot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mealSlot),
+      previousCount: previousCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(previousCount),
       createdAt: Value(createdAt),
     );
   }
@@ -5011,6 +5104,11 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
       year: serializer.fromJson<int?>(json['year']),
       month: serializer.fromJson<int?>(json['month']),
       count: serializer.fromJson<int?>(json['count']),
+      mealDate: serializer.fromJson<DateTime?>(json['mealDate']),
+      mealSlot: $ActivityLogsTable.$convertermealSlotn.fromJson(
+        serializer.fromJson<String?>(json['mealSlot']),
+      ),
+      previousCount: serializer.fromJson<int?>(json['previousCount']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -5029,6 +5127,11 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
       'year': serializer.toJson<int?>(year),
       'month': serializer.toJson<int?>(month),
       'count': serializer.toJson<int?>(count),
+      'mealDate': serializer.toJson<DateTime?>(mealDate),
+      'mealSlot': serializer.toJson<String?>(
+        $ActivityLogsTable.$convertermealSlotn.toJson(mealSlot),
+      ),
+      'previousCount': serializer.toJson<int?>(previousCount),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -5043,6 +5146,9 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
     Value<int?> year = const Value.absent(),
     Value<int?> month = const Value.absent(),
     Value<int?> count = const Value.absent(),
+    Value<DateTime?> mealDate = const Value.absent(),
+    Value<MealSlot?> mealSlot = const Value.absent(),
+    Value<int?> previousCount = const Value.absent(),
     DateTime? createdAt,
   }) => ActivityLogRow(
     id: id ?? this.id,
@@ -5056,6 +5162,11 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
     year: year.present ? year.value : this.year,
     month: month.present ? month.value : this.month,
     count: count.present ? count.value : this.count,
+    mealDate: mealDate.present ? mealDate.value : this.mealDate,
+    mealSlot: mealSlot.present ? mealSlot.value : this.mealSlot,
+    previousCount: previousCount.present
+        ? previousCount.value
+        : this.previousCount,
     createdAt: createdAt ?? this.createdAt,
   );
   ActivityLogRow copyWithCompanion(ActivityLogsCompanion data) {
@@ -5071,6 +5182,11 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
       year: data.year.present ? data.year.value : this.year,
       month: data.month.present ? data.month.value : this.month,
       count: data.count.present ? data.count.value : this.count,
+      mealDate: data.mealDate.present ? data.mealDate.value : this.mealDate,
+      mealSlot: data.mealSlot.present ? data.mealSlot.value : this.mealSlot,
+      previousCount: data.previousCount.present
+          ? data.previousCount.value
+          : this.previousCount,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -5087,6 +5203,9 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
           ..write('year: $year, ')
           ..write('month: $month, ')
           ..write('count: $count, ')
+          ..write('mealDate: $mealDate, ')
+          ..write('mealSlot: $mealSlot, ')
+          ..write('previousCount: $previousCount, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -5103,6 +5222,9 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
     year,
     month,
     count,
+    mealDate,
+    mealSlot,
+    previousCount,
     createdAt,
   );
   @override
@@ -5118,6 +5240,9 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
           other.year == this.year &&
           other.month == this.month &&
           other.count == this.count &&
+          other.mealDate == this.mealDate &&
+          other.mealSlot == this.mealSlot &&
+          other.previousCount == this.previousCount &&
           other.createdAt == this.createdAt);
 }
 
@@ -5131,6 +5256,9 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
   final Value<int?> year;
   final Value<int?> month;
   final Value<int?> count;
+  final Value<DateTime?> mealDate;
+  final Value<MealSlot?> mealSlot;
+  final Value<int?> previousCount;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const ActivityLogsCompanion({
@@ -5143,6 +5271,9 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
     this.year = const Value.absent(),
     this.month = const Value.absent(),
     this.count = const Value.absent(),
+    this.mealDate = const Value.absent(),
+    this.mealSlot = const Value.absent(),
+    this.previousCount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -5156,6 +5287,9 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
     this.year = const Value.absent(),
     this.month = const Value.absent(),
     this.count = const Value.absent(),
+    this.mealDate = const Value.absent(),
+    this.mealSlot = const Value.absent(),
+    this.previousCount = const Value.absent(),
     required DateTime createdAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -5172,6 +5306,9 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
     Expression<int>? year,
     Expression<int>? month,
     Expression<int>? count,
+    Expression<DateTime>? mealDate,
+    Expression<String>? mealSlot,
+    Expression<int>? previousCount,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -5185,6 +5322,9 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
       if (year != null) 'year': year,
       if (month != null) 'month': month,
       if (count != null) 'count': count,
+      if (mealDate != null) 'meal_date': mealDate,
+      if (mealSlot != null) 'meal_slot': mealSlot,
+      if (previousCount != null) 'previous_count': previousCount,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -5200,6 +5340,9 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
     Value<int?>? year,
     Value<int?>? month,
     Value<int?>? count,
+    Value<DateTime?>? mealDate,
+    Value<MealSlot?>? mealSlot,
+    Value<int?>? previousCount,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -5213,6 +5356,9 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
       year: year ?? this.year,
       month: month ?? this.month,
       count: count ?? this.count,
+      mealDate: mealDate ?? this.mealDate,
+      mealSlot: mealSlot ?? this.mealSlot,
+      previousCount: previousCount ?? this.previousCount,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -5250,6 +5396,17 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
     if (count.present) {
       map['count'] = Variable<int>(count.value);
     }
+    if (mealDate.present) {
+      map['meal_date'] = Variable<DateTime>(mealDate.value);
+    }
+    if (mealSlot.present) {
+      map['meal_slot'] = Variable<String>(
+        $ActivityLogsTable.$convertermealSlotn.toSql(mealSlot.value),
+      );
+    }
+    if (previousCount.present) {
+      map['previous_count'] = Variable<int>(previousCount.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -5271,6 +5428,9 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
           ..write('year: $year, ')
           ..write('month: $month, ')
           ..write('count: $count, ')
+          ..write('mealDate: $mealDate, ')
+          ..write('mealSlot: $mealSlot, ')
+          ..write('previousCount: $previousCount, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -10036,6 +10196,9 @@ typedef $$ActivityLogsTableCreateCompanionBuilder =
       Value<int?> year,
       Value<int?> month,
       Value<int?> count,
+      Value<DateTime?> mealDate,
+      Value<MealSlot?> mealSlot,
+      Value<int?> previousCount,
       required DateTime createdAt,
       Value<int> rowid,
     });
@@ -10050,6 +10213,9 @@ typedef $$ActivityLogsTableUpdateCompanionBuilder =
       Value<int?> year,
       Value<int?> month,
       Value<int?> count,
+      Value<DateTime?> mealDate,
+      Value<MealSlot?> mealSlot,
+      Value<int?> previousCount,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -10135,6 +10301,22 @@ class $$ActivityLogsTableFilterComposer
 
   ColumnFilters<int> get count => $composableBuilder(
     column: $table.count,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get mealDate => $composableBuilder(
+    column: $table.mealDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<MealSlot?, MealSlot, String> get mealSlot =>
+      $composableBuilder(
+        column: $table.mealSlot,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get previousCount => $composableBuilder(
+    column: $table.previousCount,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10234,6 +10416,21 @@ class $$ActivityLogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get mealDate => $composableBuilder(
+    column: $table.mealDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mealSlot => $composableBuilder(
+    column: $table.mealSlot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get previousCount => $composableBuilder(
+    column: $table.previousCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -10317,6 +10514,17 @@ class $$ActivityLogsTableAnnotationComposer
 
   GeneratedColumn<int> get count =>
       $composableBuilder(column: $table.count, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get mealDate =>
+      $composableBuilder(column: $table.mealDate, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<MealSlot?, String> get mealSlot =>
+      $composableBuilder(column: $table.mealSlot, builder: (column) => column);
+
+  GeneratedColumn<int> get previousCount => $composableBuilder(
+    column: $table.previousCount,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -10405,6 +10613,9 @@ class $$ActivityLogsTableTableManager
                 Value<int?> year = const Value.absent(),
                 Value<int?> month = const Value.absent(),
                 Value<int?> count = const Value.absent(),
+                Value<DateTime?> mealDate = const Value.absent(),
+                Value<MealSlot?> mealSlot = const Value.absent(),
+                Value<int?> previousCount = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ActivityLogsCompanion(
@@ -10417,6 +10628,9 @@ class $$ActivityLogsTableTableManager
                 year: year,
                 month: month,
                 count: count,
+                mealDate: mealDate,
+                mealSlot: mealSlot,
+                previousCount: previousCount,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -10431,6 +10645,9 @@ class $$ActivityLogsTableTableManager
                 Value<int?> year = const Value.absent(),
                 Value<int?> month = const Value.absent(),
                 Value<int?> count = const Value.absent(),
+                Value<DateTime?> mealDate = const Value.absent(),
+                Value<MealSlot?> mealSlot = const Value.absent(),
+                Value<int?> previousCount = const Value.absent(),
                 required DateTime createdAt,
                 Value<int> rowid = const Value.absent(),
               }) => ActivityLogsCompanion.insert(
@@ -10443,6 +10660,9 @@ class $$ActivityLogsTableTableManager
                 year: year,
                 month: month,
                 count: count,
+                mealDate: mealDate,
+                mealSlot: mealSlot,
+                previousCount: previousCount,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
