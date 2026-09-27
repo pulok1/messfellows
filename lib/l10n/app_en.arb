@@ -334,6 +334,7 @@
   "activityMonthClosed": "Month closed",
   "activityMonthReopened": "Month reopened",
   "activityMealChangedLater": "Meal changed later",
+  "activityBackupRestored": "Data restored from a backup",
 
   "noMessToExport": "No mess to export yet.",
   "invalidBackupFile": "This file is not a valid Mess Fellows backup.",

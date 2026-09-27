@@ -290,6 +290,7 @@
   "activityMonthClosed": "মাস বন্ধ হয়েছে",
   "activityMonthReopened": "মাস আবার খোলা হয়েছে",
   "activityMealChangedLater": "পরে মিল পরিবর্তন",
+  "activityBackupRestored": "ব্যাকআপ থেকে তথ্য ফিরিয়ে আনা হয়েছে",
 
   "noMessToExport": "এক্সপোর্ট করার জন্য এখনো কোনো মেস নেই।",
   "invalidBackupFile": "এটি একটি বৈধ Mess Fellows ব্যাকআপ ফাইল নয়।",

@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../../database/app_database.dart';
+import '../../models/activity_type.dart';
+import '../../models/meal_slot.dart';
+import '../../repositories/local/activity_logger.dart';
 import '../../models/rule_category.dart';
 import '../../models/settlement_status.dart';
 import '../constants/app_constants.dart';
@@ -39,6 +42,7 @@ class BackupService {
     final settlementMembers = await _db
         .select(_db.monthlySettlementMembers)
         .get();
+    final activityLogs = await _db.select(_db.activityLogs).get();
 
     final document = {
       'schemaVersion': AppConstants.backupFormatVersion,
@@ -53,6 +57,9 @@ class BackupService {
       'settlementMembers': settlementMembers
           .map(_settlementMemberToJson)
           .toList(),
+      // The change history travels with the data, so restoring a backup
+      // never erases the record of what was changed and why.
+      'activityLogs': activityLogs.map(_activityLogToJson).toList(),
     };
 
     return const JsonEncoder.withIndent('  ').convert(document);
@@ -134,7 +141,21 @@ class BackupService {
             _listOf(document['settlementMembers'])
                 .map(_settlementMemberFromJson),
           );
+          // Older backups have no 'activityLogs'; entries of a type this
+          // version doesn't know (from a newer app) are skipped.
+          batch.insertAll(
+            _db.activityLogs,
+            _listOf(
+              document['activityLogs'],
+            ).map(_activityLogFromJson).nonNulls,
+          );
         });
+
+        await logActivity(
+          _db,
+          messId: messJson['id'] as String,
+          type: ActivityType.backupRestored,
+        );
       });
     } on ImportException {
       rethrow;
@@ -406,4 +427,46 @@ class BackupService {
     balanceMinorUnits: json['balanceMinorUnits'] as int,
     createdAt: DateTime.parse(json['createdAt'] as String),
   );
+
+  // --- activity log ---
+
+  Map<String, dynamic> _activityLogToJson(ActivityLogRow row) => {
+    'id': row.id,
+    'messId': row.messId,
+    'type': row.type.name,
+    'memberId': row.memberId,
+    'amountMinorUnits': row.amountMinorUnits,
+    'detail': row.detail,
+    'year': row.year,
+    'month': row.month,
+    'count': row.count,
+    'mealDate': row.mealDate?.toIso8601String(),
+    'mealSlot': row.mealSlot?.name,
+    'previousCount': row.previousCount,
+    'createdAt': row.createdAt.toIso8601String(),
+  };
+
+  ActivityLogsCompanion? _activityLogFromJson(Map<String, dynamic> json) {
+    final type = ActivityType.values.asNameMap()[json['type']];
+    if (type == null) return null;
+    return ActivityLogsCompanion.insert(
+      id: json['id'] as String,
+      messId: json['messId'] as String,
+      type: type,
+      memberId: Value(json['memberId'] as String?),
+      amountMinorUnits: Value(json['amountMinorUnits'] as int?),
+      detail: Value(json['detail'] as String?),
+      year: Value(json['year'] as int?),
+      month: Value(json['month'] as int?),
+      count: Value(json['count'] as int?),
+      mealDate: Value(
+        json['mealDate'] == null
+            ? null
+            : DateTime.parse(json['mealDate'] as String),
+      ),
+      mealSlot: Value(MealSlot.values.asNameMap()[json['mealSlot']]),
+      previousCount: Value(json['previousCount'] as int?),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
 }

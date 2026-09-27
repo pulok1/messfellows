@@ -31,4 +31,8 @@ enum ActivityType {
   /// One meal slot on a past day changed, with the reason given — see
   /// ActivityLogs.mealDate/mealSlot/previousCount.
   mealChangedLater,
+
+  /// All data was replaced from a backup file — recorded so rolling the
+  /// mess back to an older backup is never invisible.
+  backupRestored,
 }

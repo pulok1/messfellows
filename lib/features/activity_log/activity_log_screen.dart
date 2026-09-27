@@ -42,7 +42,11 @@ const _ruleTypes = {
   ActivityType.ruleUpdated,
   ActivityType.ruleDeleted,
 };
-const _settlementTypes = {ActivityType.monthClosed, ActivityType.monthReopened};
+const _settlementTypes = {
+  ActivityType.monthClosed,
+  ActivityType.monthReopened,
+  ActivityType.backupRestored,
+};
 
 /// A permanent, filterable history of meaningful changes across the mess —
 /// bazar and payment entries, members, rules, month close/reopen. Routine
@@ -284,6 +288,7 @@ class _ActivityTile extends ConsumerWidget {
       ActivityType.monthClosed => l10n.activityMonthClosed,
       ActivityType.monthReopened => l10n.activityMonthReopened,
       ActivityType.mealChangedLater => l10n.activityMealChangedLater,
+      ActivityType.backupRestored => l10n.activityBackupRestored,
     };
   }
 
@@ -315,6 +320,7 @@ class _ActivityTile extends ConsumerWidget {
       ActivityType.monthClosed => (Icons.lock_outline, _Tone.positive),
       ActivityType.monthReopened => (Icons.lock_open_outlined, _Tone.neutral),
       ActivityType.mealChangedLater => (Icons.edit_calendar_outlined, _Tone.neutral),
+      ActivityType.backupRestored => (Icons.settings_backup_restore, _Tone.destructive),
     };
   }
 }
