@@ -380,6 +380,14 @@ void main() {
     await tester.tap(find.byType(MealToggleButton).first);
     await settle(tester);
     expect(await totalMealsOn(tester, yesterday), 1);
+
+    // Karim's row now carries a tag that opens exactly what changed.
+    expect(find.text('Edited later'), findsOneWidget);
+    await tester.tap(find.text('Edited later'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining("Changes to Karim's meals"), findsOneWidget);
+    expect(find.text('Breakfast: 0 → 1'), findsOneWidget);
+    expect(find.textContaining('Forgot to mark'), findsWidgets);
   });
 
   screenTest('a closed month is shown read-only with a way forward', (

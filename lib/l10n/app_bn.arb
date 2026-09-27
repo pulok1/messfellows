@@ -98,6 +98,10 @@
   "reasonGuestMeal": "অতিথির মিল",
   "startEditingAction": "সম্পাদনা শুরু করুন",
   "reasonRequiredSnackbar": "পুরনো দিন পরিবর্তন করতে কারণ লাগবে।",
+  "editedLaterTag": "পরে সম্পাদিত",
+  "mealChangesTitle": "{date}-এ {name}-এর মিলে পরিবর্তন",
+  "mealChangeLine": "{meal}: {from} → {to}",
+  "mealChangedAt": "পরিবর্তন: {when}",
   "unrecordedDaysTitle": "{count} দিনের কোনো মিল লেখা হয়নি",
   "unrecordedDaysHint": "কোনো দিন বাদ পড়লে মোট মিল কমে যায় আর সবার মিল রেট বেড়ে যায়। পূরণ করতে একটি দিনে ট্যাপ করুন।",
 

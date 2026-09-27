@@ -36,6 +36,10 @@ class MealDayRow extends StatelessWidget {
   /// would otherwise take a tap per meal. Hidden when [enabled] is false.
   final VoidCallback? onToggleDay;
 
+  /// Set when this day's meals for [member] were changed after the day had
+  /// passed: shows a tappable "Edited later" tag that opens the history.
+  final VoidCallback? onShowLateChanges;
+
   const MealDayRow({
     super.key,
     required this.member,
@@ -51,6 +55,7 @@ class MealDayRow extends StatelessWidget {
     required this.onLunchChanged,
     required this.onDinnerChanged,
     this.onToggleDay,
+    this.onShowLateChanges,
   });
 
   /// Whether [member] has any meal in a slot this mess tracks.
@@ -81,11 +86,26 @@ class MealDayRow extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w600),
                       ),
-                      Text(
-                        l10n.mealsThisMonth(monthMeals),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: 2,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            l10n.mealsThisMonth(monthMeals),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                          if (onShowLateChanges != null)
+                            _EditedLaterTag(
+                              label: l10n.editedLaterTag,
+                              onTap: onShowLateChanges!,
+                            ),
+                        ],
                       ),
                     ],
                   ),
@@ -182,6 +202,53 @@ class MealDayRow extends StatelessWidget {
     }
 
     return slots;
+  }
+}
+
+/// Marks a row whose meals were changed after the day had passed; tapping
+/// it shows what changed and why.
+class _EditedLaterTag extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _EditedLaterTag({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: 2,
+          ),
+          decoration: BoxDecoration(
+            color: colorScheme.tertiaryContainer,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.edit_calendar_outlined,
+                size: 12,
+                color: colorScheme.onTertiaryContainer,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall
+                    ?.copyWith(color: colorScheme.onTertiaryContainer),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

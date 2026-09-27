@@ -7,10 +7,12 @@ import '../../core/utils/date_utils.dart';
 import '../../core/utils/localized_date.dart';
 import '../../core/utils/meal_gaps.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../models/activity_log_entry.dart';
 import '../../models/meal_entry.dart';
 import '../../models/meal_slot.dart';
 import '../../models/member.dart';
 import '../../models/mess.dart';
+import '../../providers/activity_log_providers.dart';
 import '../../providers/meal_edit_providers.dart';
 import '../../providers/meal_providers.dart';
 import '../../providers/member_providers.dart';
@@ -20,6 +22,7 @@ import '../../providers/settlement_providers.dart';
 import '../members/add_edit_member_dialog.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/page_header_card.dart';
+import 'widgets/meal_changes_sheet.dart';
 import 'widgets/meal_day_row.dart';
 import 'widgets/meal_progress_row.dart';
 import 'widgets/monthly_meals_sheet.dart';
@@ -310,6 +313,16 @@ class MealsScreen extends ConsumerWidget {
     // every change made to it is then logged with that reason — so a past
     // day can be corrected, but never quietly.
     final isPastDay = date.isBefore(dateOnly(DateTime.now()));
+    final lateChangesByMember = <String, List<ActivityLogEntry>>{};
+    for (final change
+        in ref
+                .watch(mealChangesForDateProvider((messId: messId, date: date)))
+                .value ??
+            const <ActivityLogEntry>[]) {
+      if (change.memberId case final memberId?) {
+        (lateChangesByMember[memberId] ??= []).add(change);
+      }
+    }
     final editReason = ref.watch(pastDayEditReasonsProvider)[date];
     final canEdit = !locked && (!isPastDay || editReason != null);
     // Offered only when today has nothing recorded yet and yesterday has
@@ -511,6 +524,16 @@ class MealsScreen extends ConsumerWidget {
                                 showLunch: mess.trackLunch,
                                 showDinner: mess.trackDinner,
                                 enabled: canEdit,
+                                onShowLateChanges:
+                                    lateChangesByMember[member.id] == null
+                                    ? null
+                                    : () => showMealChangesSheet(
+                                        context,
+                                        memberName: member.name,
+                                        date: date,
+                                        changes:
+                                            lateChangesByMember[member.id]!,
+                                      ),
                                 onToggleDay: () => _toggleDayForMember(
                                   context,
                                   ref,
