@@ -17,3 +17,12 @@ final mealChangesForDateProvider =
           .watch(activityLogRepositoryProvider)
           .watchMealChangesForDate(params.messId, params.date);
     });
+
+/// Every late meal change on a day within one month — disclosed in the
+/// shared monthly summary and each member's meal statement.
+final mealChangesForMonthProvider =
+    StreamProvider.family<List<ActivityLogEntry>, MonthParams>((ref, params) {
+      return ref
+          .watch(activityLogRepositoryProvider)
+          .watchMealChangesForMonth(params.messId, params.year, params.month);
+    });

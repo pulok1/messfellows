@@ -7,16 +7,20 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/localized_date.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../models/activity_log_entry.dart';
+import '../../models/member.dart';
 import '../../models/member_balance.dart';
 import '../../models/mess.dart';
 import '../../models/month_calculation_result.dart';
 import '../../models/settlement.dart';
+import '../../providers/activity_log_providers.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/month_calculation_provider.dart';
 import '../../providers/repository_providers.dart';
 import '../../providers/selection_providers.dart';
 import '../../providers/settlement_providers.dart';
 import '../bazar/widgets/month_selector_bar.dart';
+import '../meals/widgets/meal_changes_sheet.dart';
 import '../shared/widgets/balance_label.dart';
 import '../shared/widgets/labeled_value_row.dart';
 import '../shared/widgets/page_header_card.dart';
@@ -321,8 +325,8 @@ class _FrozenReportBody extends ConsumerWidget {
 }
 
 /// Shared rendering for both the live and frozen cases: totals, per-member
-/// balances, and copy/share actions.
-class _ReportContent extends StatelessWidget {
+/// balances, meals changed after their day, and copy/share actions.
+class _ReportContent extends ConsumerWidget {
   final Mess mess;
   final int year;
   final int month;
@@ -337,30 +341,32 @@ class _ReportContent extends StatelessWidget {
     required this.footer,
   });
 
-  void _copySummary(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final text = buildMonthlySummary(
+  String _summary(
+    BuildContext context,
+    List<ActivityLogEntry> lateChanges,
+    Map<String, String> memberNames,
+  ) {
+    return buildMonthlySummary(
       context: context,
       messName: mess.name,
       year: year,
       month: month,
       result: result,
+      lateMealChanges: lateChanges,
+      memberNames: memberNames,
     );
+  }
+
+  void _copySummary(BuildContext context, String text) {
+    final l10n = AppLocalizations.of(context);
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.summaryCopiedSnackbar)),
     );
   }
 
-  void _shareSummary(BuildContext context) {
+  void _shareSummary(BuildContext context, String text) {
     final l10n = AppLocalizations.of(context);
-    final text = buildMonthlySummary(
-      context: context,
-      messName: mess.name,
-      year: year,
-      month: month,
-      result: result,
-    );
     SharePlus.instance.share(
       ShareParams(
         text: text,
@@ -370,8 +376,24 @@ class _ReportContent extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final lateChanges =
+        ref
+            .watch(
+              mealChangesForMonthProvider((
+                messId: mess.id,
+                year: year,
+                month: month,
+              )),
+            )
+            .value ??
+        const <ActivityLogEntry>[];
+    final memberNames = <String, String>{
+      for (final member
+          in ref.watch(allMembersProvider(mess.id)).value ?? const <Member>[])
+        member.id: member.name,
+    };
     if (result.memberBalances.isEmpty) {
       return Center(
         child: Padding(
@@ -439,11 +461,28 @@ class _ReportContent extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
+              _LateChangesCard(
+                changes: lateChanges,
+                onTap: lateChanges.isEmpty
+                    ? null
+                    : () => showMealChangesSheet(
+                        context,
+                        title: l10n.lateChangesMonthTitle(
+                          formatMonthYear(context, year, month),
+                        ),
+                        changes: lateChanges,
+                        memberNames: memberNames,
+                      ),
+              ),
+              const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => _copySummary(context),
+                      onPressed: () => _copySummary(
+                        context,
+                        _summary(context, lateChanges, memberNames),
+                      ),
                       icon: const Icon(Icons.copy_outlined),
                       label: Text(l10n.copySummaryButton),
                     ),
@@ -451,7 +490,10 @@ class _ReportContent extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => _shareSummary(context),
+                      onPressed: () => _shareSummary(
+                        context,
+                        _summary(context, lateChanges, memberNames),
+                      ),
                       icon: const Icon(Icons.share_outlined),
                       label: Text(l10n.shareButton),
                     ),
@@ -492,3 +534,36 @@ class _ReportContent extends StatelessWidget {
   }
 }
 
+/// Tells everyone, up front, whether any meal this month was changed after
+/// its day — a reassuring "none" is as important as the count — and opens
+/// the full list when there are some.
+class _LateChangesCard extends StatelessWidget {
+  final List<ActivityLogEntry> changes;
+  final VoidCallback? onTap;
+
+  const _LateChangesCard({required this.changes, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final none = changes.isEmpty;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: ListTile(
+        onTap: onTap,
+        leading: Icon(
+          none ? Icons.verified_outlined : Icons.edit_calendar_outlined,
+          color: none ? colorScheme.primary : colorScheme.tertiary,
+        ),
+        title: Text(
+          none ? l10n.summaryNoLateChangesTitle : l10n.lateChangesCount(changes.length),
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: none ? null : Text(l10n.lateChangesExplain),
+        trailing: none ? null : const Icon(Icons.chevron_right),
+      ),
+    );
+  }
+}

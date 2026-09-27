@@ -56,4 +56,26 @@ class LocalActivityLogRepository implements ActivityLogRepository {
       ]);
     return query.watch().map((rows) => rows.map(_toModel).toList());
   }
+
+  @override
+  Stream<List<ActivityLogEntry>> watchMealChangesForMonth(
+    String messId,
+    int year,
+    int month,
+  ) {
+    final query = _db.select(_db.activityLogs)
+      ..where(
+        (t) =>
+            t.messId.equals(messId) &
+            t.type.equalsValue(ActivityType.mealChangedLater) &
+            t.mealDate.isBiggerOrEqualValue(firstDayOfMonth(year, month)) &
+            t.mealDate.isSmallerThanValue(firstDayOfNextMonth(year, month)),
+      )
+      ..orderBy([
+        (t) => OrderingTerm.asc(t.mealDate),
+        (t) => OrderingTerm.asc(t.createdAt),
+        (t) => OrderingTerm.asc(t.rowId),
+      ]);
+    return query.watch().map((rows) => rows.map(_toModel).toList());
+  }
 }

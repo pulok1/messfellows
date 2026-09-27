@@ -102,6 +102,12 @@
   "mealChangesTitle": "{date}-এ {name}-এর মিলে পরিবর্তন",
   "mealChangeLine": "{meal}: {from} → {to}",
   "mealChangedAt": "পরিবর্তন: {when}",
+  "summaryLateChangesHeader": "✏️ দিন পার হওয়ার পর মিল পরিবর্তন ({count})",
+  "summaryNoLateChanges": "✅ দিন পার হওয়ার পর কোনো মিল পরিবর্তন করা হয়নি।",
+  "lateChangesCount": "{count}টি মিল দিন পার হওয়ার পর পরিবর্তন করা হয়েছে",
+  "lateChangesExplain": "শেয়ার করা সারাংশে এগুলো থাকে, তাই সব সদস্য দেখতে পায়।",
+  "lateChangesMonthTitle": "{monthYear} · দিন পার হওয়ার পর পরিবর্তন",
+  "summaryNoLateChangesTitle": "দিন পার হওয়ার পর কোনো মিল পরিবর্তন করা হয়নি",
   "unrecordedDaysTitle": "{count} দিনের কোনো মিল লেখা হয়নি",
   "unrecordedDaysHint": "কোনো দিন বাদ পড়লে মোট মিল কমে যায় আর সবার মিল রেট বেড়ে যায়। পূরণ করতে একটি দিনে ট্যাপ করুন।",
 

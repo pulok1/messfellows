@@ -529,8 +529,10 @@ class MealsScreen extends ConsumerWidget {
                                     ? null
                                     : () => showMealChangesSheet(
                                         context,
-                                        memberName: member.name,
-                                        date: date,
+                                        title: l10n.mealChangesTitle(
+                                          member.name,
+                                          formatShortDate(context, date),
+                                        ),
                                         changes:
                                             lateChangesByMember[member.id]!,
                                       ),

@@ -13,4 +13,13 @@ abstract interface class ActivityLogRepository {
     String messId,
     DateTime date,
   );
+
+  /// Every logged late change to a meal on a day within [year]/[month],
+  /// ordered by that day and then by when the change was made — the list
+  /// the shared monthly summary and meal statements disclose.
+  Stream<List<ActivityLogEntry>> watchMealChangesForMonth(
+    String messId,
+    int year,
+    int month,
+  );
 }
