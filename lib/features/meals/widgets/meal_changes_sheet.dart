@@ -4,7 +4,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/localized_date.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../models/activity_log_entry.dart';
-import '../../../models/meal_slot.dart';
+import '../meal_slot_ui.dart';
 
 /// Lists every change made to one member's meals on [date] after that day
 /// had passed — what changed, why, and when — so anyone can see exactly
@@ -50,7 +50,7 @@ Future<void> showMealChangesSheet(
                   leading: const Icon(Icons.edit_calendar_outlined),
                   title: Text(
                     l10n.mealChangeLine(
-                      _slotLabel(l10n, change.mealSlot),
+                      mealSlotLabel(l10n, change.mealSlot!),
                       change.previousCount ?? 0,
                       change.count ?? 0,
                     ),
@@ -73,9 +73,3 @@ Future<void> showMealChangesSheet(
     },
   );
 }
-
-String _slotLabel(AppLocalizations l10n, MealSlot? slot) => switch (slot) {
-  MealSlot.breakfast => l10n.breakfastLabel,
-  MealSlot.lunch => l10n.lunchLabel,
-  MealSlot.dinner || null => l10n.dinnerLabel,
-};

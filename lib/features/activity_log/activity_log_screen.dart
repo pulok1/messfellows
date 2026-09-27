@@ -9,12 +9,13 @@ import '../../models/activity_log_entry.dart';
 import '../../models/activity_type.dart';
 import '../../providers/activity_log_providers.dart';
 import '../../providers/member_providers.dart';
+import '../meals/meal_slot_ui.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/page_header_card.dart';
 import '../shared/widgets/section_header.dart';
 import '../shared/widgets/staggered_entrance.dart';
 
-enum _Filter { all, bazar, payments, members, rules, settlement }
+enum _Filter { all, meals, bazar, payments, members, rules, settlement }
 
 const _bazarTypes = {
   ActivityType.bazarAdded,
@@ -62,6 +63,7 @@ class _ActivityLogScreenState extends ConsumerState<ActivityLogScreen> {
   bool _matches(ActivityType type) {
     return switch (_filter) {
       _Filter.all => true,
+      _Filter.meals => type == ActivityType.mealChangedLater,
       _Filter.bazar => _bazarTypes.contains(type),
       _Filter.payments => _paymentTypes.contains(type),
       _Filter.members => _memberTypes.contains(type),
@@ -170,6 +172,7 @@ class _FilterRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final options = <(_Filter, String)>[
       (_Filter.all, l10n.allChip),
+      (_Filter.meals, l10n.navMeals),
       (_Filter.bazar, l10n.navBazar),
       (_Filter.payments, l10n.paymentsLabel),
       (_Filter.members, l10n.membersLabel),
@@ -226,7 +229,15 @@ class _ActivityTile extends ConsumerWidget {
       if (entry.type == ActivityType.monthClosed ||
           entry.type == ActivityType.monthReopened)
         formatMonthYear(context, entry.year!, entry.month!)
-      else if (entry.detail != null && entry.detail!.isNotEmpty)
+      else if (entry.type == ActivityType.mealChangedLater) ...[
+        formatShortDate(context, entry.mealDate!),
+        l10n.mealChangeLine(
+          mealSlotLabel(l10n, entry.mealSlot!),
+          entry.previousCount ?? 0,
+          entry.count ?? 0,
+        ),
+        if (entry.detail != null) entry.detail!,
+      ] else if (entry.detail != null && entry.detail!.isNotEmpty)
         entry.detail!,
       formatTimeOfDay(context, entry.createdAt),
     ];
