@@ -16,6 +16,7 @@ import 'package:messfellows/models/member.dart';
 import 'package:messfellows/models/mess.dart';
 import 'package:messfellows/providers/database_provider.dart';
 import 'package:messfellows/providers/selection_providers.dart';
+import 'package:messfellows/repositories/local/local_activity_log_repository.dart';
 import 'package:messfellows/repositories/local/local_meal_repository.dart';
 import 'package:messfellows/repositories/local/local_member_repository.dart';
 import 'package:messfellows/repositories/local/local_mess_repository.dart';
@@ -338,6 +339,47 @@ void main() {
     await tester.pump();
     expect(find.text('আর্কাইভড'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  screenTest('a past day is locked until a reason is given, then logged', (
+    tester,
+  ) async {
+    final yesterday = addDays(today, -1);
+    await pumpScreen(tester, date: yesterday);
+
+    expect(find.textContaining('This day has passed'), findsOneWidget);
+    await tester.tap(find.byType(MealToggleButton).first);
+    await settle(tester);
+    expect(await totalMealsOn(tester, yesterday), 0);
+
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+    // No reason yet, so editing can't start.
+    expect(
+      tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Start editing')).onPressed,
+      isNull,
+    );
+    await tester.tap(find.text('Forgot to mark'));
+    await tester.pump();
+    await tester.tap(find.text('Start editing'));
+    await tester.pumpAndSettle();
+    expect(find.text('Editing a past day · Reason: Forgot to mark'), findsOneWidget);
+
+    await tester.tap(find.byType(MealToggleButton).first);
+    await settle(tester);
+    expect(await totalMealsOn(tester, yesterday), 1);
+    final log = await tester.runAsync(
+      () => LocalActivityLogRepository(db).watchMealChangesForDate(mess.id, yesterday).first,
+    );
+    expect(log!.single.detail, 'Forgot to mark');
+    expect(log.single.memberId, karim.id); // Karim sorts first.
+
+    await tester.tap(find.text('Done'));
+    await tester.pump();
+    expect(find.textContaining('This day has passed'), findsOneWidget);
+    await tester.tap(find.byType(MealToggleButton).first);
+    await settle(tester);
+    expect(await totalMealsOn(tester, yesterday), 1);
   });
 
   screenTest('a closed month is shown read-only with a way forward', (

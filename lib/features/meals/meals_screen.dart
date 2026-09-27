@@ -11,6 +11,7 @@ import '../../models/meal_entry.dart';
 import '../../models/meal_slot.dart';
 import '../../models/member.dart';
 import '../../models/mess.dart';
+import '../../providers/meal_edit_providers.dart';
 import '../../providers/meal_providers.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/repository_providers.dart';
@@ -22,6 +23,7 @@ import '../shared/widgets/page_header_card.dart';
 import 'widgets/meal_day_row.dart';
 import 'widgets/meal_progress_row.dart';
 import 'widgets/monthly_meals_sheet.dart';
+import 'widgets/past_day_banner.dart';
 
 /// The daily meal tracker (sections 14/15) — the screen a manager is
 /// expected to open several times a day, so it defaults to today and
@@ -51,17 +53,23 @@ class MealsScreen extends ConsumerWidget {
           ..hideCurrentSnackBar()
           ..showSnackBar(
             SnackBar(
-              content: Text(
-                error is MonthClosedException
-                    ? l10n.mealsLockedSnackbar
-                    : l10n.couldntSaveMeal,
-              ),
+              content: Text(switch (error) {
+                MonthClosedException() => l10n.mealsLockedSnackbar,
+                ReasonRequiredException() => l10n.reasonRequiredSnackbar,
+                _ => l10n.couldntSaveMeal,
+              }),
             ),
           );
       }
       return false;
     }
   }
+
+  /// The reason [date] was unlocked with, if it's a past day being edited
+  /// — passed with every write so the repository can log the change. Null
+  /// for today/tomorrow, which need none.
+  String? _reasonFor(WidgetRef ref, DateTime date) =>
+      ref.read(pastDayEditReasonsProvider)[dateOnly(date)];
 
   /// Writes [changes] for [date] in one atomic step, then offers an Undo
   /// that puts back exactly what those members had before — one tap here
@@ -77,6 +85,7 @@ class MealsScreen extends ConsumerWidget {
   }) async {
     if (changes.isEmpty) return;
     final repo = ref.read(mealRepositoryProvider);
+    final reason = _reasonFor(ref, date);
     final previous = {
       for (final memberId in changes.keys)
         memberId: mealsByMember[memberId]?.counts ?? noMeals,
@@ -88,6 +97,7 @@ class MealsScreen extends ConsumerWidget {
         messId: messId,
         date: date,
         countsByMember: changes,
+        reason: reason,
       ),
     );
     if (!saved || !context.mounted) return;
@@ -109,6 +119,7 @@ class MealsScreen extends ConsumerWidget {
                 messId: messId,
                 date: date,
                 countsByMember: previous,
+                reason: reason,
               ),
             ),
           ),
@@ -295,10 +306,16 @@ class MealsScreen extends ConsumerWidget {
             month: date.month,
             today: dateOnly(DateTime.now()),
           );
+    // A day that has passed stays locked until a reason is given, and
+    // every change made to it is then logged with that reason — so a past
+    // day can be corrected, but never quietly.
+    final isPastDay = date.isBefore(dateOnly(DateTime.now()));
+    final editReason = ref.watch(pastDayEditReasonsProvider)[date];
+    final canEdit = !locked && (!isPastDay || editReason != null);
     // Offered only when today has nothing recorded yet and yesterday has
     // something to copy — never as a way to overwrite a day in progress.
     final canCopyPreviousDay =
-        !locked &&
+        canEdit &&
         (mealsAsync.value?.every((m) => m.totalMeals == 0) ?? true) &&
         (previousMeals?.any((m) => m.totalMeals > 0) ?? false);
 
@@ -361,6 +378,16 @@ class MealsScreen extends ConsumerWidget {
             if (locked)
               _LockedBanner(
                 monthYear: formatMonthYear(context, date.year, date.month),
+              )
+            else if (isPastDay)
+              PastDayBanner(
+                date: date,
+                reason: editReason,
+                onUnlock: (reason) => ref
+                    .read(pastDayEditReasonsProvider.notifier)
+                    .unlock(date, reason),
+                onLock: () =>
+                    ref.read(pastDayEditReasonsProvider.notifier).lock(date),
               ),
             Expanded(
               // Swiping sideways steps a day back or forward, like turning
@@ -430,7 +457,7 @@ class MealsScreen extends ConsumerWidget {
                           showBreakfast: mess.trackBreakfast,
                           showLunch: mess.trackLunch,
                           showDinner: mess.trackDinner,
-                          enabled: !locked,
+                          enabled: canEdit,
                           summary: _daySummary(l10n, meals),
                           onToggleBreakfast: () => _toggleAllForSlot(
                             context,
@@ -483,7 +510,7 @@ class MealsScreen extends ConsumerWidget {
                                 showBreakfast: mess.trackBreakfast,
                                 showLunch: mess.trackLunch,
                                 showDinner: mess.trackDinner,
-                                enabled: !locked,
+                                enabled: canEdit,
                                 onToggleDay: () => _toggleDayForMember(
                                   context,
                                   ref,
@@ -500,6 +527,7 @@ class MealsScreen extends ConsumerWidget {
                                         memberId: member.id,
                                         date: date,
                                         breakfast: value,
+                                        reason: _reasonFor(ref, date),
                                       ),
                                 ),
                                 onLunchChanged: (value) => _save(
@@ -511,6 +539,7 @@ class MealsScreen extends ConsumerWidget {
                                         memberId: member.id,
                                         date: date,
                                         lunch: value,
+                                        reason: _reasonFor(ref, date),
                                       ),
                                 ),
                                 onDinnerChanged: (value) => _save(
@@ -522,6 +551,7 @@ class MealsScreen extends ConsumerWidget {
                                         memberId: member.id,
                                         date: date,
                                         dinner: value,
+                                        reason: _reasonFor(ref, date),
                                       ),
                                 ),
                               );
