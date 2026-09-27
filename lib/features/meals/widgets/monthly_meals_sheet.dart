@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/localized_date.dart';
 import '../../../core/utils/meal_gaps.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../../models/activity_log_entry.dart';
 import '../../../models/meal_entry.dart';
 import '../../../models/mess.dart';
+import '../../../providers/activity_log_providers.dart';
 import '../../../providers/meal_providers.dart';
 import '../../../providers/month_calculation_provider.dart';
+import '../meal_statement_text.dart';
 
 /// Opens [MonthlyMealsSheet] for [year]/[month]. Tapping one of its
 /// unrecorded days calls [onJumpToDay] after the sheet closes.
@@ -55,6 +59,9 @@ class MonthlyMealsSheet extends ConsumerWidget {
     final result = ref.watch(monthCalculationProvider(params));
     final meals =
         ref.watch(mealsForMonthProvider(params)).value ?? const <MealEntry>[];
+    final lateChanges =
+        ref.watch(mealChangesForMonthProvider(params)).value ??
+        const <ActivityLogEntry>[];
 
     final slotTotals = <String, MealCounts>{};
     for (final meal in meals) {
@@ -132,6 +139,31 @@ class MonthlyMealsSheet extends ConsumerWidget {
                     Text(
                       l10n.mealsCount(balance.mealCount),
                       style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    IconButton(
+                      tooltip: l10n.shareStatementTooltip(balance.memberName),
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.ios_share, size: 20),
+                      onPressed: () => SharePlus.instance.share(
+                        ShareParams(
+                          text: buildMealStatement(
+                            context: context,
+                            messName: mess.name,
+                            memberName: balance.memberName,
+                            year: year,
+                            month: month,
+                            memberMeals: [
+                              for (final meal in meals)
+                                if (meal.memberId == balance.memberId) meal,
+                            ],
+                            memberLateChanges: [
+                              for (final change in lateChanges)
+                                if (change.memberId == balance.memberId) change,
+                            ],
+                            today: dateOnly(DateTime.now()),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
