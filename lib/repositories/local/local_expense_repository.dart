@@ -126,6 +126,9 @@ class LocalExpenseRepository implements ExpenseRepository {
     if (expense.amount.minorUnits <= 0) {
       throw const ValidationException('Amount must be greater than zero.');
     }
+    final existing = await (_db.select(
+      _db.expenses,
+    )..where((t) => t.id.equals(expense.id))).getSingleOrNull();
     await (_db.update(
       _db.expenses,
     )..where((t) => t.id.equals(expense.id))).write(
@@ -138,6 +141,9 @@ class LocalExpenseRepository implements ExpenseRepository {
         updatedAt: Value(DateTime.now()),
       ),
     );
+    final amountChanged =
+        existing != null && existing.amountMinorUnits != expense.amount.minorUnits;
+    final listChanged = existing != null && existing.bazarList != expense.bazarList;
     await logActivity(
       _db,
       messId: expense.messId,
@@ -145,6 +151,8 @@ class LocalExpenseRepository implements ExpenseRepository {
       memberId: expense.paidByMemberId,
       amountMinorUnits: expense.amount.minorUnits,
       detail: expense.bazarList,
+      previousAmountMinorUnits: amountChanged ? existing.amountMinorUnits : null,
+      previousDetail: listChanged ? existing.bazarList : null,
     );
   }
 

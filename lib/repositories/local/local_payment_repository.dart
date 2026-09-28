@@ -122,6 +122,9 @@ class LocalPaymentRepository implements PaymentRepository {
     if (payment.amount.minorUnits <= 0) {
       throw const ValidationException('Amount must be greater than zero.');
     }
+    final existing = await (_db.select(
+      _db.payments,
+    )..where((t) => t.id.equals(payment.id))).getSingleOrNull();
     await (_db.update(
       _db.payments,
     )..where((t) => t.id.equals(payment.id))).write(
@@ -133,6 +136,9 @@ class LocalPaymentRepository implements PaymentRepository {
         updatedAt: Value(DateTime.now()),
       ),
     );
+    final amountChanged =
+        existing != null && existing.amountMinorUnits != payment.amount.minorUnits;
+    final noteChanged = existing != null && existing.note != payment.note;
     await logActivity(
       _db,
       messId: payment.messId,
@@ -140,6 +146,8 @@ class LocalPaymentRepository implements PaymentRepository {
       memberId: payment.memberId,
       amountMinorUnits: payment.amount.minorUnits,
       detail: payment.note,
+      previousAmountMinorUnits: amountChanged ? existing.amountMinorUnits : null,
+      previousDetail: noteChanged ? existing.note : null,
     );
   }
 

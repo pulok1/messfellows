@@ -158,6 +158,9 @@ class LocalRuleRepository implements RuleRepository {
     final title = _cleanTitle(rule.title);
     final now = DateTime.now();
     await _db.transaction(() async {
+      final existing = await (_db.select(
+        _db.messRules,
+      )..where((t) => t.id.equals(rule.id))).getSingleOrNull();
       await (_db.update(_db.messRules)..where((t) => t.id.equals(rule.id)))
           .write(
             MessRulesCompanion(
@@ -169,11 +172,13 @@ class LocalRuleRepository implements RuleRepository {
             ),
           );
       await _touchRules(rule.messId, now);
+      final titleChanged = existing != null && existing.title != title;
       await logActivity(
         _db,
         messId: rule.messId,
         type: ActivityType.ruleUpdated,
         detail: title,
+        previousDetail: titleChanged ? existing.title : null,
       );
     });
   }
