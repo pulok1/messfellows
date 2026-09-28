@@ -241,8 +241,19 @@ class _ActivityTile extends ConsumerWidget {
           entry.count ?? 0,
         ),
         if (entry.detail != null) entry.detail!,
-      ] else if (entry.detail != null && entry.detail!.isNotEmpty)
-        entry.detail!,
+      ] else ...[
+        // "was → now" only for whichever of amount/detail actually
+        // changed in this edit; otherwise fall back to just showing the
+        // current detail, same as every non-edit entry type.
+        if (entry.previousAmount != null)
+          l10n.valueChangeLine(entry.previousAmount!.format(), entry.amount!.format())
+        else if (entry.previousDetail == null &&
+            entry.detail != null &&
+            entry.detail!.isNotEmpty)
+          entry.detail!,
+        if (entry.previousDetail != null)
+          l10n.valueChangeLine(entry.previousDetail!, entry.detail ?? ''),
+      ],
       formatTimeOfDay(context, entry.createdAt),
     ];
 

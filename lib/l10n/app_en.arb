@@ -121,6 +121,8 @@
   "@mealChangesTitle": {"placeholders": {"name": {"type": "String"}, "date": {"type": "String"}}},
   "mealChangeLine": "{meal}: {from} → {to}",
   "@mealChangeLine": {"placeholders": {"meal": {"type": "String"}, "from": {"type": "int"}, "to": {"type": "int"}}},
+  "valueChangeLine": "{from} → {to}",
+  "@valueChangeLine": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
   "mealChangedAt": "Changed {when}",
   "@mealChangedAt": {"placeholders": {"when": {"type": "String"}}},
   "summaryLateChangesHeader": "✏️ Meals changed after their day ({count})",

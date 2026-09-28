@@ -101,6 +101,7 @@
   "editedLaterTag": "পরে সম্পাদিত",
   "mealChangesTitle": "{date}-এ {name}-এর মিলে পরিবর্তন",
   "mealChangeLine": "{meal}: {from} → {to}",
+  "valueChangeLine": "{from} → {to}",
   "mealChangedAt": "পরিবর্তন: {when}",
   "summaryLateChangesHeader": "✏️ দিন পার হওয়ার পর মিল পরিবর্তন ({count})",
   "summaryNoLateChanges": "✅ দিন পার হওয়ার পর কোনো মিল পরিবর্তন করা হয়নি।",
