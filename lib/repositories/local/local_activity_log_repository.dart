@@ -19,6 +19,10 @@ class LocalActivityLogRepository implements ActivityLogRepository {
     memberId: row.memberId,
     amount: row.amountMinorUnits == null ? null : Money(row.amountMinorUnits!),
     detail: row.detail,
+    previousAmount: row.previousAmountMinorUnits == null
+        ? null
+        : Money(row.previousAmountMinorUnits!),
+    previousDetail: row.previousDetail,
     year: row.year,
     month: row.month,
     count: row.count,

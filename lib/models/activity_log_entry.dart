@@ -22,6 +22,12 @@ class ActivityLogEntry {
   /// payment note, or a rule title.
   final String? detail;
 
+  /// What [amount]/[detail] were before this edit — set only on
+  /// bazarEdited/paymentEdited/ruleUpdated, and only for whichever of the
+  /// two actually changed, so the tile can show "was X, now Y".
+  final Money? previousAmount;
+  final String? previousDetail;
+
   /// Set only for [ActivityType.monthClosed]/[ActivityType.monthReopened],
   /// so the month name can be formatted in whatever language is active at
   /// read time rather than frozen into English when the event happened.
@@ -48,6 +54,8 @@ class ActivityLogEntry {
     this.memberId,
     this.amount,
     this.detail,
+    this.previousAmount,
+    this.previousDetail,
     this.year,
     this.month,
     this.count,

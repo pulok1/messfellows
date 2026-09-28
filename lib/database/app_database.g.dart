@@ -4786,6 +4786,28 @@ class $ActivityLogsTable extends ActivityLogs
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _previousAmountMinorUnitsMeta =
+      const VerificationMeta('previousAmountMinorUnits');
+  @override
+  late final GeneratedColumn<int> previousAmountMinorUnits =
+      GeneratedColumn<int>(
+        'previous_amount_minor_units',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _previousDetailMeta = const VerificationMeta(
+    'previousDetail',
+  );
+  @override
+  late final GeneratedColumn<String> previousDetail = GeneratedColumn<String>(
+    'previous_detail',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -4811,6 +4833,8 @@ class $ActivityLogsTable extends ActivityLogs
     mealDate,
     mealSlot,
     previousCount,
+    previousAmountMinorUnits,
+    previousDetail,
     createdAt,
   ];
   @override
@@ -4892,6 +4916,24 @@ class $ActivityLogsTable extends ActivityLogs
         ),
       );
     }
+    if (data.containsKey('previous_amount_minor_units')) {
+      context.handle(
+        _previousAmountMinorUnitsMeta,
+        previousAmountMinorUnits.isAcceptableOrUnknown(
+          data['previous_amount_minor_units']!,
+          _previousAmountMinorUnitsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('previous_detail')) {
+      context.handle(
+        _previousDetailMeta,
+        previousDetail.isAcceptableOrUnknown(
+          data['previous_detail']!,
+          _previousDetailMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -4961,6 +5003,14 @@ class $ActivityLogsTable extends ActivityLogs
         DriftSqlType.int,
         data['${effectivePrefix}previous_count'],
       ),
+      previousAmountMinorUnits: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}previous_amount_minor_units'],
+      ),
+      previousDetail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}previous_detail'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -4994,6 +5044,8 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
   final DateTime? mealDate;
   final MealSlot? mealSlot;
   final int? previousCount;
+  final int? previousAmountMinorUnits;
+  final String? previousDetail;
   final DateTime createdAt;
   const ActivityLogRow({
     required this.id,
@@ -5008,6 +5060,8 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
     this.mealDate,
     this.mealSlot,
     this.previousCount,
+    this.previousAmountMinorUnits,
+    this.previousDetail,
     required this.createdAt,
   });
   @override
@@ -5049,6 +5103,14 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
     if (!nullToAbsent || previousCount != null) {
       map['previous_count'] = Variable<int>(previousCount);
     }
+    if (!nullToAbsent || previousAmountMinorUnits != null) {
+      map['previous_amount_minor_units'] = Variable<int>(
+        previousAmountMinorUnits,
+      );
+    }
+    if (!nullToAbsent || previousDetail != null) {
+      map['previous_detail'] = Variable<String>(previousDetail);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -5083,6 +5145,12 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
       previousCount: previousCount == null && nullToAbsent
           ? const Value.absent()
           : Value(previousCount),
+      previousAmountMinorUnits: previousAmountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(previousAmountMinorUnits),
+      previousDetail: previousDetail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(previousDetail),
       createdAt: Value(createdAt),
     );
   }
@@ -5109,6 +5177,10 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
         serializer.fromJson<String?>(json['mealSlot']),
       ),
       previousCount: serializer.fromJson<int?>(json['previousCount']),
+      previousAmountMinorUnits: serializer.fromJson<int?>(
+        json['previousAmountMinorUnits'],
+      ),
+      previousDetail: serializer.fromJson<String?>(json['previousDetail']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -5132,6 +5204,10 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
         $ActivityLogsTable.$convertermealSlotn.toJson(mealSlot),
       ),
       'previousCount': serializer.toJson<int?>(previousCount),
+      'previousAmountMinorUnits': serializer.toJson<int?>(
+        previousAmountMinorUnits,
+      ),
+      'previousDetail': serializer.toJson<String?>(previousDetail),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -5149,6 +5225,8 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
     Value<DateTime?> mealDate = const Value.absent(),
     Value<MealSlot?> mealSlot = const Value.absent(),
     Value<int?> previousCount = const Value.absent(),
+    Value<int?> previousAmountMinorUnits = const Value.absent(),
+    Value<String?> previousDetail = const Value.absent(),
     DateTime? createdAt,
   }) => ActivityLogRow(
     id: id ?? this.id,
@@ -5167,6 +5245,12 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
     previousCount: previousCount.present
         ? previousCount.value
         : this.previousCount,
+    previousAmountMinorUnits: previousAmountMinorUnits.present
+        ? previousAmountMinorUnits.value
+        : this.previousAmountMinorUnits,
+    previousDetail: previousDetail.present
+        ? previousDetail.value
+        : this.previousDetail,
     createdAt: createdAt ?? this.createdAt,
   );
   ActivityLogRow copyWithCompanion(ActivityLogsCompanion data) {
@@ -5187,6 +5271,12 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
       previousCount: data.previousCount.present
           ? data.previousCount.value
           : this.previousCount,
+      previousAmountMinorUnits: data.previousAmountMinorUnits.present
+          ? data.previousAmountMinorUnits.value
+          : this.previousAmountMinorUnits,
+      previousDetail: data.previousDetail.present
+          ? data.previousDetail.value
+          : this.previousDetail,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -5206,6 +5296,8 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
           ..write('mealDate: $mealDate, ')
           ..write('mealSlot: $mealSlot, ')
           ..write('previousCount: $previousCount, ')
+          ..write('previousAmountMinorUnits: $previousAmountMinorUnits, ')
+          ..write('previousDetail: $previousDetail, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -5225,6 +5317,8 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
     mealDate,
     mealSlot,
     previousCount,
+    previousAmountMinorUnits,
+    previousDetail,
     createdAt,
   );
   @override
@@ -5243,6 +5337,8 @@ class ActivityLogRow extends DataClass implements Insertable<ActivityLogRow> {
           other.mealDate == this.mealDate &&
           other.mealSlot == this.mealSlot &&
           other.previousCount == this.previousCount &&
+          other.previousAmountMinorUnits == this.previousAmountMinorUnits &&
+          other.previousDetail == this.previousDetail &&
           other.createdAt == this.createdAt);
 }
 
@@ -5259,6 +5355,8 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
   final Value<DateTime?> mealDate;
   final Value<MealSlot?> mealSlot;
   final Value<int?> previousCount;
+  final Value<int?> previousAmountMinorUnits;
+  final Value<String?> previousDetail;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const ActivityLogsCompanion({
@@ -5274,6 +5372,8 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
     this.mealDate = const Value.absent(),
     this.mealSlot = const Value.absent(),
     this.previousCount = const Value.absent(),
+    this.previousAmountMinorUnits = const Value.absent(),
+    this.previousDetail = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -5290,6 +5390,8 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
     this.mealDate = const Value.absent(),
     this.mealSlot = const Value.absent(),
     this.previousCount = const Value.absent(),
+    this.previousAmountMinorUnits = const Value.absent(),
+    this.previousDetail = const Value.absent(),
     required DateTime createdAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -5309,6 +5411,8 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
     Expression<DateTime>? mealDate,
     Expression<String>? mealSlot,
     Expression<int>? previousCount,
+    Expression<int>? previousAmountMinorUnits,
+    Expression<String>? previousDetail,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -5325,6 +5429,9 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
       if (mealDate != null) 'meal_date': mealDate,
       if (mealSlot != null) 'meal_slot': mealSlot,
       if (previousCount != null) 'previous_count': previousCount,
+      if (previousAmountMinorUnits != null)
+        'previous_amount_minor_units': previousAmountMinorUnits,
+      if (previousDetail != null) 'previous_detail': previousDetail,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -5343,6 +5450,8 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
     Value<DateTime?>? mealDate,
     Value<MealSlot?>? mealSlot,
     Value<int?>? previousCount,
+    Value<int?>? previousAmountMinorUnits,
+    Value<String?>? previousDetail,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -5359,6 +5468,9 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
       mealDate: mealDate ?? this.mealDate,
       mealSlot: mealSlot ?? this.mealSlot,
       previousCount: previousCount ?? this.previousCount,
+      previousAmountMinorUnits:
+          previousAmountMinorUnits ?? this.previousAmountMinorUnits,
+      previousDetail: previousDetail ?? this.previousDetail,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -5407,6 +5519,14 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
     if (previousCount.present) {
       map['previous_count'] = Variable<int>(previousCount.value);
     }
+    if (previousAmountMinorUnits.present) {
+      map['previous_amount_minor_units'] = Variable<int>(
+        previousAmountMinorUnits.value,
+      );
+    }
+    if (previousDetail.present) {
+      map['previous_detail'] = Variable<String>(previousDetail.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -5431,6 +5551,8 @@ class ActivityLogsCompanion extends UpdateCompanion<ActivityLogRow> {
           ..write('mealDate: $mealDate, ')
           ..write('mealSlot: $mealSlot, ')
           ..write('previousCount: $previousCount, ')
+          ..write('previousAmountMinorUnits: $previousAmountMinorUnits, ')
+          ..write('previousDetail: $previousDetail, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -10199,6 +10321,8 @@ typedef $$ActivityLogsTableCreateCompanionBuilder =
       Value<DateTime?> mealDate,
       Value<MealSlot?> mealSlot,
       Value<int?> previousCount,
+      Value<int?> previousAmountMinorUnits,
+      Value<String?> previousDetail,
       required DateTime createdAt,
       Value<int> rowid,
     });
@@ -10216,6 +10340,8 @@ typedef $$ActivityLogsTableUpdateCompanionBuilder =
       Value<DateTime?> mealDate,
       Value<MealSlot?> mealSlot,
       Value<int?> previousCount,
+      Value<int?> previousAmountMinorUnits,
+      Value<String?> previousDetail,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -10317,6 +10443,16 @@ class $$ActivityLogsTableFilterComposer
 
   ColumnFilters<int> get previousCount => $composableBuilder(
     column: $table.previousCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get previousAmountMinorUnits => $composableBuilder(
+    column: $table.previousAmountMinorUnits,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get previousDetail => $composableBuilder(
+    column: $table.previousDetail,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10431,6 +10567,16 @@ class $$ActivityLogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get previousAmountMinorUnits => $composableBuilder(
+    column: $table.previousAmountMinorUnits,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get previousDetail => $composableBuilder(
+    column: $table.previousDetail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -10526,6 +10672,16 @@ class $$ActivityLogsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get previousAmountMinorUnits => $composableBuilder(
+    column: $table.previousAmountMinorUnits,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get previousDetail => $composableBuilder(
+    column: $table.previousDetail,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -10616,6 +10772,8 @@ class $$ActivityLogsTableTableManager
                 Value<DateTime?> mealDate = const Value.absent(),
                 Value<MealSlot?> mealSlot = const Value.absent(),
                 Value<int?> previousCount = const Value.absent(),
+                Value<int?> previousAmountMinorUnits = const Value.absent(),
+                Value<String?> previousDetail = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ActivityLogsCompanion(
@@ -10631,6 +10789,8 @@ class $$ActivityLogsTableTableManager
                 mealDate: mealDate,
                 mealSlot: mealSlot,
                 previousCount: previousCount,
+                previousAmountMinorUnits: previousAmountMinorUnits,
+                previousDetail: previousDetail,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -10648,6 +10808,8 @@ class $$ActivityLogsTableTableManager
                 Value<DateTime?> mealDate = const Value.absent(),
                 Value<MealSlot?> mealSlot = const Value.absent(),
                 Value<int?> previousCount = const Value.absent(),
+                Value<int?> previousAmountMinorUnits = const Value.absent(),
+                Value<String?> previousDetail = const Value.absent(),
                 required DateTime createdAt,
                 Value<int> rowid = const Value.absent(),
               }) => ActivityLogsCompanion.insert(
@@ -10663,6 +10825,8 @@ class $$ActivityLogsTableTableManager
                 mealDate: mealDate,
                 mealSlot: mealSlot,
                 previousCount: previousCount,
+                previousAmountMinorUnits: previousAmountMinorUnits,
+                previousDetail: previousDetail,
                 createdAt: createdAt,
                 rowid: rowid,
               ),

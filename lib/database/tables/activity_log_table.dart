@@ -43,6 +43,13 @@ class ActivityLogs extends Table {
   TextColumn get mealSlot => textEnum<MealSlot>().nullable()();
   IntColumn get previousCount => integer().nullable()();
 
+  // Set on bazarEdited/paymentEdited/ruleUpdated when the amount or the
+  // free-text (bazar list / note / rule title) actually changed, so the
+  // entry can show "was X, now Y" instead of only the new value. Null
+  // when that particular field didn't change in this edit.
+  IntColumn get previousAmountMinorUnits => integer().nullable()();
+  TextColumn get previousDetail => text().nullable()();
+
   DateTimeColumn get createdAt => dateTime()();
 
   @override

@@ -45,7 +45,7 @@ class AppDatabase extends _$AppDatabase {
   // changes. Future sync-metadata columns (syncStatus, remoteId, ...) will
   // land as additive migrations here rather than a rewrite.
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -126,6 +126,13 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(activityLogs, activityLogs.mealDate);
         await m.addColumn(activityLogs, activityLogs.mealSlot);
         await m.addColumn(activityLogs, activityLogs.previousCount);
+      }
+      if (from >= 6 && from < 8) {
+        // Edits to a bazar entry, payment, or rule now record what the
+        // amount/text was before, so the log can show "was X, now Y"
+        // instead of just the new value.
+        await m.addColumn(activityLogs, activityLogs.previousAmountMinorUnits);
+        await m.addColumn(activityLogs, activityLogs.previousDetail);
       }
     },
     beforeOpen: (details) async {
