@@ -154,9 +154,7 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final color = isSelected
-        ? colorScheme.onSecondaryContainer
-        : colorScheme.onSurfaceVariant;
+    final unselectedColor = colorScheme.onSurfaceVariant;
     final duration = AppMotion.of(context, AppMotion.medium);
 
     return Expanded(
@@ -166,17 +164,32 @@ class _NavItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
-            // Material 3 style indicator pill that grows in behind the
-            // selected icon.
+            // A short bar above the active tab — a second, color-
+            // independent cue so "where am I" doesn't rely on a subtle
+            // container tint alone (which can wash out against this
+            // palette's other neutral surfaces on a real phone screen).
+            AnimatedContainer(
+              duration: duration,
+              curve: AppMotion.emphasized,
+              margin: const EdgeInsets.only(bottom: 4),
+              width: isSelected ? 20 : 0,
+              height: 3,
+              decoration: BoxDecoration(
+                color: colorScheme.primary,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            // Solid-filled pill (not a tinted container) so the selected
+            // icon always has guaranteed, strong contrast regardless of
+            // how close this palette's secondary tones sit to the bottom
+            // bar's own background.
             AnimatedContainer(
               duration: duration,
               curve: AppMotion.emphasized,
               width: isSelected ? 52 : 28,
               height: 28,
               decoration: BoxDecoration(
-                color: isSelected
-                    ? colorScheme.secondaryContainer
-                    : colorScheme.secondaryContainer.withValues(alpha: 0),
+                color: isSelected ? colorScheme.primary : Colors.transparent,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: AnimatedSwitcher(
@@ -186,7 +199,7 @@ class _NavItem extends StatelessWidget {
                 child: Icon(
                   isSelected ? selectedIcon : icon,
                   key: ValueKey(isSelected),
-                  color: color,
+                  color: isSelected ? colorScheme.onPrimary : unselectedColor,
                   size: 22,
                 ),
               ),
@@ -195,7 +208,7 @@ class _NavItem extends StatelessWidget {
             AnimatedDefaultTextStyle(
               duration: duration,
               style: TextStyle(
-                color: isSelected ? colorScheme.primary : color,
+                color: isSelected ? colorScheme.primary : unselectedColor,
                 fontSize: 12,
                 height: 1,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
