@@ -4,11 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/bazar_item_suggestions.dart';
 import '../../core/utils/localized_date.dart';
 import '../../core/utils/money.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/expense.dart';
 import '../../models/member.dart';
+import '../../providers/expense_providers.dart';
 import '../../providers/member_providers.dart';
 import '../../providers/repository_providers.dart';
 import '../shared/widgets/confirm_dialog.dart';
@@ -60,7 +62,8 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
     _amountController = TextEditingController(
       text: existing == null ? '' : existing.amount.major.toStringAsFixed(2),
     );
-    _bazarListController = TextEditingController(text: existing?.bazarList ?? '');
+    _bazarListController = TextEditingController(text: existing?.bazarList ?? '')
+      ..addListener(_onBazarListChanged);
     _noteController = TextEditingController(text: existing?.note ?? '');
     _paidByMemberId = existing?.paidByMemberId;
   }
@@ -68,9 +71,24 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
   @override
   void dispose() {
     _amountController.dispose();
+    _bazarListController.removeListener(_onBazarListChanged);
     _bazarListController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  // Refreshes the "frequently bought" chips so an item already typed (or
+  // just tapped in) drops out of the suggestions.
+  void _onBazarListChanged() => setState(() {});
+
+  void _addSuggestedItem(String item) {
+    HapticFeedback.selectionClick();
+    final current = _bazarListController.text.trimRight();
+    final updated = current.isEmpty ? item : '$current, $item';
+    _bazarListController.value = TextEditingValue(
+      text: updated,
+      selection: TextSelection.collapsed(offset: updated.length),
+    );
   }
 
   Future<void> _pickDate() async {
@@ -207,6 +225,11 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
                       ? l10n.enterBazarListValidator
                       : null,
                 ),
+                _SuggestedItemsRow(
+                  messId: widget.messId,
+                  currentText: _bazarListController.text,
+                  onTap: _addSuggestedItem,
+                ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _noteController,
@@ -275,6 +298,67 @@ class _PaidByField extends StatelessWidget {
           )
           .toList(),
       onChanged: onChanged,
+    );
+  }
+}
+
+/// Tappable chips for the items bought most often in past bazar entries,
+/// sourced from this mess's own history — a quick way to build up today's
+/// list without retyping the same staples every time. Hides itself once
+/// there's no history yet, or once every suggested item has already been
+/// typed in.
+class _SuggestedItemsRow extends ConsumerWidget {
+  final String messId;
+  final String currentText;
+  final ValueChanged<String> onTap;
+
+  const _SuggestedItemsRow({
+    required this.messId,
+    required this.currentText,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recentLists = ref.watch(recentBazarListsProvider(messId)).value;
+    if (recentLists == null || recentLists.isEmpty) return const SizedBox.shrink();
+
+    final alreadyTyped = splitBazarItems(
+      currentText,
+    ).map((item) => item.toLowerCase()).toSet();
+    final suggestions = topBazarItems(
+      recentLists,
+    ).where((item) => !alreadyTyped.contains(item.toLowerCase())).toList();
+    if (suggestions.isEmpty) return const SizedBox.shrink();
+
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.xs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context).frequentlyBoughtLabel,
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final item in suggestions)
+                ActionChip(
+                  visualDensity: VisualDensity.compact,
+                  avatar: const Icon(Icons.add, size: 16),
+                  label: Text(item),
+                  onPressed: () => onTap(item),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -229,4 +229,14 @@ class LocalExpenseRepository implements ExpenseRepository {
         ))
         .go();
   }
+
+  @override
+  Future<List<String>> recentBazarLists(String messId, {int limit = 200}) async {
+    final query = _db.select(_db.expenses)
+      ..where((t) => t.messId.equals(messId) & t.deletedAt.isNull())
+      ..orderBy([(t) => OrderingTerm.desc(t.date)])
+      ..limit(limit);
+    final rows = await query.get();
+    return rows.map((row) => row.bazarList).toList();
+  }
 }

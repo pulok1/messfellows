@@ -193,6 +193,7 @@
   "enterValidAmount": "Enter a valid amount",
   "bazarListLabel": "Bazar list",
   "enterBazarListValidator": "Enter what was bought",
+  "frequentlyBoughtLabel": "Frequently bought",
   "noteOptionalLabel": "Note (optional)",
   "saveChanges": "Save Changes",
   "paidByLabel": "Paid by",

@@ -23,3 +23,14 @@ final deletedExpensesProvider =
     StreamProvider.family<List<Expense>, String>((ref, messId) {
       return ref.watch(expenseRepositoryProvider).watchDeletedExpenses(messId);
     });
+
+/// Recent bazar-list text, mined for "frequently bought" suggestions on the
+/// add/edit bazar dialog. `autoDispose` so it re-queries fresh each time the
+/// dialog opens, rather than caching a one-shot result for the app's whole
+/// lifetime and missing entries added since.
+final recentBazarListsProvider = FutureProvider.autoDispose.family<List<String>, String>((
+  ref,
+  messId,
+) {
+  return ref.watch(expenseRepositoryProvider).recentBazarLists(messId);
+});

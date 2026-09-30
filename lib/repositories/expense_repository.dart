@@ -37,4 +37,10 @@ abstract interface class ExpenseRepository {
 
   /// Hard-deletes entries soft-deleted more than [retention] ago.
   Future<void> purgeExpiredExpenses(String messId, Duration retention);
+
+  /// The bazar-list text of the [limit] most recent entries for [messId],
+  /// newest first — mined for "frequently bought" suggestions when adding a
+  /// new entry. One-shot rather than a stream: it only needs to be fresh
+  /// each time the add/edit dialog opens.
+  Future<List<String>> recentBazarLists(String messId, {int limit = 200});
 }
