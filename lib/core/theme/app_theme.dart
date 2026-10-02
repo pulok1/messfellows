@@ -38,27 +38,50 @@ class AppBalanceColors {
 class AppTheme {
   AppTheme._();
 
-  static const Color _seedColor = Color(0xFF0E9F6E);
+  static const Color _seedColor = Color(0xFF1565C0);
 
   static ThemeData light() => _themeFrom(Brightness.light);
 
   /// Background for top/bottom chrome (header bars, bottom app bar): the
-  /// plain surface tone, near-white in light mode and just above the body
-  /// in dark mode.
+  /// plain surface tone, white in light mode and just above the body in
+  /// dark mode.
   static Color chromeColor(ColorScheme colorScheme) => colorScheme.surface;
 
   static ThemeData dark() => _themeFrom(Brightness.dark);
 
   static ThemeData _themeFrom(Brightness brightness) {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: _seedColor,
-      brightness: brightness,
-      // The default tonalSpot variant desaturates the seed into a muted
-      // grey-green; fidelity keeps primary close to the brand emerald so
-      // buttons, selected states and accents actually look green.
-      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
-    );
     final isDark = brightness == Brightness.dark;
+    // Fidelity keeps primary at the classic Material blue instead of the
+    // default variant's desaturated take on it. The surfaces are then
+    // swapped for plain neutral greys — the seed would otherwise tint every
+    // background and card blue — giving the familiar standard Android look:
+    // #F5F5F5 / #121212 body, white / #1E1E1E cards.
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: _seedColor,
+          brightness: brightness,
+          dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+        ).copyWith(
+          surface: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          surfaceContainerLowest: isDark
+              ? const Color(0xFF121212)
+              : Colors.white,
+          surfaceContainerLow: isDark
+              ? const Color(0xFF1A1A1A)
+              : const Color(0xFFF5F5F5),
+          surfaceContainer: isDark
+              ? const Color(0xFF1E1E1E)
+              : const Color(0xFFEEEEEE),
+          surfaceContainerHigh: isDark
+              ? const Color(0xFF262626)
+              : const Color(0xFFE8E8E8),
+          surfaceContainerHighest: isDark
+              ? const Color(0xFF2E2E2E)
+              : const Color(0xFFE0E0E0),
+          outlineVariant: isDark
+              ? const Color(0xFF3A3A3A)
+              : const Color(0xFFE0E0E0),
+        );
 
     return ThemeData(
       useMaterial3: true,
@@ -66,8 +89,7 @@ class AppTheme {
       // Light mode: a soft off-white body with pure white cards lifted off
       // it by a hairline outline. Dark mode: the darkest tone for the body
       // with lighter cards. Chrome (header, bottom bar) uses [chromeColor]
-      // and is separated from content by a divider rather than a tint, so
-      // the screen doesn't read as one wash of grey-green.
+      // and is separated from content by a divider rather than a tint.
       scaffoldBackgroundColor: isDark
           ? colorScheme.surfaceContainerLowest
           : colorScheme.surfaceContainerLow,
