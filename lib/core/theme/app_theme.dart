@@ -47,6 +47,20 @@ class AppTheme {
   /// dark mode.
   static Color chromeColor(ColorScheme colorScheme) => colorScheme.surface;
 
+  /// The top bar's fill: the classic solid brand blue in light mode, and a
+  /// raised dark grey in dark mode (a full-strength blue bar glares on a
+  /// dark screen) — either way clearly distinct from the body below it.
+  static Color topBarColor(ColorScheme colorScheme) =>
+      colorScheme.brightness == Brightness.dark
+      ? colorScheme.surfaceContainerHigh
+      : colorScheme.primary;
+
+  /// Title and icon colour on [topBarColor].
+  static Color onTopBarColor(ColorScheme colorScheme) =>
+      colorScheme.brightness == Brightness.dark
+      ? colorScheme.onSurface
+      : colorScheme.onPrimary;
+
   static ThemeData dark() => _themeFrom(Brightness.dark);
 
   static ThemeData _themeFrom(Brightness brightness) {

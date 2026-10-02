@@ -32,88 +32,74 @@ class PageHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final foreground = AppTheme.onTopBarColor(Theme.of(context).colorScheme);
     final textTheme = Theme.of(context).textTheme;
     final canPop = showBackButton && Navigator.of(context).canPop();
 
     return HeaderBar(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 64),
-            child: Row(
-              children: [
-                if (canPop)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xs,
-                    ),
-                    child: HeaderIconButton(
-                      icon: Icons.arrow_back,
-                      tooltip: AppLocalizations.of(context).back,
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  )
-                else
-                  const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      if (subtitle != null)
-                        Text(
-                          subtitle!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                    ],
-                  ),
+      bottom: bottom,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 64),
+        child: Row(
+          children: [
+            if (canPop)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                child: HeaderIconButton(
+                  icon: Icons.arrow_back,
+                  tooltip: AppLocalizations.of(context).back,
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
-                ...actions,
-                const SizedBox(width: AppSpacing.xs),
-              ],
-            ),
-          ),
-          if (bottom != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md,
-                0,
-                AppSpacing.md,
-                AppSpacing.sm,
+              )
+            else
+              const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: foreground,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: foreground.withValues(alpha: 0.8),
+                      ),
+                    ),
+                ],
               ),
-              child: bottom!,
             ),
-        ],
+            ...actions,
+            const SizedBox(width: AppSpacing.xs),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// The surface every top bar sits on: full-width, drawn under the status
-/// bar (with the status bar icons matched to the theme), and flat while the
-/// screen is scrolled to the top. Once content scrolls underneath it a
-/// divider and soft shadow fade in to separate the two, the same cue a
-/// Material 3 [AppBar] gives — it listens to the enclosing [Scaffold]'s
-/// [ScrollNotificationObserver], so screens don't need to wire anything up.
+/// The surface every top bar sits on: a full-width [AppTheme.topBarColor]
+/// bar drawn under the status bar, with an optional [bottom] strip (a month
+/// or date selector) on the plain chrome colour just beneath it. Once
+/// content scrolls underneath, a soft shadow fades in to lift the bar off
+/// it, the same cue a Material 3 [AppBar] gives — it listens to the
+/// enclosing [Scaffold]'s [ScrollNotificationObserver], so screens don't
+/// need to wire anything up.
 class HeaderBar extends StatefulWidget {
   final Widget child;
+  final Widget? bottom;
 
-  const HeaderBar({super.key, required this.child});
+  const HeaderBar({super.key, required this.child, this.bottom});
 
   @override
   State<HeaderBar> createState() => _HeaderBarState();
@@ -158,22 +144,15 @@ class _HeaderBarState extends State<HeaderBar> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final bottom = widget.bottom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: headerOverlayStyle(context),
       child: AnimatedContainer(
         duration: AppMotion.of(context, AppMotion.short),
         curve: AppMotion.emphasized,
-        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
         decoration: BoxDecoration(
           color: AppTheme.chromeColor(colorScheme),
-          border: Border(
-            bottom: BorderSide(
-              color: _scrolledUnder
-                  ? colorScheme.outlineVariant
-                  : colorScheme.outlineVariant.withValues(alpha: 0),
-            ),
-          ),
           boxShadow: [
             BoxShadow(
               color: colorScheme.shadow.withValues(
@@ -184,20 +163,52 @@ class _HeaderBarState extends State<HeaderBar> {
             ),
           ],
         ),
-        child: widget.child,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ColoredBox(
+              color: AppTheme.topBarColor(colorScheme),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.paddingOf(context).top,
+                ),
+                child: IconButtonTheme(
+                  data: IconButtonThemeData(
+                    style: IconButton.styleFrom(
+                      foregroundColor: AppTheme.onTopBarColor(colorScheme),
+                    ),
+                  ),
+                  child: widget.child,
+                ),
+              ),
+            ),
+            if (bottom != null)
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: colorScheme.outlineVariant),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                  child: bottom,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
 }
 
 /// Status bar styling for screens whose header draws under the status bar:
-/// a transparent bar so the header colour shows through, with icons that
-/// stay readable against it in both light and dark themes.
-SystemUiOverlayStyle headerOverlayStyle(BuildContext context) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  return (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
-      .copyWith(statusBarColor: Colors.transparent);
-}
+/// a transparent bar so the header colour shows through, with light icons —
+/// [AppTheme.topBarColor] is dark enough for them in both themes.
+SystemUiOverlayStyle headerOverlayStyle(BuildContext context) =>
+    SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent);
 
 /// A standard top-bar icon button — a plain 24dp icon with the usual
 /// circular press ripple — used for back buttons and trailing actions alike.
@@ -230,7 +241,8 @@ class HeaderIconButton extends StatelessWidget {
         child: Icon(icon),
       ),
       onPressed: onPressed,
-      color: color ?? Theme.of(context).colorScheme.onSurfaceVariant,
+      // Null falls through to the bar's IconButtonTheme foreground.
+      color: color,
     );
   }
 }
