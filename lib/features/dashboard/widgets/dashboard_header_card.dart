@@ -9,7 +9,7 @@ import '../../../l10n/gen/app_localizations.dart';
 import '../../../models/mess.dart';
 import '../../shared/widgets/page_header_card.dart';
 
-/// The Dashboard's header, a flat edge-to-edge gradient panel that runs
+/// The Dashboard's header, a flat edge-to-edge panel that runs
 /// under the status bar — a rounded-square mess icon, the mess name, the current
 /// month as a subtitle, and the Members/Settings actions grouped into one
 /// tonal pill on the right.
@@ -42,14 +42,7 @@ class DashboardHeaderCard extends StatelessWidget {
           AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colorScheme.primaryContainer,
-              AppTheme.chromeColor(colorScheme),
-            ],
-          ),
+          color: AppTheme.chromeColor(colorScheme),
           border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
         ),
         child: Row(
@@ -59,11 +52,7 @@ class DashboardHeaderCard extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [colorScheme.primary, colorScheme.tertiary],
-                ),
+                color: colorScheme.primary,
               ),
               child: Center(
                 child: AppLogoMark(size: 26, color: colorScheme.onPrimary),

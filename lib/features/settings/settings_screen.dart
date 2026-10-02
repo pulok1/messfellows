@@ -557,14 +557,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             borderRadius: BorderRadius.circular(
                               AppSpacing.chipRadius,
                             ),
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Theme.of(context).colorScheme.primary,
-                                Theme.of(context).colorScheme.tertiary,
-                              ],
-                            ),
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                           child: Center(
                             child: AppLogoMark(

@@ -62,15 +62,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Scaffold(
       body: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              colorScheme.primaryContainer.withValues(alpha: 0.5),
-              colorScheme.surface,
-            ],
-            stops: const [0, 0.6],
-          ),
+          color: colorScheme.surface,
         ),
         child: SafeArea(
           child: Center(
@@ -88,11 +80,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         borderRadius: BorderRadius.circular(
                           AppSpacing.cardRadius,
                         ),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [colorScheme.primary, colorScheme.tertiary],
-                        ),
+                        color: colorScheme.primary,
                         boxShadow: [
                           BoxShadow(
                             color: colorScheme.primary.withValues(alpha: 0.3),
