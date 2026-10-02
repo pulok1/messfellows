@@ -20,7 +20,13 @@ void main() {
     final mess = await LocalMessRepository(
       db,
     ).createMess(name: 'Test Mess', currencyCode: 'BDT', currencySymbol: '৳');
-    for (final column in ['meal_date', 'meal_slot', 'previous_count']) {
+    for (final column in [
+      'meal_date',
+      'meal_slot',
+      'previous_count',
+      'previous_amount_minor_units',
+      'previous_detail',
+    ]) {
       await db.customStatement('ALTER TABLE activity_logs DROP COLUMN $column');
     }
     await db.customStatement('PRAGMA user_version = 6');
