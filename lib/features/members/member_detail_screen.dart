@@ -65,6 +65,7 @@ class MemberDetailScreen extends ConsumerWidget {
         label: Text(l10n.addPaymentTitle),
       ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             PageHeaderCard(title: member?.name ?? l10n.memberFallback),

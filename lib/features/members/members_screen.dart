@@ -45,6 +45,7 @@ class MembersScreen extends ConsumerWidget {
         label: Text(l10n.addMember),
       ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             PageHeaderCard(title: l10n.membersLabel),

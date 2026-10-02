@@ -140,6 +140,7 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
 
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             PageHeaderCard(

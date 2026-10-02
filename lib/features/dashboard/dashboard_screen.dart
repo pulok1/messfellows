@@ -57,6 +57,7 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             DashboardHeaderCard(

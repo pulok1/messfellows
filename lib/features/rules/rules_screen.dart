@@ -37,6 +37,7 @@ class RulesScreen extends ConsumerWidget {
         label: Text(l10n.addRuleButton),
       ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             PageHeaderCard(

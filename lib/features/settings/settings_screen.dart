@@ -292,6 +292,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final mess = ref.watch(currentMessProvider).value ?? widget.mess;
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             PageHeaderCard(title: l10n.settingsTitle),

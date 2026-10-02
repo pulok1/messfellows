@@ -40,6 +40,7 @@ class _BazarScreenState extends ConsumerState<BazarScreen> {
 
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             PageHeaderCard(

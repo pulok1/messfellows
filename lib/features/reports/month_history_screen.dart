@@ -24,6 +24,7 @@ class MonthHistoryScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             PageHeaderCard(title: l10n.monthHistoryTitle),
