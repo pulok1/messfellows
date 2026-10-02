@@ -140,10 +140,24 @@ class _AddEditExpenseDialogState extends ConsumerState<AddEditExpenseDialog> {
         );
       }
       if (mounted) Navigator.of(context).pop(true);
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).couldntSaveBazarEntry)),
+        final l10n = AppLocalizations.of(context);
+        // A dialog (not a snackbar) because the real exception text is
+        // shown too — selectable, so it can be copied and reported — and a
+        // snackbar disappears before that's useful.
+        await showDialog<void>(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Text(l10n.couldntSaveBazarEntry),
+            content: SelectableText('$error'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.cancel),
+              ),
+            ],
+          ),
         );
       }
     } finally {

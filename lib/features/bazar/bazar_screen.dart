@@ -319,7 +319,28 @@ class _ExpenseList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => Center(child: Text(l10n.couldntLoadBazarEntries)),
+      // Shows the real exception text (selectable, so it can be copied and
+      // sent along if this needs reporting) rather than just the generic
+      // message — this has no other way to be diagnosed remotely.
+      error: (error, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.couldntLoadBazarEntries, textAlign: TextAlign.center),
+              const SizedBox(height: AppSpacing.sm),
+              SelectableText(
+                '$error',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
