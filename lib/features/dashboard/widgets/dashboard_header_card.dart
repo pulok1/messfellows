@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_logo.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/localized_date.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../models/mess.dart';
 import '../../shared/widgets/page_header_card.dart';
 
-/// The Dashboard's header, a flat edge-to-edge panel that runs
-/// under the status bar — a rounded-square mess icon, the mess name, the current
-/// month as a subtitle, and the Members/Settings actions grouped into one
-/// tonal pill on the right.
+/// The Dashboard's top bar, on the same [HeaderBar] as every other screen:
+/// a small logo tile, the mess name with the current month beneath it, and
+/// Members/Settings as standard trailing icon actions.
 class DashboardHeaderCard extends StatelessWidget {
   final Mess mess;
   final DateTime month;
@@ -31,37 +28,29 @@ class DashboardHeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context);
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: headerOverlayStyle(context),
-      child: Container(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          MediaQuery.paddingOf(context).top + AppSpacing.md,
-          AppSpacing.md,
-          AppSpacing.md,
-        ),
-        decoration: BoxDecoration(
-          color: AppTheme.chromeColor(colorScheme),
-          border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
-        ),
+    return HeaderBar(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 64),
         child: Row(
           children: [
+            const SizedBox(width: AppSpacing.md),
             Container(
-              width: 48,
-              height: 48,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
                 color: colorScheme.primary,
               ),
               child: Center(
-                child: AppLogoMark(size: 26, color: colorScheme.onPrimary),
+                child: AppLogoMark(size: 22, color: colorScheme.onPrimary),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -69,87 +58,35 @@ class DashboardHeaderCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.3,
+                      fontWeight: FontWeight.w600,
                       color: colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 2),
                   Text(
                     formatMonthYear(context, month.year, month.month),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: textTheme.bodyMedium?.copyWith(
+                    style: textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
-            _ActionPill(onMembers: onMembers, onSettings: onSettings),
+            HeaderIconButton(
+              icon: Icons.group_outlined,
+              tooltip: l10n.membersLabel,
+              onPressed: onMembers,
+            ),
+            HeaderIconButton(
+              icon: Icons.settings_outlined,
+              tooltip: l10n.settingsLabel,
+              onPressed: onSettings,
+            ),
+            const SizedBox(width: AppSpacing.xs),
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Members + Settings grouped into one rounded, translucent pill instead of
-/// two separate floating icon buttons.
-class _ActionPill extends StatelessWidget {
-  final VoidCallback onMembers;
-  final VoidCallback onSettings;
-
-  const _ActionPill({required this.onMembers, required this.onSettings});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(AppSpacing.sheetRadius),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _PillButton(
-            icon: Icons.group_outlined,
-            tooltip: AppLocalizations.of(context).membersLabel,
-            onPressed: onMembers,
-          ),
-          _PillButton(
-            icon: Icons.settings_outlined,
-            tooltip: AppLocalizations.of(context).settingsLabel,
-            onPressed: onSettings,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PillButton extends StatelessWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  const _PillButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: tooltip,
-      icon: Icon(icon, size: 20),
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
-      onPressed: onPressed,
     );
   }
 }
