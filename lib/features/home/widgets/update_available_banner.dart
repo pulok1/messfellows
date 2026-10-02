@@ -47,7 +47,7 @@ class UpdateAvailableBanner extends ConsumerWidget {
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
-                          l10n.updateAvailableMessage(updateInfo.version),
+                          l10n.updateAvailableMessage,
                           style: TextStyle(
                             color: colorScheme.onPrimaryContainer,
                             fontWeight: FontWeight.w600,

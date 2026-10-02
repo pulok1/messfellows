@@ -165,7 +165,7 @@
   "bazarListLabel": "বাজার তালিকা",
   "enterBazarListValidator": "কী কেনা হয়েছে লিখুন",
   "frequentlyBoughtLabel": "প্রায়ই কেনা হয়",
-  "updateAvailableMessage": "ভার্সন {version} উপলব্ধ",
+  "updateAvailableMessage": "একটি নতুন আপডেট উপলব্ধ",
   "updateNowAction": "আপডেট করুন",
   "updateDismissTooltip": "বাদ দিন",
   "noteOptionalLabel": "নোট (ঐচ্ছিক)",
