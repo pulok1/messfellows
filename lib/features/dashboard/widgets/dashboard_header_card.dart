@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_logo.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/localized_date.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../models/mess.dart';
 import '../../shared/widgets/page_header_card.dart';
 
 /// The Dashboard's top bar, on the same [HeaderBar] as every other screen:
-/// a small logo tile, the mess name with the current month beneath it, and
+/// a translucent logo tile, the mess name with the current month beneath it, and
 /// Members/Settings as standard trailing icon actions.
 class DashboardHeaderCard extends StatelessWidget {
   final Mess mess;
@@ -26,7 +27,7 @@ class DashboardHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final foreground = AppTheme.onTopBarColor(Theme.of(context).colorScheme);
     final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context);
 
@@ -41,11 +42,9 @@ class DashboardHeaderCard extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-                color: colorScheme.primary,
+                color: foreground.withValues(alpha: 0.18),
               ),
-              child: Center(
-                child: AppLogoMark(size: 22, color: colorScheme.onPrimary),
-              ),
+              child: Center(child: AppLogoMark(size: 22, color: foreground)),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -59,7 +58,7 @@ class DashboardHeaderCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface,
+                      color: foreground,
                     ),
                   ),
                   Text(
@@ -67,7 +66,7 @@ class DashboardHeaderCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                      color: foreground.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
