@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../l10n/gen/app_localizations.dart';
 
 /// The shared top bar used by every screen instead of an [AppBar] — a flat,
@@ -46,7 +47,7 @@ class PageHeaderCard extends StatelessWidget {
           AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
+          color: AppTheme.chromeColor(colorScheme),
           border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
         ),
         child: Column(

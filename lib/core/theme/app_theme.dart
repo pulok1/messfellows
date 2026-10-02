@@ -38,39 +38,58 @@ class AppBalanceColors {
 class AppTheme {
   AppTheme._();
 
-  static const Color _seedColor = Color(0xFF2E7D67);
+  static const Color _seedColor = Color(0xFF0E9F6E);
 
   static ThemeData light() => _themeFrom(Brightness.light);
+
+  /// Background for top/bottom chrome (header bars, bottom app bar): the
+  /// plain surface tone, near-white in light mode and just above the body
+  /// in dark mode.
+  static Color chromeColor(ColorScheme colorScheme) => colorScheme.surface;
+
   static ThemeData dark() => _themeFrom(Brightness.dark);
 
   static ThemeData _themeFrom(Brightness brightness) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: _seedColor,
       brightness: brightness,
+      // The default tonalSpot variant desaturates the seed into a muted
+      // grey-green; fidelity keeps primary close to the brand emerald so
+      // buttons, selected states and accents actually look green.
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
     );
+    final isDark = brightness == Brightness.dark;
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      // The seed palette's surface/surfaceContainer* tones sit only a few
-      // percent of lightness apart, so pairing a plain surface body with
-      // surfaceContainerHigh chrome (the previous setup) read as "everything
-      // is the same color". Using the lowest tone for the body and the
-      // highest for chrome (header, bottom nav) gives a clearly visible
-      // three-tier hierarchy: white-ish body < surfaceContainerHigh cards <
-      // surfaceContainerHighest chrome.
-      scaffoldBackgroundColor: colorScheme.surfaceContainerLowest,
+      // Light mode: a soft off-white body with pure white cards lifted off
+      // it by a hairline outline. Dark mode: the darkest tone for the body
+      // with lighter cards. Chrome (header, bottom bar) uses [chromeColor]
+      // and is separated from content by a divider rather than a tint, so
+      // the screen doesn't read as one wash of grey-green.
+      scaffoldBackgroundColor: isDark
+          ? colorScheme.surfaceContainerLowest
+          : colorScheme.surfaceContainerLow,
+      dividerTheme: DividerThemeData(color: colorScheme.outlineVariant),
       bottomAppBarTheme: BottomAppBarThemeData(
-        color: colorScheme.surfaceContainerHighest,
+        color: chromeColor(colorScheme),
         surfaceTintColor: Colors.transparent,
         elevation: 3,
         shadowColor: colorScheme.shadow.withValues(alpha: 0.08),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: colorScheme.surfaceContainerHigh,
+        color: isDark
+            ? colorScheme.surfaceContainer
+            : colorScheme.surfaceContainerLowest,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+          side: BorderSide(
+            color: colorScheme.outlineVariant.withValues(
+              alpha: isDark ? 0.4 : 0.6,
+            ),
+          ),
         ),
         margin: EdgeInsets.zero,
       ),
@@ -121,7 +140,9 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: colorScheme.surfaceContainerHighest,
+        fillColor: isDark
+            ? colorScheme.surfaceContainerHigh
+            : colorScheme.surfaceContainer,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
           borderSide: BorderSide.none,

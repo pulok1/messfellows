@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_logo.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/localized_date.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../models/mess.dart';
@@ -46,7 +47,7 @@ class DashboardHeaderCard extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               colorScheme.primaryContainer,
-              colorScheme.surfaceContainerHighest,
+              AppTheme.chromeColor(colorScheme),
             ],
           ),
           border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
