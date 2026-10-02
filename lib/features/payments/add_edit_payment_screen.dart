@@ -151,7 +151,6 @@ class _AddEditPaymentScreenState extends ConsumerState<AddEditPaymentScreen> {
                     icon: Icons.delete_outline,
                     tooltip: l10n.deleteTooltip,
                     onPressed: _delete,
-                    color: Theme.of(context).colorScheme.error,
                   ),
               ],
             ),
