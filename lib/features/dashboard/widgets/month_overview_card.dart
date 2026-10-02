@@ -65,10 +65,12 @@ class MonthOverviewCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (calculation.hasNoMeals)
-                            Text(
-                              l10n.noMealsRecordedYet,
-                              style: textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
+                            Flexible(
+                              child: Text(
+                                l10n.noMealsRecordedYet,
+                                style: textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             )
                           else
