@@ -10,6 +10,7 @@ import '../dashboard/dashboard_screen.dart';
 import '../meals/meals_screen.dart';
 import '../reports/report_screen.dart';
 import '../shared/quick_add/quick_add_sheet.dart';
+import 'widgets/update_available_banner.dart';
 
 /// The main app shell (section 12): Home / Meals / Bazar / Report on the
 /// bottom nav, with the Quick Add FAB always available. Each tab keeps its
@@ -73,15 +74,22 @@ class _HomeShellState extends ConsumerState<HomeShell>
     ];
 
     return Scaffold(
-      body: FadeTransition(
-        opacity: _tabCurve,
-        child: SlideTransition(
-          position: Tween(
-            begin: const Offset(0, 0.015),
-            end: Offset.zero,
-          ).animate(_tabCurve),
-          child: IndexedStack(index: _currentIndex, children: tabs),
-        ),
+      body: Column(
+        children: [
+          const SafeArea(bottom: false, child: UpdateAvailableBanner()),
+          Expanded(
+            child: FadeTransition(
+              opacity: _tabCurve,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0, 0.015),
+                  end: Offset.zero,
+                ).animate(_tabCurve),
+                child: IndexedStack(index: _currentIndex, children: tabs),
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showQuickAddSheet(

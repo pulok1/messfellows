@@ -39,6 +39,12 @@ dependencies:
   collection: ^1.19.1
   shared_preferences: ^2.5.5
 
+  # "Update available" banner (section: no Play Store, so the app has to
+  # check GitHub releases itself — see core/services/update_checker_service.dart).
+  http: ^1.2.2
+  package_info_plus: ^10.2.2
+  url_launcher: ^6.3.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
