@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/gen/app_localizations.dart';
 
-/// The shared "floating card" top bar used by every screen instead of a
-/// flat [AppBar] — a rounded, softly-shadowed card containing the title,
+/// The shared top bar used by every screen instead of an [AppBar] — a flat,
+/// edge-to-edge panel that runs under the status bar, containing the title,
 /// an optional subtitle, a back button when the route can pop, trailing
 /// actions, and an optional [bottom] slot for a screen's own navigation
 /// controls (a tab bar, a date/month selector) so that content reads as
@@ -35,80 +36,85 @@ class PageHeaderCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final canPop = showBackButton && Navigator.of(context).canPop();
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.sm,
-        MediaQuery.paddingOf(context).top + AppSpacing.sm,
-        AppSpacing.md,
-        AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(AppSpacing.sheetRadius),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: headerOverlayStyle(context),
+      child: Container(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.sm,
+          MediaQuery.paddingOf(context).top + AppSpacing.sm,
+          AppSpacing.md,
+          AppSpacing.sm,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              if (canPop) ...[
-                _HeaderIconButton(
-                  icon: Icons.arrow_back,
-                  tooltip: AppLocalizations.of(context).back,
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-              ] else
-                const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    if (subtitle != null)
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest,
+          border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                if (canPop) ...[
+                  _HeaderIconButton(
+                    icon: Icons.arrow_back,
+                    tooltip: AppLocalizations.of(context).back,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                ] else
+                  const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        subtitle!,
+                        title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
                         ),
                       ),
-                  ],
+                      if (subtitle != null)
+                        Text(
+                          subtitle!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              for (final action in actions)
-                Padding(padding: const EdgeInsets.only(left: 4), child: action),
+                for (final action in actions)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: action,
+                  ),
+              ],
+            ),
+            if (bottom != null) ...[
+              const SizedBox(height: AppSpacing.xs),
+              bottom!,
             ],
-          ),
-          if (bottom != null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            bottom!,
           ],
-        ],
+        ),
       ),
     );
   }
+}
+
+/// Status bar styling for screens whose header draws under the status bar:
+/// a transparent bar so the header colour shows through, with icons that
+/// stay readable against it in both light and dark themes.
+SystemUiOverlayStyle headerOverlayStyle(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+      .copyWith(statusBarColor: Colors.transparent);
 }
 
 /// A rounded, tonal icon button used inside header cards — consistent

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_logo.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/localized_date.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../models/mess.dart';
+import '../../shared/widgets/page_header_card.dart';
 
-/// The Dashboard's header, rendered as its own floating card rather than a
-/// flat app bar — a rounded-square mess icon, the mess name, the current
+/// The Dashboard's header, a flat edge-to-edge gradient panel that runs
+/// under the status bar — a rounded-square mess icon, the mess name, the current
 /// month as a subtitle, and the Members/Settings actions grouped into one
 /// tonal pill on the right.
 class DashboardHeaderCard extends StatelessWidget {
@@ -29,83 +31,76 @@ class DashboardHeaderCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        MediaQuery.paddingOf(context).top + AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(AppSpacing.sheetRadius),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: headerOverlayStyle(context),
+      child: Container(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          MediaQuery.paddingOf(context).top + AppSpacing.md,
+          AppSpacing.md,
+          AppSpacing.md,
         ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colorScheme.primaryContainer,
-            colorScheme.surfaceContainerHighest,
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.10),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primaryContainer,
+              colorScheme.surfaceContainerHighest,
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [colorScheme.primary, colorScheme.tertiary],
+          border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [colorScheme.primary, colorScheme.tertiary],
+                ),
+              ),
+              child: Center(
+                child: AppLogoMark(size: 26, color: colorScheme.onPrimary),
               ),
             ),
-            child: Center(
-              child: AppLogoMark(size: 26, color: colorScheme.onPrimary),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  mess.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    color: colorScheme.onSurface,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    mess.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  formatMonthYear(context, month.year, month.month),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
+                  const SizedBox(height: 2),
+                  Text(
+                    formatMonthYear(context, month.year, month.month),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          _ActionPill(onMembers: onMembers, onSettings: onSettings),
-        ],
+            const SizedBox(width: AppSpacing.sm),
+            _ActionPill(onMembers: onMembers, onSettings: onSettings),
+          ],
+        ),
       ),
     );
   }
