@@ -30,15 +30,17 @@ class DashboardHeaderCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(
+      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.md,
-        AppSpacing.sm,
+        MediaQuery.paddingOf(context).top + AppSpacing.md,
         AppSpacing.md,
-        AppSpacing.xs,
+        AppSpacing.md,
       ),
-      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppSpacing.sheetRadius),
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(AppSpacing.sheetRadius),
+        ),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

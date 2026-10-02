@@ -36,21 +36,18 @@ class PageHeaderCard extends StatelessWidget {
     final canPop = showBackButton && Navigator.of(context).canPop();
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
+      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.sm,
-        AppSpacing.md,
-        AppSpacing.xs,
-      ),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.sm,
-        AppSpacing.sm,
+        MediaQuery.paddingOf(context).top + AppSpacing.sm,
         AppSpacing.md,
         AppSpacing.sm,
       ),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppSpacing.sheetRadius),
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(AppSpacing.sheetRadius),
+        ),
         boxShadow: [
           BoxShadow(
             color: colorScheme.shadow.withValues(alpha: 0.08),
