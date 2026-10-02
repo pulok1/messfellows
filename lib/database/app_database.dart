@@ -56,11 +56,21 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         // expenses.category (required quick-pick text) replaced by
         // expenses.bazarList (a free-text list of what was bought).
+        //
+        // TableMigration always rebuilds the table to *today's* full column
+        // set, not just the ones this version introduced — so deletedAt
+        // (added later, at from < 5) has to be listed here too, or a device
+        // jumping straight from before v2 to v5+ fails with "no such
+        // column: deleted_at" because that column doesn't exist yet on its
+        // actual on-disk table.
         await m.alterTable(
           TableMigration(
             expenses,
-            columnTransformer: {expenses.bazarList: const Constant('')},
-            newColumns: [expenses.bazarList],
+            columnTransformer: {
+              expenses.bazarList: const Constant(''),
+              expenses.deletedAt: const Constant(null),
+            },
+            newColumns: [expenses.bazarList, expenses.deletedAt],
           ),
         );
       }
@@ -75,6 +85,12 @@ class AppDatabase extends _$AppDatabase {
         // messes gains per-mess toggles for which meal slots it tracks (not
         // every mess serves breakfast). Default true so existing messes
         // keep showing all three slots exactly as before.
+        //
+        // Same caveat as the expenses migration above: this rebuilds to
+        // today's full column set, so rulesUpdatedAt (added later, at
+        // from < 5) must be listed here too or a device jumping straight
+        // from before v4 to v5+ fails with "no such column:
+        // rules_updated_at".
         await m.alterTable(
           TableMigration(
             messes,
@@ -82,11 +98,13 @@ class AppDatabase extends _$AppDatabase {
               messes.trackBreakfast: const Constant(true),
               messes.trackLunch: const Constant(true),
               messes.trackDinner: const Constant(true),
+              messes.rulesUpdatedAt: const Constant(null),
             },
             newColumns: [
               messes.trackBreakfast,
               messes.trackLunch,
               messes.trackDinner,
+              messes.rulesUpdatedAt,
             ],
           ),
         );
@@ -95,7 +113,13 @@ class AppDatabase extends _$AppDatabase {
         // Mess rules & regulations: a new table, plus a stamp on messes for
         // when the rules last changed (nullable, so no backfill needed).
         await m.createTable(messRules);
-        await m.addColumn(messes, messes.rulesUpdatedAt);
+        if (from >= 4) {
+          // A device below v4 already got this column for free from the
+          // from < 4 TableMigration above (which has to rebuild messes to
+          // today's full shape regardless of version) — adding it again
+          // here would be a duplicate-column error.
+          await m.addColumn(messes, messes.rulesUpdatedAt);
+        }
 
         // Recycle Bin: expenses/payments gain a nullable deletedAt so a
         // delete can be undone instead of being a hard SQL DELETE.
