@@ -13,12 +13,12 @@ import 'app_spacing.dart';
 class AppBalanceColors {
   AppBalanceColors._();
 
-  static const Color _willReceiveLight = Color(0xFF2E7D32);
-  static const Color _willReceiveDark = Color(0xFF81C784);
-  static const Color _needsToPayLight = Color(0xFFC62828);
-  static const Color _needsToPayDark = Color(0xFFEF9A9A);
-  static const Color _settledLight = Color(0xFF616161);
-  static const Color _settledDark = Color(0xFFBDBDBD);
+  static const Color _willReceiveLight = Color(0xFF15803D);
+  static const Color _willReceiveDark = Color(0xFF4ADE80);
+  static const Color _needsToPayLight = Color(0xFFDC2626);
+  static const Color _needsToPayDark = Color(0xFFF87171);
+  static const Color _settledLight = Color(0xFF64748B);
+  static const Color _settledDark = Color(0xFF94A3B8);
 
   static Color willReceive(BuildContext context) =>
       _of(context, _willReceiveLight, _willReceiveDark);
