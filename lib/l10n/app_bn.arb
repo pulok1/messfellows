@@ -44,6 +44,9 @@
   "createMess": "মেস তৈরি করুন",
   "couldntCreateMess": "আপনার মেস তৈরি করা যায়নি। আবার চেষ্টা করুন।",
 
+  "greetingMorning": "শুভ সকাল",
+  "greetingAfternoon": "শুভ অপরাহ্ন",
+  "greetingEvening": "শুভ সন্ধ্যা",
   "currentMealRate": "বর্তমান মিল রেট",
   "noMealsRecordedYet": "এখনো কোনো মিল রেকর্ড হয়নি",
   "totalBazar": "মোট বাজার",

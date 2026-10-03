@@ -46,6 +46,9 @@
   "createMess": "Create Mess",
   "couldntCreateMess": "Couldn't create your mess. Please try again.",
 
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
   "currentMealRate": "Current Meal Rate",
   "noMealsRecordedYet": "No meals recorded yet",
   "totalBazar": "Total Bazar",

@@ -9,7 +9,8 @@ import '../../../models/mess.dart';
 import '../../shared/widgets/page_header_card.dart';
 
 /// The Dashboard's top bar, on the same [HeaderBar] as every other screen:
-/// a translucent logo tile, the mess name with the current month beneath it, and
+/// a translucent logo tile, the mess name with a time-of-day greeting and
+/// the current month beneath it, and
 /// Members/Settings as standard trailing icon actions.
 class DashboardHeaderCard extends StatelessWidget {
   final Mess mess;
@@ -57,12 +58,13 @@ class DashboardHeaderCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: foreground,
                     ),
                   ),
                   Text(
-                    formatMonthYear(context, month.year, month.month),
+                    '${_greeting(l10n, DateTime.now())} · '
+                    '${formatMonthYear(context, month.year, month.month)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.bodySmall?.copyWith(
@@ -88,4 +90,14 @@ class DashboardHeaderCard extends StatelessWidget {
       ),
     );
   }
+
+  /// A time-of-day greeting for the subtitle. Evening runs on through the
+  /// night — "Good evening" at 2am still reads naturally, a "Good night"
+  /// on opening the app would sound like a goodbye.
+  static String _greeting(AppLocalizations l10n, DateTime now) =>
+      switch (now.hour) {
+        >= 5 && < 12 => l10n.greetingMorning,
+        >= 12 && < 17 => l10n.greetingAfternoon,
+        _ => l10n.greetingEvening,
+      };
 }
