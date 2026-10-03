@@ -63,7 +63,7 @@ class PageHeaderCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: foreground,
                     ),
                   ),
@@ -90,11 +90,13 @@ class PageHeaderCard extends StatelessWidget {
 
 /// The surface every top bar sits on: a full-width [AppTheme.topBarColor]
 /// bar drawn under the status bar, with an optional [bottom] strip (a month
-/// or date selector) on the plain chrome colour just beneath it. Once
-/// content scrolls underneath, a soft shadow fades in to lift the bar off
-/// it, the same cue a Material 3 [AppBar] gives — it listens to the
-/// enclosing [Scaffold]'s [ScrollNotificationObserver], so screens don't
-/// need to wire anything up.
+/// or date selector) on the plain chrome colour just beneath it.
+///
+/// It reacts to the screen's scrolling: the shadow deepens once content is
+/// under the bar, and the title row slides away while scrolling down a long
+/// list and returns on the first scroll back up (the Gmail/Chrome pattern),
+/// handing the space to content. It listens to the enclosing [Scaffold]'s
+/// [ScrollNotificationObserver], so screens don't need to wire anything up.
 class HeaderBar extends StatefulWidget {
   final Widget child;
   final Widget? bottom;
@@ -108,6 +110,20 @@ class HeaderBar extends StatefulWidget {
 class _HeaderBarState extends State<HeaderBar> {
   ScrollNotificationObserverState? _observer;
   bool _scrolledUnder = false;
+
+  /// Whether the title row is slid away. The [HeaderBar.bottom] strip and
+  /// the status bar fill stay put, so a screen's month/date selector is
+  /// always reachable.
+  bool _collapsed = false;
+
+  /// How far a single scroll update has to move before the title row hides
+  /// or returns, so slow drifts and tiny flings don't make it flicker.
+  static const double _collapseThreshold = 4;
+
+  /// Lists shorter than this never collapse the bar: hiding it grows the
+  /// viewport by the bar's height, and on a barely-scrollable list that can
+  /// remove the scroll range that triggered the hide in the first place.
+  static const double _minScrollExtentToCollapse = 160;
 
   @override
   void didChangeDependencies() {
@@ -131,13 +147,28 @@ class _HeaderBarState extends State<HeaderBar> {
     final metrics = notification.metrics;
     // Horizontal scrollers (chip rows, month strips) say nothing about
     // whether content sits under the bar.
-    final scrolledUnder = switch (metrics.axisDirection) {
-      AxisDirection.down => metrics.extentBefore > 0,
-      AxisDirection.up => metrics.extentAfter > 0,
-      AxisDirection.left || AxisDirection.right => _scrolledUnder,
-    };
-    if (scrolledUnder != _scrolledUnder) {
-      setState(() => _scrolledUnder = scrolledUnder);
+    if (metrics.axis != Axis.vertical) return;
+
+    final scrolledUnder = metrics.axisDirection == AxisDirection.down
+        ? metrics.extentBefore > 0
+        : metrics.extentAfter > 0;
+
+    var collapsed = _collapsed;
+    final delta = notification.scrollDelta ?? 0;
+    if (metrics.extentBefore <= 0 ||
+        metrics.maxScrollExtent < _minScrollExtentToCollapse) {
+      collapsed = false;
+    } else if (delta > _collapseThreshold) {
+      collapsed = true;
+    } else if (delta < -_collapseThreshold) {
+      collapsed = false;
+    }
+
+    if (scrolledUnder != _scrolledUnder || collapsed != _collapsed) {
+      setState(() {
+        _scrolledUnder = scrolledUnder;
+        _collapsed = collapsed;
+      });
     }
   }
 
@@ -145,20 +176,23 @@ class _HeaderBarState extends State<HeaderBar> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final bottom = widget.bottom;
+    final duration = AppMotion.of(context, AppMotion.medium);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: headerOverlayStyle(context),
       child: AnimatedContainer(
-        duration: AppMotion.of(context, AppMotion.short),
+        duration: duration,
         curve: AppMotion.emphasized,
         decoration: BoxDecoration(
           color: AppTheme.chromeColor(colorScheme),
+          // Always slightly lifted off the body; deeper once content is
+          // actually scrolling underneath.
           boxShadow: [
             BoxShadow(
               color: colorScheme.shadow.withValues(
-                alpha: _scrolledUnder ? 0.08 : 0,
+                alpha: _scrolledUnder ? 0.16 : 0.06,
               ),
-              blurRadius: 8,
+              blurRadius: _scrolledUnder ? 12 : 6,
               offset: const Offset(0, 2),
             ),
           ],
@@ -172,13 +206,27 @@ class _HeaderBarState extends State<HeaderBar> {
                 padding: EdgeInsets.only(
                   top: MediaQuery.paddingOf(context).top,
                 ),
-                child: IconButtonTheme(
-                  data: IconButtonThemeData(
-                    style: IconButton.styleFrom(
-                      foregroundColor: AppTheme.onTopBarColor(colorScheme),
+                child: ClipRect(
+                  child: AnimatedAlign(
+                    duration: duration,
+                    curve: AppMotion.emphasized,
+                    alignment: Alignment.bottomCenter,
+                    heightFactor: _collapsed ? 0 : 1,
+                    child: AnimatedOpacity(
+                      duration: duration,
+                      opacity: _collapsed ? 0 : 1,
+                      child: IconButtonTheme(
+                        data: IconButtonThemeData(
+                          style: IconButton.styleFrom(
+                            foregroundColor: AppTheme.onTopBarColor(
+                              colorScheme,
+                            ),
+                          ),
+                        ),
+                        child: widget.child,
+                      ),
                     ),
                   ),
-                  child: widget.child,
                 ),
               ),
             ),
