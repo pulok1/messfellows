@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -11,6 +13,11 @@ import 'providers/theme_mode_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // The bundled UI font's licence, so it's listed on the Licenses page.
+  LicenseRegistry.addLicense(() async* {
+    final text = await rootBundle.loadString('assets/fonts/OFL.txt');
+    yield LicenseEntryWithLineBreaks(['Plus Jakarta Sans'], text);
+  });
   // Both supported locales' date symbols (month/weekday names) must be
   // loaded before any DateFormat call — see core/utils/localized_date.dart.
   await Future.wait([initializeDateFormatting('en'), initializeDateFormatting('bn')]);

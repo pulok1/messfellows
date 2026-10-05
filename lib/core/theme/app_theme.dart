@@ -124,6 +124,7 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'PlusJakartaSans',
       colorScheme: colorScheme,
       // Light mode: a soft off-white body with pure white cards lifted off
       // it by a hairline outline. Dark mode: the darkest tone for the body
