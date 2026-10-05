@@ -14,6 +14,9 @@ class SettlementTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final name = balance.memberName.trim();
+
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
@@ -21,6 +24,15 @@ class SettlementTile extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.xs,
+        ),
+        leading: CircleAvatar(
+          radius: 18,
+          backgroundColor: colorScheme.primaryContainer,
+          foregroundColor: colorScheme.onPrimaryContainer,
+          child: Text(
+            name.isEmpty ? '?' : name.characters.first.toUpperCase(),
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
         ),
         title: Text(
           balance.memberName,

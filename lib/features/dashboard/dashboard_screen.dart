@@ -118,7 +118,7 @@ class DashboardScreen extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: Theme.of(
                                 context,
-                              ).colorScheme.surfaceContainerHighest,
+                              ).colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
@@ -127,7 +127,7 @@ class DashboardScreen extends ConsumerWidget {
                                   ?.copyWith(
                                     color: Theme.of(
                                       context,
-                                    ).colorScheme.onSurfaceVariant,
+                                    ).colorScheme.onPrimaryContainer,
                                     fontWeight: FontWeight.w700,
                                   ),
                             ),
