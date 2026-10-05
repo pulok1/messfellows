@@ -187,17 +187,18 @@ class _NavItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
             ),
-            // Solid-filled pill (not a tinted container) so the selected
-            // icon always has guaranteed, strong contrast regardless of
-            // how close this palette's secondary tones sit to the bottom
-            // bar's own background.
+            // A soft brand-tinted pill behind the active icon (the
+            // Material 3 navigation indicator), with the icon itself in
+            // the brand colour.
             AnimatedContainer(
               duration: duration,
               curve: AppMotion.emphasized,
               width: isSelected ? 52 : 28,
               height: 28,
               decoration: BoxDecoration(
-                color: isSelected ? colorScheme.primary : Colors.transparent,
+                color: isSelected
+                    ? colorScheme.primaryContainer
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: AnimatedSwitcher(
@@ -207,7 +208,9 @@ class _NavItem extends StatelessWidget {
                 child: Icon(
                   isSelected ? selectedIcon : icon,
                   key: ValueKey(isSelected),
-                  color: isSelected ? colorScheme.onPrimary : unselectedColor,
+                  color: isSelected
+                      ? colorScheme.onPrimaryContainer
+                      : unselectedColor,
                   size: 22,
                 ),
               ),
