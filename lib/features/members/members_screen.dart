@@ -9,6 +9,7 @@ import '../../providers/month_calculation_provider.dart';
 import '../../providers/repository_providers.dart';
 import '../shared/widgets/confirm_dialog.dart';
 import '../shared/widgets/empty_state.dart';
+import '../shared/widgets/member_avatar.dart';
 import '../shared/widgets/page_header_card.dart';
 import 'add_edit_member_dialog.dart';
 import 'member_detail_screen.dart';
@@ -149,11 +150,10 @@ class _MemberTile extends ConsumerWidget {
           horizontal: AppSpacing.md,
           vertical: AppSpacing.xs,
         ),
-        leading: CircleAvatar(
-          backgroundColor: member.isActive
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: Text(member.name.isEmpty ? '?' : member.name[0].toUpperCase()),
+        leading: MemberAvatar(
+          memberId: member.id,
+          name: member.name,
+          muted: !member.isActive,
         ),
         title: Text(
           member.name,

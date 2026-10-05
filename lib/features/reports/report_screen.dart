@@ -23,6 +23,7 @@ import '../bazar/widgets/month_selector_bar.dart';
 import '../meals/widgets/meal_changes_sheet.dart';
 import '../shared/widgets/balance_label.dart';
 import '../shared/widgets/labeled_value_row.dart';
+import '../shared/widgets/member_avatar.dart';
 import '../shared/widgets/page_header_card.dart';
 import '../shared/widgets/section_header.dart';
 import '../shared/widgets/stat_tile.dart';
@@ -512,9 +513,23 @@ class _ReportContent extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          balance.memberName,
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        Row(
+                          children: [
+                            MemberAvatar(
+                              memberId: balance.memberId,
+                              name: balance.memberName,
+                              radius: 14,
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: Text(
+                                balance.memberName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(l10n.mealsCount(balance.mealCount)),
