@@ -127,7 +127,7 @@ class _ActivityLogScreenState extends ConsumerState<ActivityLogScreen> {
       if (lastDay == null || day != lastDay) {
         if (lastDay != null) children.add(const SizedBox(height: AppSpacing.sm));
         children.add(
-          SectionHeader(_dayLabel(context, l10n, day), padding: _sectionPadding),
+          SectionHeader(formatRelativeDay(context, day), padding: _sectionPadding),
         );
         lastDay = day;
       }
@@ -149,18 +149,6 @@ class _ActivityLogScreenState extends ConsumerState<ActivityLogScreen> {
       ),
       children: children,
     );
-  }
-
-  String _dayLabel(BuildContext context, AppLocalizations l10n, DateTime day) {
-    final today = DateTime.now();
-    final diff = DateTime(
-      today.year,
-      today.month,
-      today.day,
-    ).difference(day).inDays;
-    if (diff == 0) return l10n.todayLabel;
-    if (diff == 1) return l10n.yesterdayLabel;
-    return formatFullDate(context, day);
   }
 }
 
