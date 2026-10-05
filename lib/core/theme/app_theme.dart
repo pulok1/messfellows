@@ -13,12 +13,12 @@ import 'app_spacing.dart';
 class AppBalanceColors {
   AppBalanceColors._();
 
-  static const Color _willReceiveLight = Color(0xFF15803D);
-  static const Color _willReceiveDark = Color(0xFF4ADE80);
-  static const Color _needsToPayLight = Color(0xFFDC2626);
-  static const Color _needsToPayDark = Color(0xFFF87171);
-  static const Color _settledLight = Color(0xFF64748B);
-  static const Color _settledDark = Color(0xFF94A3B8);
+  static const Color _willReceiveLight = Color(0xFF12805C);
+  static const Color _willReceiveDark = Color(0xFF5CCB9B);
+  static const Color _needsToPayLight = Color(0xFFC4421A);
+  static const Color _needsToPayDark = Color(0xFFF28B6B);
+  static const Color _settledLight = Color(0xFF66756C);
+  static const Color _settledDark = Color(0xFF9AA8A0);
 
   static Color willReceive(BuildContext context) =>
       _of(context, _willReceiveLight, _willReceiveDark);
@@ -38,7 +38,12 @@ class AppBalanceColors {
 class AppTheme {
   AppTheme._();
 
-  static const Color _seedColor = Color(0xFF6750A4);
+  /// The "Emerald" palette: a deep green top bar, an emerald accent for
+  /// buttons and selected states, and greys with a faint green bias so the
+  /// neutrals sit with the brand instead of reading as default grey.
+  static const Color _emerald = Color(0xFF12805C);
+  static const Color _emeraldDeep = Color(0xFF0F5A3E);
+  static const Color _emeraldDarkBar = Color(0xFF123D2D);
 
   static ThemeData light() => _themeFrom(Brightness.light);
 
@@ -47,55 +52,75 @@ class AppTheme {
   /// dark mode.
   static Color chromeColor(ColorScheme colorScheme) => colorScheme.surface;
 
-  /// The top bar's fill: the solid brand purple in light mode, and a
-  /// raised dark grey in dark mode (a full-strength purple bar glares on a
-  /// dark screen) — either way clearly distinct from the body below it.
+  /// The top bar's fill: deep emerald in light mode, and a much darker
+  /// green in dark mode (full-strength green glares on a dark screen) —
+  /// either way clearly distinct from the body below it.
   static Color topBarColor(ColorScheme colorScheme) =>
       colorScheme.brightness == Brightness.dark
-      ? colorScheme.surfaceContainerHigh
-      : colorScheme.primary;
+      ? _emeraldDarkBar
+      : _emeraldDeep;
 
   /// Title and icon colour on [topBarColor].
   static Color onTopBarColor(ColorScheme colorScheme) =>
       colorScheme.brightness == Brightness.dark
       ? colorScheme.onSurface
-      : colorScheme.onPrimary;
+      : Colors.white;
+
+  /// The colour for a screen's headline figure (the meal rate): the deep
+  /// brand green on light surfaces, the lighter primary on dark ones.
+  static Color headlineFigureColor(ColorScheme colorScheme) =>
+      colorScheme.brightness == Brightness.dark
+      ? colorScheme.primary
+      : _emeraldDeep;
+
+  /// Soft amber for a neutral "worth noticing" badge, like the meal rate's
+  /// month-on-month change — deliberately neither the good green nor the
+  /// owed red.
+  static (Color background, Color foreground) noticeColors(
+    ColorScheme colorScheme,
+  ) => colorScheme.brightness == Brightness.dark
+      ? (const Color(0xFF3D2E12), const Color(0xFFF5C46B))
+      : (const Color(0xFFFFF1DC), const Color(0xFF9A5B00));
 
   static ThemeData dark() => _themeFrom(Brightness.dark);
 
   static ThemeData _themeFrom(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    // Fidelity keeps primary at the Material 3 baseline purple instead of the
-    // default variant's desaturated take on it. The surfaces are then
-    // swapped for plain neutral greys — the seed would otherwise tint every
-    // background and card purple — giving the familiar standard Android look:
-    // #F5F5F5 / #121212 body, white / #1E1E1E cards.
-    final colorScheme =
-        ColorScheme.fromSeed(
-          seedColor: _seedColor,
-          brightness: brightness,
-          dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
-        ).copyWith(
-          surface: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-          surfaceContainerLowest: isDark
-              ? const Color(0xFF121212)
-              : Colors.white,
-          surfaceContainerLow: isDark
-              ? const Color(0xFF1A1A1A)
-              : const Color(0xFFF5F5F5),
-          surfaceContainer: isDark
-              ? const Color(0xFF1E1E1E)
-              : const Color(0xFFEEEEEE),
-          surfaceContainerHigh: isDark
-              ? const Color(0xFF262626)
-              : const Color(0xFFE8E8E8),
-          surfaceContainerHighest: isDark
-              ? const Color(0xFF2E2E2E)
-              : const Color(0xFFE0E0E0),
-          outlineVariant: isDark
-              ? const Color(0xFF3A3A3A)
-              : const Color(0xFFE0E0E0),
-        );
+    // Fidelity keeps primary close to the emerald seed instead of the
+    // default variant's desaturated take on it; light mode then pins the
+    // exact brand tones. Surfaces are swapped for near-neutral greys with a
+    // faint green bias: #F2F5F3 body and white cards in light mode, a
+    // green-black body and slightly lifted cards in dark mode.
+    final seeded = ColorScheme.fromSeed(
+      seedColor: _emerald,
+      brightness: brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+    );
+    final colorScheme = isDark
+        ? seeded.copyWith(
+            surface: const Color(0xFF18201C),
+            surfaceContainerLowest: const Color(0xFF0F1412),
+            surfaceContainerLow: const Color(0xFF131A17),
+            surfaceContainer: const Color(0xFF1A2320),
+            surfaceContainerHigh: const Color(0xFF222C28),
+            surfaceContainerHighest: const Color(0xFF2A3530),
+            outlineVariant: const Color(0xFF2F3B36),
+          )
+        : seeded.copyWith(
+            primary: _emerald,
+            onPrimary: Colors.white,
+            primaryContainer: const Color(0xFFDFF1E8),
+            onPrimaryContainer: _emeraldDeep,
+            surface: Colors.white,
+            surfaceContainerLowest: Colors.white,
+            surfaceContainerLow: const Color(0xFFF2F5F3),
+            surfaceContainer: const Color(0xFFEBF0ED),
+            surfaceContainerHigh: const Color(0xFFE4EAE6),
+            surfaceContainerHighest: const Color(0xFFDDE4E0),
+            onSurface: const Color(0xFF15201A),
+            onSurfaceVariant: const Color(0xFF5E6E65),
+            outlineVariant: const Color(0xFFE1E7E3),
+          );
 
     return ThemeData(
       useMaterial3: true,
@@ -114,6 +139,14 @@ class AppTheme {
         elevation: 3,
         shadowColor: colorScheme.shadow.withValues(alpha: 0.08),
       ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.chipRadius + 2),
+        ),
+      ),
       cardTheme: CardThemeData(
         elevation: 0,
         color: isDark
@@ -122,9 +155,9 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
           side: BorderSide(
-            color: colorScheme.outlineVariant.withValues(
-              alpha: isDark ? 0.4 : 0.6,
-            ),
+            color: isDark
+                ? colorScheme.outlineVariant.withValues(alpha: 0.6)
+                : colorScheme.outlineVariant,
           ),
         ),
         margin: EdgeInsets.zero,
