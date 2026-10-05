@@ -13,6 +13,7 @@ import '../../providers/member_providers.dart';
 import '../../providers/selection_providers.dart';
 import '../shared/widgets/empty_state.dart';
 import '../shared/widgets/expandable_text.dart';
+import '../shared/widgets/member_avatar.dart';
 import '../shared/widgets/page_header_card.dart';
 import 'add_edit_expense_dialog.dart';
 import 'widgets/month_selector_bar.dart';
@@ -307,6 +308,16 @@ class _ExpenseList extends ConsumerWidget {
           );
         }
 
+        // One section per calendar day, newest first, each with that day's
+        // total — so "what did we spend yesterday" is answered at a glance
+        // instead of by adding up rows. Grouped here rather than relying on
+        // the query's order.
+        final byDay = groupBy(
+          filtered,
+          (Expense e) => DateTime(e.date.year, e.date.month, e.date.day),
+        );
+        final days = byDay.keys.toList()..sort((a, b) => b.compareTo(a));
+
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.md,
@@ -314,9 +325,12 @@ class _ExpenseList extends ConsumerWidget {
             AppSpacing.md,
             AppSpacing.xxl,
           ),
-          itemCount: filtered.length,
-          itemBuilder: (context, index) =>
-              _ExpenseTile(messId: messId, expense: filtered[index]),
+          itemCount: days.length,
+          itemBuilder: (context, index) => _ExpenseDayGroup(
+            messId: messId,
+            day: days[index],
+            expenses: byDay[days[index]]!,
+          ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -346,6 +360,74 @@ class _ExpenseList extends ConsumerWidget {
   }
 }
 
+/// A day header ("Today" / "Yesterday" / the date, plus the day's total)
+/// over that day's entries, grouped into one card.
+class _ExpenseDayGroup extends StatelessWidget {
+  final String messId;
+  final DateTime day;
+  final List<Expense> expenses;
+
+  const _ExpenseDayGroup({
+    required this.messId,
+    required this.day,
+    required this.expenses,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final dayTotal = expenses.fold(
+      const Money.zero(),
+      (total, e) => total + e.amount,
+    );
+    final headerStyle = textTheme.labelLarge?.copyWith(
+      color: colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w700,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xs,
+              AppSpacing.xs,
+              AppSpacing.xs,
+              AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(formatRelativeDay(context, day), style: headerStyle),
+                ),
+                Text(dayTotal.format(), style: headerStyle),
+              ],
+            ),
+          ),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                for (final (i, expense) in expenses.indexed) ...[
+                  if (i > 0)
+                    const Divider(
+                      height: 1,
+                      indent: AppSpacing.md + 32 + AppSpacing.md,
+                    ),
+                  _ExpenseTile(messId: messId, expense: expense),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ExpenseTile extends ConsumerWidget {
   final String messId;
   final Expense expense;
@@ -360,27 +442,30 @@ class _ExpenseTile extends ConsumerWidget {
       (m) => m.id == expense.paidByMemberId,
     );
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: ListTile(
-        onTap: () => showAddEditExpenseDialog(
-          context,
-          messId: messId,
-          existing: expense,
-        ),
-        title: ExpandableText(
-          expense.bazarList,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          '${formatShortDate(context, expense.date)} · ${payer?.name ?? l10n.unknown}'
-          '${expense.note == null || expense.note!.isEmpty ? "" : " · ${expense.note}"}',
-        ),
-        isThreeLine: false,
-        trailing: Text(
-          expense.amount.format(),
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
+    // The date lives in the day header above, so the row shows who paid.
+    return ListTile(
+      onTap: () => showAddEditExpenseDialog(
+        context,
+        messId: messId,
+        existing: expense,
+      ),
+      leading: MemberAvatar(
+        memberId: expense.paidByMemberId,
+        name: payer?.name ?? '',
+        radius: 16,
+        muted: payer == null || !payer.isActive,
+      ),
+      title: ExpandableText(
+        expense.bazarList,
+        style: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+      subtitle: Text(
+        '${payer?.name ?? l10n.unknown}'
+        '${expense.note == null || expense.note!.isEmpty ? "" : " · ${expense.note}"}',
+      ),
+      trailing: Text(
+        expense.amount.format(),
+        style: const TextStyle(fontWeight: FontWeight.w700),
       ),
     );
   }
