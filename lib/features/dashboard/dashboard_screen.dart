@@ -135,23 +135,36 @@ class DashboardScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      for (final (i, balance)
-                          in calculation.memberBalances.indexed)
-                        StaggeredEntrance(
-                          key: ValueKey(balance.memberId),
-                          index: i,
-                          child: SettlementTile(
-                            balance: balance,
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => MemberDetailScreen(
-                                  messId: mess.id,
-                                  memberId: balance.memberId,
+                      Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: Column(
+                          children: [
+                            for (final (i, balance)
+                                in calculation.memberBalances.indexed) ...[
+                              if (i > 0)
+                                const Divider(
+                                  height: 1,
+                                  indent: AppSpacing.md + 36 + AppSpacing.md,
+                                ),
+                              StaggeredEntrance(
+                                key: ValueKey(balance.memberId),
+                                index: i,
+                                child: SettlementTile(
+                                  balance: balance,
+                                  onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => MemberDetailScreen(
+                                        messId: mess.id,
+                                        memberId: balance.memberId,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
+                            ],
+                          ],
                         ),
+                      ),
                     ],
                   );
                 },
