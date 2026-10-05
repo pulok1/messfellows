@@ -159,8 +159,20 @@ class _InsightRow extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 40),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: colorScheme.onSurfaceVariant),
-          const SizedBox(width: AppSpacing.sm),
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              size: 18,
+              color: colorScheme.onPrimaryContainer,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm + 4),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
