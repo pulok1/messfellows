@@ -225,8 +225,7 @@ class _LiveReportBody extends ConsumerWidget {
       year: year,
       month: month,
       result: result,
-      footer: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      footer: _ReportFooter(
         child: FilledButton.icon(
           onPressed: result.memberBalances.isEmpty
               ? null
@@ -310,8 +309,7 @@ class _FrozenReportBody extends ConsumerWidget {
           year: settlement.year,
           month: settlement.month,
           result: result,
-          footer: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+          footer: _ReportFooter(
             child: OutlinedButton.icon(
               onPressed: () => _reopenMonth(context, ref),
               icon: const Icon(Icons.lock_open),
@@ -322,6 +320,27 @@ class _FrozenReportBody extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (_, _) => Center(child: Text(l10n.couldntLoadSettlement)),
+    );
+  }
+}
+
+/// The month's Close/Reopen action, full-width at the end of the report.
+/// It scrolls with the content rather than being pinned to the bottom of
+/// the screen, where it sat right under the home shell's docked + button;
+/// the bottom padding keeps it clear of that button at the end of the list.
+class _ReportFooter extends StatelessWidget {
+  final Widget child;
+
+  const _ReportFooter({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: AppSpacing.md,
+        bottom: AppSpacing.xxl + AppSpacing.md,
+      ),
+      child: SizedBox(width: double.infinity, child: child),
     );
   }
 }
@@ -541,10 +560,10 @@ class _ReportContent extends ConsumerWidget {
                     ),
                   ),
                 ),
+              footer,
             ],
           ),
         ),
-        footer,
       ],
     );
   }
