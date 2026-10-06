@@ -456,8 +456,13 @@ class _ReportContent extends ConsumerWidget {
                         result.hasNoMeals
                             ? l10n.noMealsRecordedYet
                             : result.mealRate.format(),
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                        // A sentence, not a figure — headline size is for
+                        // the rate itself.
+                        style:
+                            (result.hasNoMeals
+                                    ? Theme.of(context).textTheme.titleLarge
+                                    : Theme.of(context).textTheme.headlineMedium)
+                                ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
