@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/utils/localized_date.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/activity_log_entry.dart';
@@ -225,8 +226,9 @@ class _LiveReportBody extends ConsumerWidget {
       year: year,
       month: month,
       result: result,
-      footer: _ReportFooter(
-        child: FilledButton.icon(
+      statusCard: _MonthStatusCard(
+        isClosed: false,
+        action: FilledButton.icon(
           onPressed: result.memberBalances.isEmpty
               ? null
               : () => _closeMonth(context, ref),
@@ -309,8 +311,9 @@ class _FrozenReportBody extends ConsumerWidget {
           year: settlement.year,
           month: settlement.month,
           result: result,
-          footer: _ReportFooter(
-            child: OutlinedButton.icon(
+          statusCard: _MonthStatusCard(
+            isClosed: true,
+            action: OutlinedButton.icon(
               onPressed: () => _reopenMonth(context, ref),
               icon: const Icon(Icons.lock_open),
               label: Text(l10n.reopenMonthButton),
@@ -324,23 +327,75 @@ class _FrozenReportBody extends ConsumerWidget {
   }
 }
 
-/// The month's Close/Reopen action, full-width at the end of the report.
-/// It scrolls with the content rather than being pinned to the bottom of
-/// the screen, where it sat right under the home shell's docked + button;
-/// the bottom padding keeps it clear of that button at the end of the list.
-class _ReportFooter extends StatelessWidget {
-  final Widget child;
+/// The month's state, open or closed, at the top of the report, with the
+/// Close/Reopen action inside it. Up top rather than at the bottom of the
+/// screen, where the home shell's docked + button covered it — and it
+/// answers "is this month final yet?" before anyone reads the figures.
+class _MonthStatusCard extends StatelessWidget {
+  final bool isClosed;
+  final Widget action;
 
-  const _ReportFooter({required this.child});
+  const _MonthStatusCard({required this.isClosed, required this.action});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: AppSpacing.md,
-        bottom: AppSpacing.xxl + AppSpacing.md,
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final (tileBackground, tileForeground) = isClosed
+        ? (colorScheme.primaryContainer, colorScheme.onPrimaryContainer)
+        : AppTheme.noticeColors(colorScheme);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: tileBackground,
+                    borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+                  ),
+                  child: Icon(
+                    isClosed ? Icons.lock_outline : Icons.lock_open_outlined,
+                    color: tileForeground,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isClosed ? l10n.monthClosedTitle : l10n.monthOpenTitle,
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        isClosed
+                            ? l10n.monthClosedMessage
+                            : l10n.monthOpenMessage,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            action,
+          ],
+        ),
       ),
-      child: SizedBox(width: double.infinity, child: child),
     );
   }
 }
@@ -352,14 +407,14 @@ class _ReportContent extends ConsumerWidget {
   final int year;
   final int month;
   final MonthCalculationResult result;
-  final Widget footer;
+  final Widget statusCard;
 
   const _ReportContent({
     required this.mess,
     required this.year,
     required this.month,
     required this.result,
-    required this.footer,
+    required this.statusCard,
   });
 
   String _summary(
@@ -434,13 +489,17 @@ class _ReportContent extends ConsumerWidget {
       children: [
         Expanded(
           child: ListView(
+            // Bottom room so the last card can scroll clear of the home
+            // shell's docked + button.
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.md,
               AppSpacing.md,
               AppSpacing.md,
-              0,
+              AppSpacing.xxl + AppSpacing.md,
             ),
             children: [
+              statusCard,
+              const SizedBox(height: AppSpacing.md),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
@@ -565,7 +624,6 @@ class _ReportContent extends ConsumerWidget {
                     ),
                   ),
                 ),
-              footer,
             ],
           ),
         ),
