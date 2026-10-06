@@ -84,6 +84,12 @@ class AppTheme {
 
   static ThemeData dark() => _themeFrom(Brightness.dark);
 
+  static OutlineInputBorder _fieldBorder(Color color, {double width = 1}) =>
+      OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+        borderSide: BorderSide(color: color, width: width),
+      );
+
   static ThemeData _themeFrom(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
     // Fidelity keeps primary close to the emerald seed instead of the
@@ -121,6 +127,10 @@ class AppTheme {
             onSurfaceVariant: const Color(0xFF5E6E65),
             outlineVariant: const Color(0xFFE1E7E3),
           );
+
+    final fieldOutline = isDark
+        ? const Color(0xFF3A4842)
+        : const Color(0xFFCBD5CF);
 
     return ThemeData(
       useMaterial3: true,
@@ -208,15 +218,22 @@ class AppTheme {
           ),
         ),
       ),
+      // Every field carries its own outline, so it stays visible whatever
+      // it sits on — a borderless fill vanished wherever the fill matched
+      // the surface behind it (dark-mode dialogs did exactly that). Dark
+      // mode fills fields a step darker than dialogs and cards so they read
+      // as recessed wells; light mode keeps them white.
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: isDark
-            ? colorScheme.surfaceContainerHigh
-            : colorScheme.surfaceContainer,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-          borderSide: BorderSide.none,
-        ),
+            ? colorScheme.surfaceContainerLow
+            : colorScheme.surfaceContainerLowest,
+        border: _fieldBorder(fieldOutline),
+        enabledBorder: _fieldBorder(fieldOutline),
+        focusedBorder: _fieldBorder(colorScheme.primary, width: 2),
+        errorBorder: _fieldBorder(colorScheme.error),
+        focusedErrorBorder: _fieldBorder(colorScheme.error, width: 2),
+        disabledBorder: _fieldBorder(fieldOutline.withValues(alpha: 0.5)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
@@ -240,7 +257,9 @@ class AppTheme {
         ),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: colorScheme.surfaceContainerHigh,
+        backgroundColor: isDark
+            ? colorScheme.surfaceContainerHigh
+            : colorScheme.surfaceContainerLowest,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.sheetRadius),
         ),
