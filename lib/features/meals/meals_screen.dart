@@ -503,11 +503,13 @@ class MealsScreen extends ConsumerWidget {
                         ),
                         Expanded(
                           child: ListView.separated(
+                            // Bottom room so the last member's meal toggles
+                            // can scroll clear of the docked + button.
                             padding: const EdgeInsets.fromLTRB(
                               AppSpacing.md,
                               0,
                               AppSpacing.md,
-                              AppSpacing.md,
+                              AppSpacing.xxl + AppSpacing.md,
                             ),
                             itemCount: listed.length,
                             separatorBuilder: (_, _) =>
