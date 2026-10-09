@@ -11,6 +11,9 @@ class EmptyState extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
 
+  /// The action button's icon; most empty states offer to add something.
+  final IconData actionIcon;
+
   const EmptyState({
     super.key,
     required this.icon,
@@ -18,6 +21,7 @@ class EmptyState extends StatelessWidget {
     required this.message,
     this.actionLabel,
     this.onAction,
+    this.actionIcon = Icons.add,
   });
 
   @override
@@ -29,15 +33,38 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: colorScheme.onSurfaceVariant),
-            const SizedBox(height: AppSpacing.md),
+            // The icon on a soft brand-tinted disc, with a fainter outer
+            // ring, so an empty screen reads as designed rather than blank.
+            Container(
+              width: 112,
+              height: 112,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colorScheme.primaryContainer.withValues(alpha: 0.4),
+              ),
+              alignment: Alignment.center,
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colorScheme.primaryContainer,
+                ),
+                child: Icon(
+                  icon,
+                  size: 38,
+                  color: colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w700),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium
@@ -46,7 +73,11 @@ class EmptyState extends StatelessWidget {
             ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: AppSpacing.lg),
-              FilledButton(onPressed: onAction, child: Text(actionLabel!)),
+              FilledButton.icon(
+                onPressed: onAction,
+                icon: Icon(actionIcon),
+                label: Text(actionLabel!),
+              ),
             ],
           ],
         ),

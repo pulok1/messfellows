@@ -63,6 +63,7 @@ class RulesScreen extends ConsumerWidget {
                       title: l10n.rulesEmptyTitle,
                       message: l10n.rulesEmptyMessage,
                       actionLabel: l10n.startFromSuggestions,
+                      actionIcon: Icons.auto_awesome,
                       onAction: () =>
                           showRuleTemplatesSheet(context, messId: messId),
                     );
