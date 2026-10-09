@@ -11,9 +11,16 @@ class StatTile extends StatelessWidget {
   final num? count;
   final String Function(double value)? format;
 
-  const StatTile({super.key, required this.label, required String this.value})
-    : count = null,
-      format = null;
+  /// A small icon before the label, matching the dashboard's tiles.
+  final IconData? icon;
+
+  const StatTile({
+    super.key,
+    required this.label,
+    required String this.value,
+    this.icon,
+  }) : count = null,
+       format = null;
 
   /// A tile whose number counts up to [count], shown through [format].
   const StatTile.animated({
@@ -21,10 +28,12 @@ class StatTile extends StatelessWidget {
     required this.label,
     required num this.count,
     required String Function(double value) this.format,
+    this.icon,
   }) : value = null;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final valueStyle = Theme.of(context).textTheme.headlineSmall
         ?.copyWith(fontWeight: FontWeight.bold);
 
@@ -34,11 +43,20 @@ class StatTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 16, color: colorScheme.onSurfaceVariant),
+                  const SizedBox(width: AppSpacing.xs),
+                ],
+                Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.labelMedium
+                        ?.copyWith(color: colorScheme.onSurfaceVariant),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.xs),
             if (count case final count?)
