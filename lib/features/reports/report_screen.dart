@@ -507,8 +507,15 @@ class _ReportContent extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.mealRateUpperLabel,
-                        style: Theme.of(context).textTheme.labelMedium,
+                        l10n.mealRateUpperLabel.toUpperCase(),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                              letterSpacing: 0.6,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
@@ -517,11 +524,17 @@ class _ReportContent extends ConsumerWidget {
                             : result.mealRate.format(),
                         // A sentence, not a figure — headline size is for
                         // the rate itself.
-                        style:
-                            (result.hasNoMeals
-                                    ? Theme.of(context).textTheme.titleLarge
-                                    : Theme.of(context).textTheme.headlineMedium)
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                        style: result.hasNoMeals
+                            ? Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold)
+                            : Theme.of(context).textTheme.displaySmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                    color: AppTheme.headlineFigureColor(
+                                      Theme.of(context).colorScheme,
+                                    ),
+                                  ),
                       ),
                     ],
                   ),
@@ -534,6 +547,7 @@ class _ReportContent extends ConsumerWidget {
                     child: StatTile(
                       label: l10n.totalFoodCost,
                       value: result.totalExpense.format(),
+                      icon: Icons.shopping_basket_outlined,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
@@ -541,6 +555,7 @@ class _ReportContent extends ConsumerWidget {
                     child: StatTile(
                       label: l10n.totalMeals,
                       value: '${result.totalMeals}',
+                      icon: Icons.restaurant_outlined,
                     ),
                   ),
                 ],
@@ -601,24 +616,43 @@ class _ReportContent extends ConsumerWidget {
                             MemberAvatar(
                               memberId: balance.memberId,
                               name: balance.memberName,
-                              radius: 14,
                             ),
-                            const SizedBox(width: AppSpacing.sm),
+                            const SizedBox(width: AppSpacing.sm + 4),
                             Expanded(
                               child: Text(
                                 balance.memberName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w700),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(l10n.mealsCount(balance.mealCount)),
-                        Text(l10n.mealCostLine(balance.mealCost.format())),
-                        Text(l10n.paidLine(balance.paidAmount.format())),
-                        const SizedBox(height: AppSpacing.xs),
+                        const SizedBox(height: AppSpacing.sm + 4),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _MemberFigure(
+                                label: l10n.memberStatMeals,
+                                value: '${balance.mealCount}',
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: _MemberFigure(
+                                label: l10n.memberStatMealCost,
+                                value: balance.mealCost.format(),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: _MemberFigure(
+                                label: l10n.memberStatPaid,
+                                value: balance.paidAmount.format(),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.sm + 4),
                         BalanceLabel(balance: balance),
                       ],
                     ),
@@ -628,6 +662,56 @@ class _ReportContent extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// One small labelled figure in a member's report card (meals, meal cost,
+/// paid), on a soft tile so the three read as a set.
+class _MemberFigure extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MemberFigure({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm + 2,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

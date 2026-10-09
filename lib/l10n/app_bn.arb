@@ -219,6 +219,9 @@
   "shareSubject": "{messName} — {monthYear}",
   "mealCostLine": "মিলের খরচঃ {value}",
   "paidLine": "জমাঃ {value}",
+  "memberStatMeals": "মিল",
+  "memberStatMealCost": "মিলের খরচ",
+  "memberStatPaid": "জমা",
 
   "totalBazarLine": "মোট বাজারঃ {value}",
   "totalMealsLine": "মোট মিলঃ {value}",

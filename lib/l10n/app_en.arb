@@ -253,6 +253,9 @@
   "mealCostLine": "Meal Cost: {value}",
   "@mealCostLine": {"placeholders": {"value": {"type": "String"}}},
   "paidLine": "Paid: {value}",
+  "memberStatMeals": "Meals",
+  "memberStatMealCost": "Meal cost",
+  "memberStatPaid": "Paid",
   "@paidLine": {"placeholders": {"value": {"type": "String"}}},
 
   "totalBazarLine": "Total Bazar: {value}",
