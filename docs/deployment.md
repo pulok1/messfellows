@@ -25,7 +25,9 @@ Nothing secret is stored in the repo or on a work machine; the secrets live in G
    *Edit Cloudflare Workers* → account resources: your account → create. Add it as secret `CLOUDFLARE_API_TOKEN`.
 3. **Cloudflare account id:** the long hex id in the dashboard URL. Add it as secret `CLOUDFLARE_ACCOUNT_ID`.
 4. Repo Settings → Actions → General → Workflow permissions → *Read and write permissions*.
-5. Push to `main` (or Actions → *Release & deploy* → Run workflow).
+5. *(Optional, cloud sync)* add repository **variables** `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` — see
+   [supabase/README.md](../supabase/README.md). Without them the build is offline-only.
+6. Push to `main` (or Actions → *Release & deploy* → Run workflow).
 
 The site is then live at `https://messfellows.<your-subdomain>.workers.dev`.
 
