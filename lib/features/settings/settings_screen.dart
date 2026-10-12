@@ -27,10 +27,10 @@ import '../rules/rules_screen.dart';
 import '../shared/widgets/confirm_dialog.dart';
 import '../shared/widgets/page_header_card.dart';
 import '../shared/widgets/section_header.dart';
+import 'widgets/cloud_sync_section.dart';
 
-/// Settings (section 41): mess name, a link to member management, local
-/// backup export/import, and full data deletion. There is deliberately no
-/// account/login section here — see section 40.
+/// Settings (section 41): mess name, a link to member management, optional
+/// cloud sync, local backup export/import, and full data deletion.
 class SettingsScreen extends ConsumerStatefulWidget {
   final Mess mess;
 
@@ -442,6 +442,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
+                    const CloudSyncSection(
+                      headerPadding: _sectionHeaderPadding,
+                    ),
                     SectionHeader(
                       l10n.localDataSectionHeader,
                       padding: _sectionHeaderPadding,
