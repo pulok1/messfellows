@@ -6,6 +6,7 @@ import '../models/activity_type.dart';
 import '../models/meal_slot.dart';
 import '../models/rule_category.dart';
 import '../models/settlement_status.dart';
+import '../sync/sync_triggers.dart';
 import 'tables/activity_log_table.dart';
 import 'tables/expense_table.dart';
 import 'tables/meal_entry_table.dart';
@@ -15,6 +16,7 @@ import 'tables/mess_table.dart';
 import 'tables/monthly_settlement_member_table.dart';
 import 'tables/monthly_settlement_table.dart';
 import 'tables/payment_table.dart';
+import 'tables/sync_tables.dart';
 
 part 'app_database.g.dart';
 
@@ -33,6 +35,8 @@ part 'app_database.g.dart';
     MonthlySettlements,
     MonthlySettlementMembers,
     ActivityLogs,
+    SyncOutbox,
+    SyncMeta,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -42,10 +46,9 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   // Bump this and add a migration step below whenever a table or column
-  // changes. Future sync-metadata columns (syncStatus, remoteId, ...) will
-  // land as additive migrations here rather than a rewrite.
+  // changes.
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -158,9 +161,16 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(activityLogs, activityLogs.previousAmountMinorUnits);
         await m.addColumn(activityLogs, activityLogs.previousDetail);
       }
+      if (from < 9) {
+        // Cloud sync: an outbox of locally changed rows (filled by
+        // triggers — see beforeOpen) and a little bookkeeping table.
+        await m.createTable(syncOutbox);
+        await m.createTable(syncMeta);
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
+      await installSyncTriggers(this);
     },
   );
 
