@@ -32,7 +32,9 @@ class LocalSyncStore {
     } else {
       await _db
           .into(_db.syncMeta)
-          .insertOnConflictUpdate(SyncMetaCompanion.insert(key: key, value: value));
+          .insertOnConflictUpdate(
+            SyncMetaCompanion.insert(key: key, value: value),
+          );
     }
   }
 
@@ -49,18 +51,20 @@ class LocalSyncStore {
 
   Future<int> pendingCount() async {
     final count = _db.syncOutbox.seq.count();
-    final row = await (_db.selectOnly(_db.syncOutbox)..addColumns([count]))
-        .getSingle();
+    final row = await (_db.selectOnly(
+      _db.syncOutbox,
+    )..addColumns([count])).getSingle();
     return row.read(count) ?? 0;
   }
 
   /// The oldest [limit] queued changes, each carrying the row's *current*
   /// contents (or a tombstone if it has since been deleted).
   Future<List<PendingChange>> pendingChanges({int limit = 500}) async {
-    final entries = await (_db.select(_db.syncOutbox)
-          ..orderBy([(t) => OrderingTerm.asc(t.seq)])
-          ..limit(limit))
-        .get();
+    final entries =
+        await (_db.select(_db.syncOutbox)
+              ..orderBy([(t) => OrderingTerm.asc(t.seq)])
+              ..limit(limit))
+            .get();
     final changes = <PendingChange>[];
     for (final entry in entries) {
       final data = entry.deleted
@@ -294,12 +298,11 @@ class LocalSyncStore {
     return {for (final r in rows) (r.rowTableName, r.rowId)};
   }
 
-  Future<void> _queueTombstone(String table, String id) =>
-      _db.customStatement(
-        'INSERT OR REPLACE INTO sync_outbox (table_name, row_id, deleted) '
-        'VALUES (?, ?, 1)',
-        [table, id],
-      );
+  Future<void> _queueTombstone(String table, String id) => _db.customStatement(
+    'INSERT OR REPLACE INTO sync_outbox (table_name, row_id, deleted) '
+    'VALUES (?, ?, 1)',
+    [table, id],
+  );
 
   Future<void> _setApplyingRemote(bool on) => on
       ? _db.customStatement(

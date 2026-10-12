@@ -27,8 +27,7 @@ class SyncRecord {
       deleted = true;
 
   @override
-  String toString() =>
-      'SyncRecord($table/$rowId${deleted ? ', deleted' : ''})';
+  String toString() => 'SyncRecord($table/$rowId${deleted ? ', deleted' : ''})';
 }
 
 /// A queued local change ready to push, remembering which outbox entry it
