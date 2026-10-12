@@ -51,6 +51,19 @@ jobs:
 
       - run: flutter pub get
 
+      # Optional cloud sync: repository *variables* (not secrets — the
+      # publishable key ships inside the app anyway). Unset = offline-only build.
+      - name: Supabase config
+        run: |
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "SUPABASE_DEFINES=--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_PUBLISHABLE_KEY=$SUPABASE_PUBLISHABLE_KEY" >> "$GITHUB_ENV"
+          else
+            echo "::warning::SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY variables not set; building without cloud sync (see supabase/README.md)"
+          fi
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+
       - name: Restore signing key
         run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
@@ -71,9 +84,9 @@ jobs:
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
           # One APK per CPU type instead of a 61 MB fat APK. Same versionCode and signing key, so a
           # phone updates in place from whichever one it installed first.
-          flutter build apk --release --target-platform android-arm64 --build-number="$BUILD_NUMBER"
+          flutter build apk --release --target-platform android-arm64 --build-number="$BUILD_NUMBER" $SUPABASE_DEFINES
           cp build/app/outputs/flutter-apk/app-release.apk messfellows.apk
-          flutter build apk --release --target-platform android-arm --build-number="$BUILD_NUMBER"
+          flutter build apk --release --target-platform android-arm --build-number="$BUILD_NUMBER" $SUPABASE_DEFINES
           cp build/app/outputs/flutter-apk/app-release.apk messfellows-32bit.apk
 
       - name: Publish GitHub release
@@ -87,7 +100,7 @@ jobs:
             --target "$GITHUB_SHA"
 
       - name: Build web app
-        run: flutter build web --release --base-href /app/ --output landing/app
+        run: flutter build web --release --base-href /app/ --output landing/app $SUPABASE_DEFINES
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3

@@ -3,7 +3,10 @@
 $root = Split-Path -Parent $PSScriptRoot
 Push-Location $root
 try {
-    flutter build web --release --base-href /app/ --output landing/app
+    # Bake in cloud sync config when a local supabase.json exists (see supabase/README.md).
+    $defines = @()
+    if (Test-Path supabase.json) { $defines += '--dart-define-from-file=supabase.json' }
+    flutter build web --release --base-href /app/ --output landing/app @defines
 } finally {
     Pop-Location
 }
