@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app_root.dart';
+import 'core/config/supabase_config.dart';
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/gen/app_localizations.dart';
@@ -21,6 +23,14 @@ void main() async {
   // Both supported locales' date symbols (month/weekday names) must be
   // loaded before any DateFormat call — see core/utils/localized_date.dart.
   await Future.wait([initializeDateFormatting('en'), initializeDateFormatting('bn')]);
+  // Optional cloud sync. Restores a saved session from disk without needing
+  // the network, so an offline launch is as fast as before.
+  if (SupabaseConfig.isConfigured) {
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      publishableKey: SupabaseConfig.publishableKey,
+    );
+  }
   final savedLocale = await loadSavedLocale();
   final savedThemeMode = await loadSavedThemeMode();
 

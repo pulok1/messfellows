@@ -4,11 +4,14 @@
 /// build without them is simply an offline-only app with the cloud section
 /// hidden.
 ///
-/// The anon (publishable) key is safe to ship inside the app: every row is
-/// guarded by row-level security on the server, not by keeping this secret.
+/// The publishable key (or the legacy anon key) is safe to ship inside the
+/// app: every row is guarded by row-level security on the server, not by
+/// keeping this secret.
 abstract final class SupabaseConfig {
   static const url = String.fromEnvironment('SUPABASE_URL');
-  static const anonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  static const publishableKey = String.fromEnvironment(
+    'SUPABASE_PUBLISHABLE_KEY',
+  );
 
-  static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
+  static bool get isConfigured => url.isNotEmpty && publishableKey.isNotEmpty;
 }
