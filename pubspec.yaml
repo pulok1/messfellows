@@ -45,6 +45,10 @@ dependencies:
   package_info_plus: ^10.2.2
   url_launcher: ^6.3.1
 
+  # Optional cloud sync (email sign-in + a Postgres mirror of the local
+  # database) — see lib/sync/ and supabase/README.md.
+  supabase_flutter: ^2.18.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

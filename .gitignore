@@ -58,3 +58,7 @@ app.*.map.json
 
 # Flutter web build served by the landing page (see scripts/build_landing.ps1)
 /landing/app/
+
+# Local Supabase project URL + anon key for --dart-define-from-file (see
+# supabase/README.md). Not secret, but per-developer.
+/supabase.json
