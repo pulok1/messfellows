@@ -30,7 +30,9 @@ realtime. Safe to run again.
 confirming. They then go back to the app and sign in.
 
 **Authentication → Emails → Reset Password**: the app resets passwords with a 6-digit code rather than a link,
-so no deep-link setup is needed. Make the template include the code, e.g.:
+so no deep-link setup is needed. Templates can only be edited once custom SMTP is set up (see above), and
+until then "Forgot password?" can't work. Sign-in and sync are unaffected. Make the template include the
+code, e.g.:
 
 ```html
 <h2>Reset your Mess Fellows password</h2>
