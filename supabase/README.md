@@ -26,7 +26,7 @@ realtime. Safe to run again.
 > with your own address only.
 
 **Authentication → URL Configuration → Site URL**: set it to the landing site
-(`https://messfellows.<subdomain>.workers.dev`). The "confirm your email" link sends people there after
+(`https://messfellows.pulok.workers.dev/`). The "confirm your email" link sends people there after
 confirming. They then go back to the app and sign in.
 
 **Authentication → Emails → Reset Password**: the app resets passwords with a 6-digit code rather than a link,
