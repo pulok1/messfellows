@@ -1,16 +1,22 @@
-/// Where the optional cloud sync backend lives. Both values are baked in at
-/// build time (`--dart-define-from-file=supabase.json` locally, repository
-/// variables in CI — see supabase/README.md) rather than committed, so a
-/// build without them is simply an offline-only app with the cloud section
-/// hidden.
+/// Where the optional cloud sync backend lives.
 ///
-/// The publishable key (or the legacy anon key) is safe to ship inside the
-/// app: every row is guarded by row-level security on the server, not by
-/// keeping this secret.
+/// Defaults to the production project, so every build (including a plain
+/// `flutter run`) has cloud sync. A different project can be swapped in at
+/// build time with `--dart-define-from-file=supabase.json` (see
+/// supabase/README.md); defining both values as empty strings builds an
+/// offline-only app with the cloud section hidden.
+///
+/// The publishable key is safe to commit and ship inside the app: every row
+/// is guarded by row-level security on the server, not by keeping this
+/// secret.
 abstract final class SupabaseConfig {
-  static const url = String.fromEnvironment('SUPABASE_URL');
+  static const url = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://kppnsbkztvyrnfsepquk.supabase.co',
+  );
   static const publishableKey = String.fromEnvironment(
     'SUPABASE_PUBLISHABLE_KEY',
+    defaultValue: 'sb_publishable_s03JQBaKxwXWQ5sZaH7cgQ_GhpCsf4b',
   );
 
   static bool get isConfigured => url.isNotEmpty && publishableKey.isNotEmpty;

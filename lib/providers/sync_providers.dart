@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../core/config/supabase_config.dart';
 import '../core/services/cloud_auth_service.dart';
 import '../sync/local_sync_store.dart';
 import '../sync/supabase_sync_api.dart';
@@ -11,11 +10,10 @@ import '../sync/sync_engine.dart';
 import '../sync/sync_triggers.dart';
 import 'database_provider.dart';
 
-/// Null when the build has no Supabase config — the app is then
+/// Overridden in main() with the initialized client. Null otherwise (a
+/// build with cloud sync switched off, and tests) — the app is then
 /// offline-only and every cloud entry point hides itself.
-final supabaseClientProvider = Provider<SupabaseClient?>((ref) {
-  return SupabaseConfig.isConfigured ? Supabase.instance.client : null;
-});
+final supabaseClientProvider = Provider<SupabaseClient?>((ref) => null);
 
 /// Null when cloud sync isn't configured in this build.
 final cloudAuthServiceProvider = Provider<CloudAuthService?>((ref) {

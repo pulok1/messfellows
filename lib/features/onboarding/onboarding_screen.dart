@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/config/supabase_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_logo.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../providers/repository_providers.dart';
+import '../../providers/sync_providers.dart';
 import '../account/cloud_account_screen.dart';
 
 /// First-run experience: a short welcome, then a single form to create the
@@ -191,7 +191,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     // A new phone for an existing account: signing in pulls
                     // the mess down, and AppRoot switches to it.
-                    if (SupabaseConfig.isConfigured) ...[
+                    if (ref.watch(supabaseClientProvider) != null) ...[
                       const SizedBox(height: AppSpacing.md),
                       TextButton.icon(
                         onPressed: _isSaving

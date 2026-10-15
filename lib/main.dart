@@ -11,6 +11,7 @@ import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'providers/locale_provider.dart';
+import 'providers/sync_providers.dart';
 import 'providers/theme_mode_provider.dart';
 
 void main() async {
@@ -22,21 +23,26 @@ void main() async {
   });
   // Both supported locales' date symbols (month/weekday names) must be
   // loaded before any DateFormat call — see core/utils/localized_date.dart.
-  await Future.wait([initializeDateFormatting('en'), initializeDateFormatting('bn')]);
+  await Future.wait([
+    initializeDateFormatting('en'),
+    initializeDateFormatting('bn'),
+  ]);
   // Optional cloud sync. Restores a saved session from disk without needing
   // the network, so an offline launch is as fast as before.
-  if (SupabaseConfig.isConfigured) {
-    await Supabase.initialize(
-      url: SupabaseConfig.url,
-      publishableKey: SupabaseConfig.publishableKey,
-    );
-  }
+  final supabase = SupabaseConfig.isConfigured
+      ? (await Supabase.initialize(
+          url: SupabaseConfig.url,
+          publishableKey: SupabaseConfig.publishableKey,
+        )).client
+      : null;
   final savedLocale = await loadSavedLocale();
   final savedThemeMode = await loadSavedThemeMode();
 
   runApp(
     ProviderScope(
       overrides: [
+        if (supabase != null)
+          supabaseClientProvider.overrideWithValue(supabase),
         if (savedLocale != null)
           localeProvider.overrideWith(() => LocaleNotifier(savedLocale)),
         if (savedThemeMode != null)
