@@ -40,6 +40,21 @@ code, e.g.:
 <p style="font-size:24px;font-weight:bold;letter-spacing:4px">{{ .Token }}</p>
 ```
 
+### 2b. Google sign-in
+
+"Continue with Google" opens Google in the browser and returns to the app. Google has already verified the email,
+so no confirmation emails or SMTP are involved.
+
+1. **Google Cloud Console** (console.cloud.google.com): create a project or reuse one.
+   - **Google Auth Platform → Branding:** app name *Mess Fellows*, your support email.
+   - **Audience:** click **Publish app**. While it says *Testing*, only listed test users can sign in.
+   - **Clients → Create client**, type **Web application**. Under *Authorized redirect URIs* add
+     `https://kppnsbkztvyrnfsepquk.supabase.co/auth/v1/callback`. Copy the **Client ID** and **Client secret**.
+2. **Supabase → Authentication → Sign In / Providers → Google**: enable it, paste the client ID and secret, save.
+3. **Supabase → Authentication → URL Configuration → Redirect URLs → Add URL**, both of:
+   - `com.pulok.messfellows://login-callback` (Android app)
+   - `https://messfellows.pulok.workers.dev/app/` (web app)
+
 ### 3. Point the app at the project
 
 **Project Settings → API Keys**: copy the **publishable** key (`sb_publishable_…`; the legacy `anon` key also
