@@ -493,5 +493,7 @@
   "syncChoiceMessage": "This phone and your account both have a mess. Choose one to keep — the other is replaced on all your devices.",
   "syncChoiceKeepCloud": "Use the account's data",
   "syncChoiceKeepDevice": "Use this phone's data",
-  "onboardingSignIn": "Already use Mess Fellows? Sign in"
+  "onboardingSignIn": "Already use Mess Fellows? Sign in",
+  "accountContinueWithGoogle": "Continue with Google",
+  "accountOrUseEmail": "or use email"
 }

@@ -90,8 +90,31 @@ class _CloudAccountScreenState extends ConsumerState<CloudAccountScreen> {
     }
   }
 
+  Future<void> _google() async {
+    final l10n = AppLocalizations.of(context);
+    setState(() {
+      _busy = true;
+      _error = null;
+      _info = null;
+    });
+    try {
+      await _auth.signInWithGoogle();
+    } catch (e) {
+      _error = authErrorMessage(l10n, e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Google sign-in finishes in the browser and comes back through the
+    // auth stream, not through _google() — close as soon as it lands.
+    ref.listen(signedInUserIdProvider, (previous, next) {
+      if (previous == null && next != null && mounted) {
+        Navigator.of(context).maybePop();
+      }
+    });
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -142,6 +165,38 @@ class _CloudAccountScreenState extends ConsumerState<CloudAccountScreen> {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       if (!resetting) ...[
+                        SizedBox(
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: _busy ? null : _google,
+                            icon: const _GoogleMark(),
+                            label: Text(
+                              l10n.accountContinueWithGoogle,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Row(
+                          children: [
+                            const Expanded(child: Divider()),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.sm,
+                              ),
+                              child: Text(
+                                l10n.accountOrUseEmail,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            const Expanded(child: Divider()),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.md),
                         SegmentedButton<_Mode>(
                           segments: [
                             ButtonSegment(
@@ -275,6 +330,24 @@ class _CloudAccountScreenState extends ConsumerState<CloudAccountScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A plain "G" in Google's blue, standing in for the logo so no image
+/// asset is needed.
+class _GoogleMark extends StatelessWidget {
+  const _GoogleMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      'G',
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w800,
+        color: Color(0xFF4285F4),
       ),
     );
   }

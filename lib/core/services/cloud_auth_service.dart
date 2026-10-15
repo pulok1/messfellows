@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Email + password accounts for cloud sync. Signing in or out only flips
@@ -7,6 +8,28 @@ class CloudAuthService {
   final GoTrueClient _auth;
 
   CloudAuthService(this._auth);
+
+  /// Where Google sends the user back to on Android — matches the
+  /// intent-filter in AndroidManifest.xml and must be listed under the
+  /// project's Redirect URLs (see supabase/README.md).
+  static const mobileRedirect = 'com.pulok.messfellows://login-callback';
+
+  /// Opens Google's sign-in page. Covers both sign-in and sign-up: a new
+  /// Google account simply becomes a new user. Returns as soon as the page
+  /// opens — the session arrives later, when Google redirects back, through
+  /// the auth state stream.
+  Future<void> signInWithGoogle() async {
+    await _auth.signInWithOAuth(
+      OAuthProvider.google,
+      // On the web app, come back to the page we're on.
+      redirectTo: kIsWeb
+          ? '${Uri.base.origin}${Uri.base.path}'
+          : mobileRedirect,
+      authScreenLaunchMode: kIsWeb
+          ? LaunchMode.platformDefault
+          : LaunchMode.externalApplication,
+    );
+  }
 
   Future<void> signIn(String email, String password) async {
     await _auth.signInWithPassword(email: email, password: password);

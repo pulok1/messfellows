@@ -436,5 +436,7 @@
   "syncChoiceMessage": "এই ফোনে এবং আপনার অ্যাকাউন্টে — দুই জায়গাতেই একটি মেস আছে। একটি বেছে নিন — অন্যটি আপনার সব ডিভাইসে প্রতিস্থাপিত হবে।",
   "syncChoiceKeepCloud": "অ্যাকাউন্টের ডাটা রাখুন",
   "syncChoiceKeepDevice": "এই ফোনের ডাটা রাখুন",
-  "onboardingSignIn": "আগে থেকেই Mess Fellows ব্যবহার করেন? সাইন ইন করুন"
+  "onboardingSignIn": "আগে থেকেই Mess Fellows ব্যবহার করেন? সাইন ইন করুন",
+  "accountContinueWithGoogle": "Google দিয়ে চালিয়ে যান",
+  "accountOrUseEmail": "অথবা ইমেইল দিয়ে"
 }
