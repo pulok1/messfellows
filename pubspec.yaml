@@ -49,6 +49,10 @@ dependencies:
   # database) — see lib/sync/ and supabase/README.md.
   supabase_flutter: ^2.18.3
 
+  # In-app update: downloads the new APK with progress and opens Android's
+  # installer (see core/services/app_updater.dart).
+  ota_update: ^7.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
