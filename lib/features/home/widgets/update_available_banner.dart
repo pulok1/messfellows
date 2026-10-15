@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../providers/update_check_provider.dart';
+import 'update_sheet.dart';
 
-/// A dismissible strip above the bottom-nav tabs announcing a newer build
-/// is on GitHub — see UpdateCheckerService for why the app has to check
-/// this itself. Tapping it (or "Update") opens the APK download in the
-/// browser; nothing here installs anything automatically.
+/// A strip above the tabs that stays while a newer build is available —
+/// the quiet reminder behind the update popup (see HomeShell). Tapping it
+/// (or "Update") reopens the popup; closing it snoozes like "Later".
 class UpdateAvailableBanner extends ConsumerWidget {
   const UpdateAvailableBanner({super.key});
 
@@ -29,7 +28,7 @@ class UpdateAvailableBanner extends ConsumerWidget {
           : Material(
               color: colorScheme.primaryContainer,
               child: InkWell(
-                onTap: () => _openDownload(updateInfo.downloadUrl),
+                onTap: () => showUpdateSheet(context, updateInfo),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSpacing.md,
@@ -55,14 +54,15 @@ class UpdateAvailableBanner extends ConsumerWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: () => _openDownload(updateInfo.downloadUrl),
+                        onPressed: () => showUpdateSheet(context, updateInfo),
                         child: Text(l10n.updateNowAction),
                       ),
                       IconButton(
                         icon: const Icon(Icons.close, size: 18),
                         color: colorScheme.onPrimaryContainer,
                         tooltip: l10n.updateDismissTooltip,
-                        onPressed: () => ref.read(updateAvailableProvider.notifier).dismiss(),
+                        onPressed: () =>
+                            ref.read(updateAvailableProvider.notifier).snooze(),
                       ),
                     ],
                   ),
@@ -70,9 +70,5 @@ class UpdateAvailableBanner extends ConsumerWidget {
               ),
             ),
     );
-  }
-
-  Future<void> _openDownload(String url) {
-    return launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 }

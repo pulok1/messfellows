@@ -5,12 +5,14 @@ import '../../core/theme/app_motion.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/mess.dart';
 import '../../providers/recycle_bin_purge_provider.dart';
+import '../../providers/update_check_provider.dart';
 import '../bazar/bazar_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../meals/meals_screen.dart';
 import '../reports/report_screen.dart';
 import '../shared/quick_add/quick_add_sheet.dart';
 import 'widgets/update_available_banner.dart';
+import 'widgets/update_sheet.dart';
 
 /// The main app shell (section 12): Home / Meals / Bazar / Report on the
 /// bottom nav, with the Quick Add FAB always available. Each tab keeps its
@@ -65,6 +67,14 @@ class _HomeShellState extends ConsumerState<HomeShell>
   Widget build(BuildContext context) {
     // Runs once per session — see recycle_bin_purge_provider.dart.
     ref.watch(recycleBinPurgeProvider(widget.mess.id));
+    // Pops up once per newly found build (at launch, or when a check on
+    // returning to the app finds one); the banner stays as the reminder.
+    ref.listen(updateAvailableProvider, (previous, next) {
+      final info = next.value;
+      if (info != null && info.buildNumber != previous?.value?.buildNumber) {
+        showUpdateSheet(context, info);
+      }
+    });
     final l10n = AppLocalizations.of(context);
     final tabs = [
       DashboardScreen(mess: widget.mess, onOpenMeals: _goToMealsTab),

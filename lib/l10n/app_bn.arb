@@ -438,5 +438,20 @@
   "syncChoiceKeepDevice": "এই ফোনের ডাটা রাখুন",
   "onboardingSignIn": "আগে থেকেই Mess Fellows ব্যবহার করেন? সাইন ইন করুন",
   "accountContinueWithGoogle": "Google দিয়ে চালিয়ে যান",
-  "accountOrUseEmail": "অথবা ইমেইল দিয়ে"
+  "accountOrUseEmail": "অথবা ইমেইল দিয়ে",
+  "updateSheetTitle": "আপডেট এসেছে",
+  "updateVersionLabel": "ভার্সন {version} (বিল্ড {build})",
+  "@updateVersionLabel": {"placeholders": {"version": {"type": "String"}, "build": {"type": "int"}}},
+  "updateWhatsNew": "নতুন যা আছে",
+  "updateNoNotes": "উন্নতি ও বাগ ফিক্স।",
+  "updateLaterAction": "পরে",
+  "updateReloadAction": "রিলোড",
+  "updateKeepsData": "এই ভার্সনের উপরেই ইনস্টল হবে — আপনার ডাটা থাকবে।",
+  "updateWebHint": "নতুন ভার্সন ব্যবহার করতে পেজটি রিলোড করুন।",
+  "updateDownloading": "ডাউনলোড হচ্ছে… {percent}%",
+  "@updateDownloading": {"placeholders": {"percent": {"type": "int"}}},
+  "updateInstalling": "ইনস্টলার খুলছে — শেষ করতে সেখানে Update চাপুন। আপনার ডাটা থাকবে।",
+  "updatePermissionNeeded": "Mess Fellows-কে অ্যাপ ইনস্টলের অনুমতি দিন (Android যে সুইচটি দেখাল), তারপর আবার আপডেট চাপুন।",
+  "updateFailed": "আপডেট ডাউনলোড করা যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।",
+  "updateDownloadInBrowser": "এর বদলে ব্রাউজারে ডাউনলোড করুন"
 }

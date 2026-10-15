@@ -495,5 +495,20 @@
   "syncChoiceKeepDevice": "Use this phone's data",
   "onboardingSignIn": "Already use Mess Fellows? Sign in",
   "accountContinueWithGoogle": "Continue with Google",
-  "accountOrUseEmail": "or use email"
+  "accountOrUseEmail": "or use email",
+  "updateSheetTitle": "Update available",
+  "updateVersionLabel": "Version {version} (build {build})",
+  "@updateVersionLabel": {"placeholders": {"version": {"type": "String"}, "build": {"type": "int"}}},
+  "updateWhatsNew": "What's new",
+  "updateNoNotes": "Improvements and bug fixes.",
+  "updateLaterAction": "Later",
+  "updateReloadAction": "Reload",
+  "updateKeepsData": "Installs over this version — your data stays.",
+  "updateWebHint": "Reload the page to start using the new version.",
+  "updateDownloading": "Downloading… {percent}%",
+  "@updateDownloading": {"placeholders": {"percent": {"type": "int"}}},
+  "updateInstalling": "Opening the installer — tap Update there to finish. Your data stays.",
+  "updatePermissionNeeded": "Allow Mess Fellows to install apps (the switch Android just showed), then tap Update again.",
+  "updateFailed": "Couldn't download the update. Check your connection and try again.",
+  "updateDownloadInBrowser": "Download in browser instead"
 }
