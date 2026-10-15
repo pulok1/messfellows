@@ -37,6 +37,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # full history: the commit count is the Android versionCode
+          fetch-tags: true # the previous release tag bounds this release's notes
 
       - uses: actions/setup-java@v4
         with:
@@ -87,18 +88,40 @@ jobs:
           flutter build apk --release --target-platform android-arm --build-number="$BUILD_NUMBER" $SUPABASE_DEFINES
           cp build/app/outputs/flutter-apk/app-release.apk messfellows-32bit.apk
 
+      # "What's new" for the in-app update popup: the feat/fix commit subjects since the
+      # previous release, scope stripped ("feat(meals): add X" -> "Add X"). The app reads the
+      # "- " lines above the "---"; below it is download info for people browsing GitHub.
+      - name: Write release notes
+        run: |
+          PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)
+          {
+            git log ${PREV:+$PREV..}HEAD --no-merges --pretty=format:%s%n \
+              | sed -nE 's/^(feat|fix)(\([^)]*\))?!?: (.+)$/\3/p' \
+              | awk '!seen[$0]++ { print "- " toupper(substr($0,1,1)) substr($0,2) }' \
+              | head -n 15 > changes.md
+            if [ -s changes.md ]; then cat changes.md; else echo "- Improvements and bug fixes"; fi
+            echo
+            echo "---"
+            echo "messfellows.apk for current 64-bit phones; messfellows-32bit.apk for older 32-bit phones. Installs over the previous version."
+          } > notes.md
+          cat notes.md
+
       - name: Publish GitHub release
         run: |
           VERSION=$(grep -m1 '^version:' pubspec.yaml | sed -E 's/version: *([^+ ]+).*/\1/')
           TAG="v$VERSION-build.$BUILD_NUMBER"
           gh release create "$TAG" messfellows.apk messfellows-32bit.apk \
             --title "Mess Fellows $VERSION (build $BUILD_NUMBER)" \
-            --notes "messfellows.apk for current 64-bit phones; messfellows-32bit.apk for older 32-bit phones. Installs over the previous version." \
+            --notes-file notes.md \
             --latest \
             --target "$GITHUB_SHA"
 
       - name: Build web app
-        run: flutter build web --release --base-href /app/ --output landing/app $SUPABASE_DEFINES
+        # The build number lands in version.json and is compiled in as APP_BUILD_NUMBER, so a
+        # running web app can tell a newer deploy is live and offer to reload.
+        run: |
+          flutter build web --release --base-href /app/ --output landing/app \
+            --build-number="$BUILD_NUMBER" --dart-define=APP_BUILD_NUMBER="$BUILD_NUMBER" $SUPABASE_DEFINES
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3
