@@ -57,17 +57,25 @@ so no confirmation emails or SMTP are involved.
 
 ### 3. Point the app at the project
 
-**Project Settings → API Keys**: copy the **publishable** key (`sb_publishable_…`; the legacy `anon` key also
-works). The project URL is `https://<project-ref>.supabase.co` (shown under **Data API**).
+The project URL and publishable key are built into `lib/core/config/supabase_config.dart`, so a plain
+`flutter run` or a CI build syncs with it. They're not secret: the key ships inside the app, and access is
+controlled by row-level security.
 
-These are not secret: the key ships inside the app, and access is controlled by row-level security.
+To use a different project (e.g. a staging one), override both at build time: locally, copy
+`supabase.example.json` to `supabase.json` (git-ignored) and run with `--dart-define-from-file=supabase.json`;
+in CI, set repository variables `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`.
 
-- **Local runs:** copy `supabase.example.json` (in the repo root) to `supabase.json` (git-ignored), fill both
-  values in, then `flutter run --dart-define-from-file=supabase.json`. `scripts/build_landing.ps1` picks the
-  file up automatically.
-- **CI releases:** GitHub repo → Settings → Secrets and variables → Actions → **Variables** → add
-  `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`. `.github/workflows/deploy.yml` passes them to the APK and web
-  builds.
+### 4. Redirect URLs for local web runs
+
+`flutter run -d chrome` serves the app from `http://localhost:<port>`. Supabase only redirects back to
+allow-listed URLs and otherwise falls back to the Site URL (the landing page). Run on a fixed port and
+allow-list it:
+
+```
+flutter run -d chrome --web-port 5000
+```
+
+**Authentication → URL Configuration → Redirect URLs**: add `http://localhost:5000/**`.
 
 ## How it works
 

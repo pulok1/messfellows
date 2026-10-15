@@ -51,14 +51,12 @@ jobs:
 
       - run: flutter pub get
 
-      # Optional cloud sync: repository *variables* (not secrets — the
-      # publishable key ships inside the app anyway). Unset = offline-only build.
+      # Cloud sync points at the project baked into lib/core/config/supabase_config.dart.
+      # Repository *variables* SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY override it if set.
       - name: Supabase config
         run: |
           if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_PUBLISHABLE_KEY" ]; then
             echo "SUPABASE_DEFINES=--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_PUBLISHABLE_KEY=$SUPABASE_PUBLISHABLE_KEY" >> "$GITHUB_ENV"
-          else
-            echo "::warning::SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY variables not set; building without cloud sync (see supabase/README.md)"
           fi
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
